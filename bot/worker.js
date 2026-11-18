@@ -26,12 +26,13 @@ const num = id => '#' + String(id).padStart(3, '0');
 const json = (o, s = 200, h = {}) => new Response(JSON.stringify(o), { status: s, headers: { 'content-type': 'application/json', ...h } });
 const J = (s, d) => { try { return JSON.parse(s) ?? d; } catch { return d; } };
 
+const TOK = env => String(env.BOT_TOKEN || '').replace(/\s+/g, '');
 async function secretOf(env) {
-  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('avvall:' + env.BOT_TOKEN));
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('avvall:' + TOK(env)));
   return [...new Uint8Array(b)].slice(0, 20).map(x => x.toString(16).padStart(2, '0')).join('');
 }
 async function tg(env, method, body) {
-  const r = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await fetch(`https://api.telegram.org/bot${TOK(env)}/${method}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   const j = await r.json(); if (!j.ok) console.log('tg', method, JSON.stringify(j)); return j;
 }
 const ORIGINS = ['https://avvall.uz', 'https://www.avvall.uz', 'https://dev.avvall.uz', 'https://avvall-dev.behruzbework.workers.dev'];
