@@ -249,7 +249,7 @@ export default {
       const r = await tg(env, 'setWebhook', { url: `${url.origin}/tg`, secret_token: await secretOf(env), allowed_updates: ['message', 'callback_query'], drop_pending_updates: true });
       await tg(env, 'setMyCommands', { commands: [{ command: 'stats', description: 'Statistika (30 kun)' }, { command: 'bugun', description: 'Bugungi uchrashuvlar' }, { command: 'test', description: 'Sinov lidi' }, { command: 'setup', description: 'Guruhni sozlash' }] });
       const me = await tg(env, 'getMe', {});
-      return json({ webhook: r.ok, bot: me.result?.username, group: (await conf(env)).g });
+      return json({ webhook: r.ok, err: r.description, bot: me.result?.username, group: (await conf(env)).g });
     }
     return new Response('AVVALL bot ishlayapti');
   },
