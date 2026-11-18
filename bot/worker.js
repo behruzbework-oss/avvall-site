@@ -364,7 +364,7 @@ async function onMessage(env, m) {
     for (const [k, name, color] of TOPICS) {
       if (t[k]) continue;
       const r = await tg(env, 'createForumTopic', { chat_id: m.chat.id, name, icon_color: color });
-      if (r.ok) t[k] = r.result.message_thread_id; else return tg(env, 'sendMessage', { chat_id: m.chat.id, text: 'Bo\'lim ochib bo\'lmadi: botga "Mavzularni boshqarish" huquqini bering.' });
+      if (r.ok) t[k] = r.result.message_thread_id; else return tg(env, 'sendMessage', { chat_id: m.chat.id, text: 'Bo\'lim ochib bo\'lmadi: ' + (r.description || '') });
     }
     await kset(env, 'topics2', JSON.stringify(t));
     const guide = {
