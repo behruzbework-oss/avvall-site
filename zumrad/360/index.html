@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=36db393a-5d94-4eae-9663-7955aaa970b1
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Zumrad Residence: D xonadon 360°</title>
+<style>
+  @font-face { font-family:"Sofia Cond"; src:url(/fonts/sofia-sans-extra-condensed-latin-600-normal.woff2) format("woff2"); font-weight:600; font-display:swap; }
+  @font-face { font-family:"Sofia"; src:url(/fonts/sofia-sans-latin-400-normal.woff2) format("woff2"); font-weight:400; font-display:swap; }
+  @font-face { font-family:"Sofia"; src:url(/fonts/sofia-sans-latin-500-normal.woff2) format("woff2"); font-weight:500; font-display:swap; }
+  :root { --ink:#ECE6DA; --panel:rgba(19,36,30,.78); --line:rgba(236,230,218,.2); --accent:#8FB8A3; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; height:100%; background:#13241E; color:var(--ink); font-family:"Sofia",system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden; overscroll-behavior:none; }
+  canvas { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; cursor:grab; }
+  canvas.drag { cursor:grabbing; }
+  #top { position:fixed; left:0; right:0; top:0; display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 16px; pointer-events:none; background:linear-gradient(rgba(0,0,0,.45),transparent); }
+  #brand { display:inline-flex; align-items:center; gap:10px; font:600 22px/1 "Sofia Cond",sans-serif; color:var(--ink); text-decoration:none; pointer-events:auto; padding:8px 12px; margin:-8px -12px; border-radius:3px; }
+  #brand svg { width:18px; height:18px; }
+  #brand:focus-visible { outline:2px solid var(--accent); }
+  #where { font-size:14px; color:var(--ink); opacity:.85; text-align:right; }
+  #rooms { position:fixed; left:50%; bottom:max(14px,env(safe-area-inset-bottom)); transform:translateX(-50%); display:flex; gap:4px; padding:5px; max-width:calc(100vw - 16px); overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:3px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); scrollbar-width:none; }
+  #rooms::-webkit-scrollbar { display:none; }
+  #rooms button { flex:none; border:0; background:transparent; color:var(--ink); font:inherit; font-size:13px; padding:9px 14px; border-radius:3px; cursor:pointer; white-space:nowrap; }
+  #rooms button.on { background:var(--ink); color:#13241E; }
+  #rooms button:focus-visible, .hs:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  #hs { position:fixed; inset:0; pointer-events:none; }
+  .hs { position:absolute; transform:translate(-50%,-50%); pointer-events:auto; border:0; background:none; color:var(--ink); font:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; padding:6px; }
+  .hs i { width:44px; height:44px; border-radius:50%; border:2px solid var(--ink); background:rgba(20,18,15,.35); display:block; position:relative; box-shadow:0 2px 14px rgba(0,0,0,.4); }
+  .hs i::after { content:""; position:absolute; inset:13px; border-radius:50%; background:var(--ink); }
+  .hs span { font-size:12px; padding:3px 9px; border-radius:3px; background:var(--panel); border:1px solid var(--line); white-space:nowrap; }
+  .hs.other i { border-color:var(--accent); } .hs.other i::after { background:var(--accent); }
+  #fade { position:fixed; inset:0; background:#13241E; opacity:0; pointer-events:none; transition:opacity .22s ease; }
+  #fade.on { opacity:1; }
+  #hint { position:fixed; left:50%; top:64px; transform:translateX(-50%); font-size:12.5px; padding:8px 14px; border-radius:3px; background:var(--panel); border:1px solid var(--line); transition:opacity .5s; text-align:center; max-width:calc(100vw - 24px); }
+  #hint.off { opacity:0; }
+  #load { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#13241E; font-size:14px; transition:opacity .4s; }
+  #load.off { opacity:0; pointer-events:none; }
+  /* reja (minimap) */
+  #mm { position:fixed; left:16px; bottom:max(16px,env(safe-area-inset-bottom)); width:clamp(260px,28vw,440px); padding:6px; background:rgba(19,36,30,.9); border:1px solid var(--line); border-radius:3px; z-index:2; }
+  #mm .in { position:relative; aspect-ratio:1800/894; }
+  #mm img, #mm svg { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #mm img { filter:saturate(.85) brightness(.9); }
+  #mm .pt { fill:rgba(236,230,218,.6); stroke:rgba(19,36,30,.8); stroke-width:5; cursor:pointer; transition:fill .2s; }
+  #mm .pt:hover, #mm .pt:focus-visible { fill:#fff; outline:none; }
+  #mm .pt.here { display:none; }
+  #mm .glow { transform-box:fill-box; transform-origin:center; animation:mmPulse 2.6s ease-in-out infinite; }
+  @keyframes mmPulse { 0%,100% { opacity:.75; transform:scale(.85); } 50% { opacity:1; transform:scale(1.12); } }
+  @media (max-width:700px) { #mm { left:8px; bottom:calc(max(14px,env(safe-area-inset-bottom)) + 58px); width:min(62vw,280px); padding:4px; } }
+  @media (prefers-reduced-motion:reduce) { #mm .glow { animation:none; } }
+  @media (prefers-reduced-motion:reduce) { #fade { transition:none; } }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="D xonadonning 360 darajali ko'rinishi. Sudrab atrofga qarang."></canvas>
+<div id="hs"></div>
+<div id="top"><a id="brand" href="/" aria-label="Qavat rejasiga qaytish"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 3.5 5.5 9l5.5 5.5"/></svg>Zumrad Residence</a><div id="where"></div></div>
+<div id="hint">Atrofga qarash uchun sudrang. Boshqa joyga o'tish uchun halqani bosing.</div>
+<nav id="rooms" aria-label="Xonalar"></nav>
+<div id="mm" aria-label="D xonadon rejasi: siz turgan joy">
+  <div class="in">
+    <img src="plan_D.webp" alt="" width="900" height="447">
+    <svg viewBox="0 0 1800 894" aria-hidden="false">
+      <defs>
+        <radialGradient id="mmG"><stop offset="0" stop-color="#FFE9B8" stop-opacity=".95"/><stop offset=".35" stop-color="#FFD98A" stop-opacity=".45"/><stop offset="1" stop-color="#FFD98A" stop-opacity="0"/></radialGradient>
+        <radialGradient id="mmC" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="scale(150)"><stop offset="0" stop-color="#FFE9B8" stop-opacity=".62"/><stop offset="1" stop-color="#FFE9B8" stop-opacity="0"/></radialGradient>
+      </defs>
+      <g id="mmPts"></g>
+      <g id="mmMe"><g transform="scale(3.4)">
+        <path id="mmCone" fill="url(#mmC)" d="M0 0 L190 -110 A220 220 0 0 1 190 110 Z"/>
+        <circle class="glow" r="46" fill="url(#mmG)"/>
+        <circle r="13" fill="#FFF1CF" stroke="#13241E" stroke-width="4"/>
+      </g></g>
+    </svg>
+  </div>
+</div>
+
+<div id="fade"></div>
+<div id="load">Yuklanmoqda…</div>
+<script>
+// Blender koordinatalari: x sharq, y shimol. Har nuqta: [x, y], ko'z balandligi 1.55 m.
+const PTS = {
+  L1:[8.7,-4.3], L2:[8.8,-1.9], L3:[8.6,-6.3],
+  K1:[0.9,-4.3], K2:[-0.65,-5.9], K3:[0.6,-7.2],
+  B1:[3.15,-3.0], B2:[4.7,-5.5], B3:[5.6,-5.9],
+  H1:[2.55,-1.45], H2:[5.2,-1.45], H3:[1.0,-2.6],
+  G1:[11.7,-1.6], G2:[11.3,-3.3], G3:[11.5,-4.45],
+  T1:[-0.7,-1.6], T2:[-0.6,-2.8]
+};
+const LINKS = {
+  L1:['L2','L3'], L2:['L1','H2','G1'], L3:['L1'],
+  H2:['L2','H1'], H1:['H2','H3','B1'], H3:['H1','K1','T1'],
+  K1:['H3','K2','K3'], K2:['K1','K3'], K3:['K1','K2'],
+  B1:['H1','B2','B3'], B2:['B1','B3'], B3:['B1','B2'],
+  G1:['L2','G2'], G2:['G1','G3'], G3:['G2'],
+  T1:['H3','T2'], T2:['T1']
+};
+const ROOMS = { L:'Mehmonxona', K:'Oshxona', B:'Yotoqxona', H:'Dahliz', G:'Loggiya', T:'Hammom' };
+const START_YAW = { L1:200, K1:215, B1:-45, H1:0, G1:-90, T1:200 }; // gradus, sharqdan soat miliga teskari
+const EYE = 1.55;
+// belgi turadigan ko'rinadigan bo'sh pol nuqtasi (mebel to'sgan yo'nalishlar uchun)
+const MARKS = {"H3>T1": [0.07, -2.05], "K1>K3": [0.81, -5.2], "B3>B1": [4.62, -4.74], "T1>H3": [0.07, -2.05]};
+const READY = new Set(/*READY*/['B1', 'B2', 'B3', 'G1', 'G2', 'G3', 'H1', 'H2', 'H3', 'K1', 'K2', 'K3', 'L1', 'L2', 'L3', 'T1', 'T2']/*END*/);
+const $ = s => document.querySelector(s);
+const canvas = $('#c'), gl = canvas.getContext('webgl', { antialias:false, alpha:false });
+const hsLayer = $('#hs'), fade = $('#fade'), hint = $('#hint'), where = $('#where'), roomsEl = $('#rooms');
+if (!gl) { $('#load').textContent = "Bu qurilmada 3D ko'rinish ishlamaydi"; throw new Error('no webgl'); }
+
+const vs = 'attribute vec2 p; varying vec2 v; void main(){ v=p; gl_Position=vec4(p,0.,1.); }';
+const fs = `precision highp float; varying vec2 v; uniform sampler2D t; uniform mat3 m; uniform vec2 k;
+void main(){ vec3 d=normalize(m*vec3(v.x*k.x, v.y*k.y, 1.0));
+  float th=atan(d.y,d.x), ph=asin(clamp(d.z,-1.,1.));
+  gl_FragColor=texture2D(t, vec2(0.5-th/6.28318530718, 0.5-ph/3.14159265359)); }`;
+function sh(type, src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s; }
+const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER,vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(prog); gl.useProgram(prog);
+const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog,'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+const uM = gl.getUniformLocation(prog,'m'), uK = gl.getUniformLocation(prog,'k');
+const MAXTEX = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+const imgs = {}, texs = {};
+function loadImg(id){ return imgs[id] || (imgs[id] = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error(id)); im.src = './p/' + id + '.jpg'; })); }
+function texFor(id, im){
+  if (texs[id]) return texs[id];
+  let src = im;
+  if (im.width > MAXTEX) { const c = document.createElement('canvas'); c.width = MAXTEX; c.height = MAXTEX/2; c.getContext('2d').drawImage(im,0,0,c.width,c.height); src = c; }
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  // eski nuqtalar xotirasini bo'shatish (telefon uchun): faqat oxirgi 4 tasini saqlaymiz
+  const keys = Object.keys(texs); if (keys.length >= 4) { const old = keys[0]; gl.deleteTexture(texs[old]); delete texs[old]; }
+  return (texs[id] = t);
+}
+
+let cur = null, yaw = 0, pitch = 0, fov = 78, dirty = true;
+let R=[0,0,0], U=[0,0,0], F=[0,0,0];
+function basis(){ const cp=Math.cos(pitch), sp=Math.sin(pitch), cy=Math.cos(yaw), sy=Math.sin(yaw);
+  F=[cy*cp, sy*cp, sp]; R=[sy,-cy,0]; U=[-cy*sp,-sy*sp,cp]; }
+function resize(){ const d=Math.min(devicePixelRatio||1,2), w=Math.round(innerWidth*d), h=Math.round(innerHeight*d); if(canvas.width!==w||canvas.height!==h){ canvas.width=w; canvas.height=h; gl.viewport(0,0,w,h);} dirty=true; }
+addEventListener('resize', resize);
+
+const hsEls = {};
+function buildHotspots(){
+  hsLayer.innerHTML=''; for (const k in hsEls) delete hsEls[k];
+  for (const id of LINKS[cur]) { if (!READY.has(id)) continue; const b=document.createElement('button'); b.type='button'; b.className='hs' + (id[0]!==cur[0] ? ' other':'' );
+    const lab = id[0]!==cur[0] ? ROOMS[id[0]] : '';
+    b.innerHTML = '<i></i>' + (lab ? '<span>'+lab+'</span>' : ''); b.setAttribute('aria-label', (lab || ROOMS[id[0]]) + ' tomon ko\'chish');
+    b.onclick = e => { e.stopPropagation(); go(id); }; hsLayer.appendChild(b); hsEls[id]=b; }
+}
+function placeHotspots(){
+  const ty=Math.tan(fov*Math.PI/360), tx=ty*innerWidth/innerHeight, c=PTS[cur];
+  for (const id in hsEls) { const p=MARKS[cur+'>'+id]||PTS[id], v=[p[0]-c[0], p[1]-c[1], 0.04-EYE];
+    const zf=v[0]*F[0]+v[1]*F[1]+v[2]*F[2], el=hsEls[id];
+    if (zf<0.15) { el.style.display='none'; continue; }
+    const x=(v[0]*R[0]+v[1]*R[1])/zf/tx, y=(v[0]*U[0]+v[1]*U[1]+v[2]*U[2])/zf/ty;
+    if (Math.abs(x)>1.15||Math.abs(y)>1.15) { el.style.display='none'; continue; }
+    el.style.display='flex'; el.style.left=((x+1)/2*innerWidth)+'px'; el.style.top=((1-y)/2*innerHeight)+'px'; }
+}
+function draw(){
+  if (dirty && cur && texs[cur]) { dirty=false; basis();
+    const ty=Math.tan(fov*Math.PI/360), tx=ty*canvas.width/canvas.height;
+    gl.uniformMatrix3fv(uM,false,new Float32Array([R[0],R[1],R[2],U[0],U[1],U[2],F[0],F[1],F[2]])); gl.uniform2f(uK,tx,ty);
+    gl.bindTexture(gl.TEXTURE_2D, texs[cur]); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); placeHotspots(); mmLook(); }
+  requestAnimationFrame(draw);
+}
+function markRooms(){ for (const b of roomsEl.children) b.classList.toggle('on', b.dataset.r===cur[0]); where.textContent='D xonadon, '+ROOMS[cur[0]].toLowerCase(); }
+let busy=false;
+async function go(id, keepYaw){
+  if (busy || id===cur) return; busy=true; fade.classList.add('on');
+  try {
+    const [im] = await Promise.all([loadImg(id), new Promise(r=>setTimeout(r,200))]);
+    if (cur && !keepYaw) { const a=PTS[cur], b=PTS[id]; yaw=Math.atan2(b[1]-a[1], b[0]-a[0]); pitch=0; }
+    cur=id; texFor(id, im); buildHotspots(); markRooms(); mmMove(id); dirty=true;
+    for (const n of LINKS[id]) loadImg(n).catch(()=>{});
+  } catch(e) { where.textContent="Rasm yuklanmadi, qayta urinib ko'ring"; }
+  fade.classList.remove('on'); $('#load').classList.add('off'); busy=false;
+}
+
+// ---- reja: Blender (x,y) -> reja piksellari (ortho render 120 px/m, markaz 5.5,-4.4, kesim 90,60)
+const MM = { s:120, cx:5.5, cy:-4.4, ox:990-90, oy:510-60 };
+const mmXY = ([x,y]) => [MM.ox + (x-MM.cx)*MM.s, MM.oy - (y-MM.cy)*MM.s];
+const mmMe = $('#mmMe'), mmCone = $('#mmCone'), mmPts = $('#mmPts'), mmDot = {};
+let mmPos = null, mmAnim = 0, mmRot = null;
+for (const id in PTS) { if (!READY.has(id)) continue; const [px,py]=mmXY(PTS[id]); const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx',px); c.setAttribute('cy',py); c.setAttribute('r',15); c.setAttribute('class','pt'); c.setAttribute('tabindex','0'); c.setAttribute('role','button');
+  c.setAttribute('aria-label', ROOMS[id[0]]+' '+id[1]+'-nuqtaga o\'tish'); c.onclick=()=>{ go(id); hint.classList.add('off'); };
+  c.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(id); } }; mmPts.appendChild(c); mmDot[id]=c; }
+function mmSet(){ if (!mmPos) return; mmMe.setAttribute('transform',`translate(${mmPos[0].toFixed(1)} ${mmPos[1].toFixed(1)})`); }
+function mmMove(id){
+  for (const k in mmDot) mmDot[k].classList.toggle('here', k===id);
+  const to=mmXY(PTS[id]); cancelAnimationFrame(mmAnim);
+  if (!mmPos || matchMedia('(prefers-reduced-motion:reduce)').matches) { mmPos=to; mmSet(); return; }
+  const from=mmPos.slice(), t0=performance.now(), D=650, ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+  (function st(now){ const k=Math.min(1,(now-t0)/D), q=ease(k); mmPos=[from[0]+(to[0]-from[0])*q, from[1]+(to[1]-from[1])*q]; mmSet(); if(k<1) mmAnim=requestAnimationFrame(st); })(t0);
+}
+function mmLook(){ // konus: qarash yo'nalishi va gorizontal ko'rish burchagi
+  const half=Math.atan(Math.tan(fov*Math.PI/360)*innerWidth/innerHeight), L=150, a=Math.min(1.35,half);
+  const key=yaw.toFixed(3)+'|'+a.toFixed(3); if (key===mmRot) return; mmRot=key;
+  mmCone.setAttribute('d',`M0 0 L${(L*Math.cos(a)).toFixed(1)} ${(-L*Math.sin(a)).toFixed(1)} A${L} ${L} 0 0 1 ${(L*Math.cos(a)).toFixed(1)} ${(L*Math.sin(a)).toFixed(1)} Z`);
+  mmCone.setAttribute('transform',`rotate(${(-yaw*180/Math.PI).toFixed(2)})`);
+}
+for (const r in ROOMS) { if (!READY.has(r+'1')) continue; const b=document.createElement('button'); b.type='button'; b.textContent=ROOMS[r]; b.dataset.r=r;
+  b.onclick=()=>{ const id=r+'1'; if (cur && cur[0]===r) return; yaw=(START_YAW[id]||0)*Math.PI/180; pitch=0; go(id,true); hint.classList.add('off'); }; roomsEl.appendChild(b); }
+
+// boshqaruv: sudrab qarash, chimdib yoki g'ildirak bilan yaqinlashtirish, klaviatura
+const ptrs=new Map(); let pinch=0, vy=0, vp=0, lastT=0, coast=0;
+function glide(t){ const dt=Math.min(40,t-coast); coast=t; if (ptrs.size || (Math.abs(vy)<2e-5 && Math.abs(vp)<2e-5)) { coast=0; return; }
+  yaw+=vy*dt; pitch=Math.max(-1.35,Math.min(1.35,pitch+vp*dt)); const f=Math.pow(0.994,dt); vy*=f; vp*=f; dirty=true; requestAnimationFrame(glide); }
+canvas.addEventListener('pointerdown', e=>{ vy=0; vp=0; lastT=performance.now(); ptrs.set(e.pointerId,[e.clientX,e.clientY]); try{canvas.setPointerCapture(e.pointerId);}catch(_){} canvas.classList.add('drag'); hint.classList.add('off'); });
+canvas.addEventListener('pointermove', e=>{ const p=ptrs.get(e.pointerId); if(!p) return;
+  if (ptrs.size===1) { const sp=(e.pointerType==='touch'?2.4:1.4), k=sp*(fov*Math.PI/180)/innerHeight, dy=(e.clientX-p[0])*k, dp=(e.clientY-p[1])*k*0.8;
+    yaw+=dy; pitch=Math.max(-1.35,Math.min(1.35,pitch+dp)); const t=performance.now(), dt=Math.max(4,t-lastT); lastT=t; vy=vy*0.4+0.6*dy/dt; vp=vp*0.4+0.6*dp/dt; dirty=true; }
+  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+  if (ptrs.size===2) { const a=[...ptrs.values()], d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]); if (pinch) { fov=Math.max(40,Math.min(100,fov*pinch/d)); dirty=true; } pinch=d; }
+});
+function up(e){ ptrs.delete(e.pointerId); pinch=0; if(!ptrs.size) { canvas.classList.remove('drag'); if (performance.now()-lastT>80) { vy=0; vp=0; } else if(!coast) { coast=performance.now(); requestAnimationFrame(glide); } } }
+canvas.addEventListener('pointerup',up); canvas.addEventListener('pointercancel',up);
+canvas.addEventListener('wheel', e=>{ fov=Math.max(40,Math.min(100,fov+Math.sign(e.deltaY)*3)); dirty=true; e.preventDefault(); }, {passive:false});
+addEventListener('keydown', e=>{ const s=0.08; if(e.key==='ArrowLeft'){yaw+=s;} else if(e.key==='ArrowRight'){yaw-=s;} else if(e.key==='ArrowUp'){pitch=Math.min(1.35,pitch+s);} else if(e.key==='ArrowDown'){pitch=Math.max(-1.35,pitch-s);} else return; dirty=true; e.preventDefault(); });
+setTimeout(()=>hint.classList.add('off'), 7000);
+
+resize(); requestAnimationFrame(draw);
+{ const f=+new URLSearchParams(location.search).get('f'); if (f>=2&&f<=10) $('#brand').href='/#/qavat/'+f; }
+const startId = (location.hash||'').slice(1); yaw=(START_YAW[PTS[startId]?startId:'L1']||200)*Math.PI/180;
+go(PTS[startId]?startId:'L1', true);
+</script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="36db393a-5d94-4eae-9663-7955aaa970b1" data-app-host="app.netlify.com" data-account-tier="free"></script>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=36db393a-5d94-4eae-9663-7955aaa970b1
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zumrad Residence</title>
+<meta name="description" content="Zumrad Residence: qavatni tanlang, rejani aylantirib ko'ring, xonadon ichida 360° sayr qiling.">
+<meta name="theme-color" content="#13241E">
+<link rel="preload" href="fonts/sofia-sans-extra-condensed-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sofia-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face { font-family:"Sofia Cond"; src:url(fonts/sofia-sans-extra-condensed-latin-500-normal.woff2) format("woff2"); font-weight:500; font-display:swap; }
+@font-face { font-family:"Sofia Cond"; src:url(fonts/sofia-sans-extra-condensed-latin-600-normal.woff2) format("woff2"); font-weight:600; font-display:swap; }
+@font-face { font-family:"Sofia"; src:url(fonts/sofia-sans-latin-400-normal.woff2) format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"Sofia"; src:url(fonts/sofia-sans-latin-500-normal.woff2) format("woff2"); font-weight:500; font-display:swap; }
+@font-face { font-family:"Sofia"; src:url(fonts/sofia-sans-latin-600-normal.woff2) format("woff2"); font-weight:600; font-display:swap; }
+
+:root {
+  --ground:#13241E;      /* zumrad, sahifa foni (qavat kadrlari foni bilan bir xil) */
+  --raised:#1B3129;      /* ko'tarilgan yuzalar */
+  --stone:#ECE6DA;       /* fasad toshi: asosiy matn */
+  --stone-2:#A9B6AD;     /* ikkinchi darajali matn */
+  --verd:#8FB8A3;        /* tanlov, belgilash */
+  --line:rgba(236,230,218,.16);
+  --hot:rgba(143,184,163,.34);
+  --cond:"Sofia Cond", "Arial Narrow", sans-serif;
+  --text:"Sofia", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { margin:0; height:100%; background:var(--ground); color:var(--stone); font:400 15px/1.5 var(--text); overflow:hidden; overscroll-behavior:none; }
+button { font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
+:focus-visible { outline:2px solid var(--verd); outline-offset:2px; }
+.view { position:fixed; inset:0; display:none; }
+body.v-building #building { display:grid; }
+body.v-floor #floor { display:grid; }
+.mark { font:600 26px/1 var(--cond); letter-spacing:.01em; margin:0; color:var(--stone); text-decoration:none; }
+
+/* ---------------- Bino ---------------- */
+#building { grid-template-columns:1fr 340px; }
+.scene { position:relative; overflow:hidden; background:#2a2f2b; }
+.stage { position:absolute; left:0; top:0; }
+#snow { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.stage img, .stage svg { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.stage polygon { fill:transparent; stroke:transparent; stroke-width:1.5; vector-effect:non-scaling-stroke; cursor:pointer; transition:fill .18s, stroke .18s; outline:none; }
+.stage polygon.on { fill:var(--hot); stroke:#D4E6DC; }
+.stage polygon.off { cursor:default; }
+#level { position:absolute; right:0; height:0; border-top:1px dashed #13241E; box-shadow:0 1px 0 rgba(236,230,218,.55); opacity:0; transition:opacity .18s; pointer-events:none; }
+#level.on { opacity:1; }
+.rail-col { position:relative; background:var(--ground); border-left:1px solid var(--line); }
+.rail-col header { position:absolute; left:28px; right:24px; top:26px; }
+.rail { position:absolute; inset:0; }
+.lvl { position:absolute; left:0; right:0; display:grid; grid-template-columns:76px 1fr; align-items:center; padding:0 24px 0 28px; transform:translateY(-50%); text-align:left; }
+.lvl b { font:600 var(--n, 40px)/1 var(--cond); font-variant-numeric:tabular-nums; color:var(--stone-2); transition:color .15s; }
+.lvl span { font-size:13.5px; color:var(--stone-2); font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:12px; }
+.lvl span::before { content:""; flex:none; width:22px; height:1px; background:currentColor; opacity:.55; transition:width .2s; }
+button.lvl:hover b, button.lvl.on b, button.lvl:focus-visible b { color:var(--stone); }
+button.lvl:hover span, button.lvl.on span { color:var(--stone); }
+button.lvl:hover span::before, button.lvl.on span::before { width:40px; opacity:1; }
+.lvl.ground { cursor:default; }
+.lvl.ground b { color:rgba(169,182,173,.45); }
+.rail-col footer { position:absolute; left:28px; right:24px; bottom:26px; }
+.rail-col h1 { font:600 34px/1.05 var(--cond); margin:0 0 8px; }
+.rail-col footer p { margin:0; color:var(--stone-2); font-size:14px; max-width:28ch; }
+
+/* ---------------- Qavat ---------------- */
+#floor { grid-template-columns:84px 1fr; grid-template-rows:auto 1fr auto; }
+.fbar { grid-column:1 / -1; display:flex; align-items:center; gap:22px; padding:16px 28px; border-bottom:1px solid var(--line); }
+.back { display:inline-flex; align-items:center; gap:10px; font-size:14px; color:var(--stone-2); padding:6px 2px; }
+.back:hover { color:var(--stone); }
+.back svg { width:18px; height:18px; }
+.fbar .mark { font-size:22px; }
+.fbar .title { margin-left:auto; display:flex; align-items:baseline; gap:12px; }
+.fbar .title b { font:600 34px/1 var(--cond); }
+.fbar .title span { color:var(--stone-2); font-size:14px; }
+.frail { border-right:1px solid var(--line); display:flex; flex-direction:column; justify-content:center; gap:2px; padding:12px 0; }
+.frail button { font:600 22px/1 var(--cond); color:var(--stone-2); padding:9px 0 9px 28px; text-align:left; position:relative; font-variant-numeric:tabular-nums; }
+.frail button:hover { color:var(--stone); }
+.frail button.on { color:var(--stone); }
+.frail button.on::before { content:""; position:absolute; left:0; top:50%; width:18px; height:2px; background:var(--verd); }
+.fmain { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:0; padding:8px 24px 0; }
+.turn { position:relative; width:100%; max-width:calc((100dvh - 290px) * 16 / 9); aspect-ratio:16 / 9; overflow:hidden; touch-action:none; cursor:grab; user-select:none; -webkit-user-select:none; }
+.turn.drag { cursor:grabbing; }
+.turn.zoomed { cursor:move; }
+.zoomer { position:absolute; left:0; top:0; transform-origin:0 0; }
+.zoomer img, .zoomer svg { position:absolute; inset:0; width:100%; height:100%; display:block; -webkit-user-drag:none; }
+.zoomer img { pointer-events:none; }
+.zoomer polygon { fill:transparent; stroke:transparent; stroke-width:1.5; vector-effect:non-scaling-stroke; cursor:pointer; transition:fill .15s, stroke .15s; outline:none; }
+.zoomer polygon.hov { fill:rgba(236,230,218,.12); stroke:rgba(236,230,218,.6); }
+.zoomer polygon.on { fill:var(--hot); stroke:#D4E6DC; }
+.tag { position:absolute; transform:translate(-50%,-50%); pointer-events:none; width:30px; height:30px; display:grid; place-items:center; font:600 18px/1 var(--cond); background:var(--ground); color:var(--stone); border:1px solid rgba(236,230,218,.55); border-radius:2px; transition:background .15s, color .15s; }
+.tag.on { background:var(--stone); color:var(--ground); border-color:var(--stone); }
+#pre { position:absolute; inset:0; display:grid; place-items:center; color:var(--stone-2); font-size:13px; background:var(--ground); transition:opacity .4s; }
+#pre.off { opacity:0; pointer-events:none; }
+#hint { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); font-size:13px; color:var(--stone); background:rgba(19,36,30,.82); padding:7px 14px; border-radius:3px; pointer-events:none; transition:opacity .6s; white-space:nowrap; }
+#hint.off { opacity:0; }
+.zoomctl { position:absolute; right:10px; top:10px; display:flex; flex-direction:column; border:1px solid var(--line); background:rgba(19,36,30,.8); border-radius:3px; }
+.zoomctl button { width:38px; height:38px; font-size:20px; line-height:1; color:var(--stone); }
+.zoomctl button + button { border-top:1px solid var(--line); }
+.zoomctl button:disabled { opacity:.35; cursor:default; }
+.scrub { position:relative; width:100%; max-width:calc((100dvh - 290px) * 16 / 9); height:34px; margin-top:6px; cursor:ew-resize; touch-action:none; }
+.scrub i { position:absolute; bottom:8px; width:1px; height:7px; background:var(--stone-2); opacity:.45; }
+.scrub i.major { height:13px; opacity:.8; }
+.scrub .needle { position:absolute; bottom:4px; width:2px; height:22px; background:var(--verd); transform:translateX(-1px); }
+.apts { grid-column:2; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)) minmax(260px, 1.3fr); border-top:1px solid var(--line); }
+.apt { display:grid; grid-template-columns:auto 1fr; align-items:baseline; column-gap:14px; padding:16px 22px 18px; text-align:left; border-right:1px solid var(--line); transition:background .15s, color .15s; }
+.apt b { font:600 44px/1 var(--cond); }
+.apt span { font-size:15px; font-variant-numeric:tabular-nums; }
+.apt small { grid-column:2; font-size:12.5px; color:var(--stone-2); }
+.apt:hover, .apt.hov { background:var(--raised); }
+.apt.on { background:var(--stone); color:var(--ground); }
+.apt.on small { color:rgba(19,36,30,.7); }
+.act { display:flex; align-items:center; padding:14px 24px; }
+.act a { display:inline-block; text-decoration:none; background:var(--verd); color:var(--ground); font-weight:600; font-size:15.5px; padding:14px 22px; border-radius:3px; }
+.act a:hover { background:#A6CBB8; }
+.act p { margin:0; color:var(--stone-2); font-size:14px; max-width:30ch; }
+
+/* ---------------- Telefon ---------------- */
+@media (max-width:820px), (max-aspect-ratio:1/1) {
+  html, body { overflow:auto; height:auto; }
+  .view { position:static; min-height:100dvh; }
+  #building { grid-template-columns:1fr; grid-template-rows:auto 58vh auto; }
+  .mbar { display:flex !important; align-items:center; padding:14px 18px; }
+  .rail-col { border-left:0; display:flex; flex-direction:column; }
+  .rail-col header { display:none; }
+  .rail, .rail-col footer { position:static; }
+  .rail { display:grid; grid-template-columns:repeat(3,1fr); gap:0; border-top:1px solid var(--line); }
+  .lvl { position:static; transform:none; grid-template-columns:1fr; padding:12px 18px; border-bottom:1px solid var(--line); border-right:1px solid var(--line); }
+  .lvl:nth-child(3n) { border-right:0; }
+  .lvl b { font-size:34px !important; }
+  .lvl span { font-size:12.5px; }
+  .lvl span::before { display:none; }
+  button.lvl.on { background:var(--raised); }
+  .lvl.ground { display:none; }
+  .rail-col footer { order:-1; padding:18px 18px 14px; }
+  .rail-col h1 { font-size:28px; }
+  #level { display:none; }
+  #floor { grid-template-columns:1fr; grid-template-rows:none; align-content:start; }
+  .fbar { padding:12px 16px; gap:14px; }
+  .fbar .mark { display:none; }
+  .fbar .title b { font-size:28px; }
+  .frail { flex-direction:row; border-right:0; border-bottom:1px solid var(--line); overflow-x:auto; padding:0 8px; gap:0; scrollbar-width:none; }
+  .frail::-webkit-scrollbar { display:none; }
+  .frail button { padding:12px 12px 14px; font-size:20px; }
+  .frail button.on::before { left:12px; right:12px; top:auto; bottom:0; width:auto; }
+  .fmain { padding:10px 0 0; }
+  .turn, .scrub { max-width:none; }
+  .turn { aspect-ratio:4 / 3; }
+  .scrub { width:calc(100% - 32px); }
+  .apts { grid-column:1; grid-template-columns:repeat(4,1fr); }
+  .apt { grid-template-columns:1fr; padding:12px 12px 14px; row-gap:2px; }
+  .apt b { font-size:36px; }
+  .apt small { grid-column:1; }
+  .apt:nth-child(4) { border-right:0; }
+  .act { grid-column:1 / -1; border-top:1px solid var(--line); padding:14px 16px 22px; }
+  .act a { width:100%; text-align:center; }
+}
+.mbar { display:none; }
+@media (min-width:821px) and (min-aspect-ratio:1/1) and (max-height:820px) { .rail-col footer p { display:none; } .rail-col h1 { font-size:28px; margin:0; } }
+/* ---------------- Muhit ---------------- */
+.envs { position:absolute; inset:0; z-index:0; }
+.stage svg { z-index:1; }
+.envs img { position:absolute; inset:0; width:100%; height:100%; display:block; opacity:0; transform:translateZ(0); backface-visibility:hidden; }
+#snow { transition:opacity .9s; }
+.env { position:absolute; left:28px; bottom:26px; z-index:3; background:rgba(19,36,30,.9); border:1px solid var(--line); border-radius:3px; padding:8px 6px; }
+.g-time, .g-wx { display:flex; flex-direction:column; justify-content:flex-end; }
+.btns { display:flex; }
+.sky { position:relative; height:30px; margin:0 14px 2px; cursor:ew-resize; touch-action:none; outline:none; }
+.sky:focus-visible { outline:2px solid var(--verd); outline-offset:2px; }
+.arc { position:absolute; left:0; right:0; bottom:0; width:100%; height:24px; overflow:visible; }
+.arc path { fill:none; stroke:rgba(236,230,218,.3); stroke-width:1; stroke-dasharray:2 3; vector-effect:non-scaling-stroke; }
+.arc path.nightp { stroke:rgba(201,211,216,.22); }
+.arc line { stroke:rgba(236,230,218,.18); stroke-width:1; vector-effect:non-scaling-stroke; }
+.sun { position:absolute; left:0; top:0; width:11px; height:11px; margin:-5.5px 0 0 -5.5px; border-radius:50%; background:#F0CF85; box-shadow:0 0 0 3px rgba(240,207,133,.18), 0 0 14px 3px rgba(240,207,133,.45); transition:background .5s, box-shadow .5s, opacity .5s; pointer-events:none; }
+.sun.night { background:#D5DEE2; box-shadow:0 0 0 3px rgba(213,222,226,.12), 0 0 10px 2px rgba(213,222,226,.3); }
+.sun b { position:absolute; left:50%; bottom:15px; transform:translateX(-50%); font:500 11.5px/1 var(--text); font-variant-numeric:tabular-nums; color:var(--stone); white-space:nowrap; opacity:.85; }
+.env.wx .sun { opacity:0; }
+.env.wx .arc { opacity:.45; }
+.envs img { will-change:opacity; }
+.env-row { display:flex; align-items:stretch; }
+.env-row button { display:grid; gap:1px; padding:6px 14px 4px; text-align:left; color:var(--stone-2); border-radius:2px; transition:color .2s, background .2s; }
+.env-row button b { font:600 19px/1 var(--cond); letter-spacing:.01em; }
+.env-row button span { font-size:12px; font-variant-numeric:tabular-nums; opacity:.8; }
+.env-row button:hover { color:var(--stone); }
+.env-row button[aria-checked="true"] { color:var(--stone); background:rgba(143,184,163,.16); }
+.env-row .sep { width:1px; margin:30px 6px 4px; background:var(--line); }
+@media (max-width:820px), (max-aspect-ratio:1/1) {
+  .env { position:static; margin:0; border:0; border-bottom:1px solid var(--line); border-radius:0; background:var(--raised); padding:8px 8px 6px; order:-2; }
+  .env-row, .g-time .btns { justify-content:space-between; }
+  .g-time { flex:1; }
+  .env-row button { padding:5px 6px 3px; }
+  .env-row button b { font-size:17px; }
+  .env-row button span { font-size:11px; }
+  .env-row .sep { margin:28px 2px 4px; }
+}
+@media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body class="v-building">
+
+<section class="view" id="building" aria-label="Bino">
+  <div class="mbar"><a class="mark" href="#">Zumrad Residence</a></div>
+  <div class="scene" id="scene">
+    <div class="stage" id="stage">
+      <div class="envs" id="envs"></div>
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+    <canvas id="snow" aria-hidden="true"></canvas>
+    <div class="env" id="env">
+      <div class="env-row" role="radiogroup" aria-label="Kun vaqti va ob-havo">
+        <div class="g-time"><div class="sky" id="sky" role="slider" tabindex="0" aria-label="Kun vaqti" aria-valuemin="6.97" aria-valuemax="20.5"><svg class="arc" viewBox="0 0 400 44" preserveAspectRatio="none" aria-hidden="true"><path d="M8 40 Q174 -26 340 40" /><path class="nightp" d="M340 40 L392 48" /><line x1="0" y1="40" x2="400" y2="40" /></svg><i class="sun" id="sun"><b id="clock">18:07</b></i></div><div class="btns"></div></div>
+        <i class="sep"></i>
+        <div class="g-wx"><div class="btns"></div></div>
+      </div>
+    </div>
+    <div id="level"></div>
+  </div>
+  <div class="rail-col">
+    <header><a class="mark" href="#">Zumrad Residence</a></header>
+    <nav class="rail" id="rail" aria-label="Qavatlar"></nav>
+    <footer>
+      <h1>Qavatni tanlang</h1>
+      <p>Binodagi qavat yoki sath belgisi ustiga bosing.</p>
+    </footer>
+  </div>
+</section>
+
+<section class="view" id="floor" aria-label="Qavat rejasi">
+  <div class="fbar">
+    <button class="back" id="back" type="button"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 3.5 5.5 9l5.5 5.5"/></svg>Bino</button>
+    <a class="mark" href="#">Zumrad Residence</a>
+    <div class="title"><b id="ftitle">5-qavat</b><span>4 ta xonadon</span></div>
+  </div>
+  <nav class="frail" id="frail" aria-label="Qavatni almashtirish"></nav>
+  <div class="fmain">
+    <div class="turn" id="turn">
+      <div class="zoomer" id="zoomer">
+        <img id="frame" alt="Qavat rejasining 3D ko'rinishi" draggable="false">
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="none"></svg>
+        <div id="tags"></div>
+      </div>
+      <div id="pre">Qavat yuklanmoqda</div>
+      <div id="hint"></div>
+      <div class="zoomctl"><button type="button" id="zin" aria-label="Yaqinlashtirish">+</button><button type="button" id="zout" aria-label="Uzoqlashtirish">−</button></div>
+    </div>
+    <div class="scrub" id="scrub" role="slider" tabindex="0" aria-label="Qavatni aylantirish" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0"><div class="needle" id="needle"></div></div>
+  </div>
+  <div class="apts" id="apts"></div>
+</section>
+
+<script>
+const BANDS = /*BANDS*/{"1":[[0.36,0.7659],[0.566,0.8049],[0.656,0.7685],[0.656,0.8437],[0.566,0.8985],[0.36,0.8398]],"2":[[0.36,0.7079],[0.566,0.7314],[0.656,0.7095],[0.656,0.7685],[0.566,0.8049],[0.36,0.7659]],"3":[[0.36,0.6499],[0.566,0.6579],[0.656,0.6504],[0.656,0.7095],[0.566,0.7314],[0.36,0.7079]],"4":[[0.36,0.5919],[0.566,0.5844],[0.656,0.5914],[0.656,0.6504],[0.566,0.6579],[0.36,0.6499]],"5":[[0.36,0.5338],[0.566,0.5108],[0.656,0.5323],[0.656,0.5914],[0.566,0.5844],[0.36,0.5919]],"6":[[0.36,0.4758],[0.566,0.4373],[0.656,0.4733],[0.656,0.5323],[0.566,0.5108],[0.36,0.5338]],"7":[[0.36,0.4178],[0.566,0.3638],[0.656,0.4142],[0.656,0.4733],[0.566,0.4373],[0.36,0.4758]],"8":[[0.36,0.3598],[0.566,0.2903],[0.656,0.3552],[0.656,0.4142],[0.566,0.3638],[0.36,0.4178]],"9":[[0.36,0.3017],[0.566,0.2167],[0.656,0.2961],[0.656,0.3552],[0.566,0.2903],[0.36,0.3598]],"10":[[0.36,0.2437],[0.566,0.1432],[0.656,0.2371],[0.656,0.2961],[0.566,0.2167],[0.36,0.3017]]}/*END*/;
+const N = 144;
+const APTS = [
+  { k:'A', area:70 }, { k:'B', area:69 }, { k:'C', area:79 },
+  { k:'D', area:110, tour:'/360/' }
+];
+const LEVEL = n => n === 1 ? '±0,00' : '+' + (4.2 + (n - 2) * 3.3).toFixed(2).replace('.', ',');
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+
+/* ================= Bino ================= */
+const scene = $('#scene'), stage = $('#stage'), hsvg = stage.querySelector('svg'), rail = $('#rail'), level = $('#level');
+const bandPoly = {}, railBtn = {};
+let cov = { x:0, y:0, w:1, h:1 };
+for (let n = 10; n >= 1; n--) {
+  const k = String(n), b = BANDS[k];
+  const p = document.createElementNS(NS, 'polygon');
+  p.setAttribute('points', b.map(q => (q[0]*1600).toFixed(1) + ',' + (q[1]*900).toFixed(1)).join(' '));
+  if (n > 1) { p.addEventListener('pointerenter', () => hl(k, true)); p.addEventListener('pointerleave', () => hl(k, false)); p.addEventListener('click', () => go(n)); }
+  else p.classList.add('off');
+  hsvg.appendChild(p); bandPoly[k] = p;
+  const r = document.createElement(n > 1 ? 'button' : 'div');
+  r.className = 'lvl' + (n === 1 ? ' ground' : '');
+  r.innerHTML = '<b>' + n + '</b><span>' + LEVEL(n) + (n === 1 ? '&nbsp; savdo va kirish' : '') + '</span>';
+  if (n > 1) { r.type = 'button'; r.setAttribute('aria-label', n + '-qavat, sath ' + LEVEL(n) + ' metr');
+    r.addEventListener('pointerenter', () => hl(k, true)); r.addEventListener('pointerleave', () => hl(k, false));
+    r.addEventListener('focus', () => hl(k, true)); r.addEventListener('blur', () => hl(k, false)); r.addEventListener('click', () => go(n)); }
+  rail.appendChild(r); railBtn[k] = r;
+}
+function bandMid(k){ const b = BANDS[k]; return (b[0][1] + b[5][1] + b[1][1] + b[4][1]) / 4; }
+function layoutBuilding(){
+  const W = scene.clientWidth, H = scene.clientHeight, A = 16/9;
+  let w = W, h = W / A; if (h < H) { h = H; w = H * A; }
+  let x = W / 2 - 0.51 * w; x = Math.min(0, Math.max(W - w, x));
+  let y = (H - h) / 2;
+  cov = { x, y, w, h };
+  stage.style.cssText = `width:${w}px;height:${h}px;transform:translate(${x}px,${y}px)`;
+  if (getComputedStyle(rail).position !== 'absolute') return;
+  const bandH = (BANDS['5'][5][1] - BANDS['5'][0][1]) * h;
+  rail.style.setProperty('--n', Math.max(26, Math.min(46, bandH * 0.78)) + 'px');
+  for (let n = 1; n <= 10; n++) railBtn[String(n)].style.top = (y + bandMid(String(n)) * h) + 'px';
+}
+function hl(k, on){
+  bandPoly[k].classList.toggle('on', on); railBtn[k].classList.toggle('on', on);
+  if (on) { const b = BANDS[k], xr = cov.x + Math.max(b[1][0], b[2][0]) * cov.w; level.style.left = xr + 'px'; level.style.top = (cov.y + bandMid(k) * cov.h) + 'px'; }
+  level.classList.toggle('on', on);
+}
+
+/* ================= Qavat ================= */
+const turn = $('#turn'), zoomer = $('#zoomer'), frame = $('#frame'), tsvg = zoomer.querySelector('svg'), tags = $('#tags');
+const scrub = $('#scrub'), needle = $('#needle'), aptsEl = $('#apts'), frail = $('#frail');
+let FR = null, floorN = 5, sel = null;
+let pos = 0, vel = 0, target = null, shown = -1, shownTier = '';
+let zoom = 1, ox = 0, oy = 0, Wz = 1, Hz = 1;
+const lo = {}, ok = [], hi = new Map();
+$('#hint').textContent = matchMedia('(pointer:coarse)').matches ? 'Sudrab aylantiring. Ikki barmoq bilan yaqinlashtiring.' : 'Sudrab aylantiring. G\'ildirak bilan yaqinlashtiring.';
+const tierLo = () => (Wz * DPR > 1300 ? 'm' : 's');
+const tierHi = () => (Wz * zoom * DPR > 1900 ? 'h' : 'm');
+const src = (t, i) => 'floor/' + t + '/q' + String(i).padStart(3, '0') + '.webp';
+const idx = () => ((Math.round(pos) % N) + N) % N;
+
+for (let a = 0; a < 360; a += 10) { const t = document.createElement('i'); t.style.left = (a / 360 * 100) + '%'; if (a % 90 === 0) t.className = 'major'; scrub.appendChild(t); }
+for (let n = 10; n >= 2; n--) { const b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.setAttribute('aria-label', n + '-qavat'); b.addEventListener('click', () => go(n)); frail.appendChild(b); }
+const tpoly = {}, ttag = {}, acell = {};
+for (const a of APTS) {
+  const p = document.createElementNS(NS, 'polygon'); p.dataset.k = a.k;
+  p.addEventListener('pointerenter', () => hov(a.k, true)); p.addEventListener('pointerleave', () => hov(a.k, false));
+  tpoly[a.k] = p;
+  const t = document.createElement('div'); t.className = 'tag'; t.textContent = a.k; tags.appendChild(t); ttag[a.k] = t;
+  const c = document.createElement('button'); c.type = 'button'; c.className = 'apt';
+  c.innerHTML = '<b>' + a.k + '</b><span>' + a.area + ' m²</span><small>' + (a.tour ? '360° sayr bor' : 'Reja ko\'rinishi') + '</small>';
+  c.addEventListener('pointerenter', () => hov(a.k, true)); c.addEventListener('pointerleave', () => hov(a.k, false));
+  c.addEventListener('click', () => pick(sel === a.k ? null : a.k));
+  aptsEl.appendChild(c); acell[a.k] = c;
+}
+const act = document.createElement('div'); act.className = 'act'; aptsEl.appendChild(act);
+function hov(k, on){ tpoly[k].classList.toggle('hov', on); acell[k].classList.toggle('hov', on); }
+function pick(k){
+  sel = k;
+  for (const a of APTS) { const on = a.k === k; tpoly[a.k].classList.toggle('on', on); ttag[a.k].classList.toggle('on', on); acell[a.k].classList.toggle('on', on); acell[a.k].setAttribute('aria-pressed', on); }
+  const a = APTS.find(x => x.k === k);
+  if (!a) act.innerHTML = '<p>Xonadonni rejada yoki shu ro\'yxatda tanlang.</p>';
+  else if (a.tour) act.innerHTML = '<a href="' + a.tour + '?f=' + floorN + '#H1">360° sayrni boshlash</a>';
+  else act.innerHTML = '<p>' + a.k + ' xonadon uchun 360° sayr hali tayyor emas. Hozircha D xonadonni ko\'rish mumkin.</p>';
+}
+
+async function loadFrames(){
+  if (FR) return; FR = await (await fetch('floor/frames.json')).json();
+  const order = []; const seen = new Set();
+  for (const st of [16, 8, 4, 2, 1]) for (let i = 0; i < N; i += st) if (!seen.has(i)) { seen.add(i); order.push(i); }
+  const t = tierLo(); let run = 0, done = 0;
+  const next = () => { while (run < 6 && order.length) { const i = order.shift(); run++;
+    const im = new Image(); im.decoding = 'async';
+    im.onload = () => { ok[i] = true; done++; if (done === 1) { $('#pre').classList.add('off'); shown = -1; } run--; next(); };
+    im.onerror = () => { run--; next(); };
+    im.src = src(t, i); lo[i] = im; } };
+  next(); requestAnimationFrame(tick);
+}
+function nearest(i){ if (ok[i]) return i; for (let d = 1; d <= N / 2; d++) { const a = (i + d) % N, b = (i - d + N) % N; if (ok[a]) return a; if (ok[b]) return b; } return -1; }
+function draw(i, url){
+  frame.src = url; shown = i;
+  const F = FR[i]; const order = Object.keys(F).sort((a, b) => F[b].depth - F[a].depth);
+  for (const k of order) { tpoly[k].setAttribute('points', F[k].poly.map(q => (q[0]*1600).toFixed(1) + ',' + (q[1]*900).toFixed(1)).join(' ')); tsvg.appendChild(tpoly[k]);
+    ttag[k].style.left = (F[k].c[0]*100) + '%'; ttag[k].style.top = (F[k].c[1]*100) + '%'; }
+}
+let idleT = 0;
+function show(){
+  const want = idx(); const i = nearest(want); if (i < 0) return;
+  if (i !== shown) { draw(i, lo[i].src); shownTier = 'lo'; clearTimeout(idleT); idleT = setTimeout(sharpen, 160); }
+  const deg = (((pos % N) + N) % N) / N * 360; needle.style.left = (deg / 360 * 100) + '%'; scrub.setAttribute('aria-valuenow', Math.round(deg));
+}
+function sharpen(){
+  const i = shown; if (i < 0) return; const t = tierHi(); if (t === tierLo() && shownTier !== 'lo') return;
+  const key = t + i; let im = hi.get(key);
+  const apply = () => { if (shown === i && idx() === i) { frame.src = im.src; shownTier = t; } };
+  if (im && im.complete) return apply();
+  im = new Image(); im.src = src(t, i); hi.set(key, im);
+  if (hi.size > 14) hi.delete(hi.keys().next().value);
+  im.decode().then(apply).catch(() => {});
+}
+let lastT = 0;
+function tick(t){
+  const dt = Math.min(50, t - lastT || 16); lastT = t;
+  if (document.body.classList.contains('v-floor')) {
+    if (target !== null) { const d = target - pos; if (Math.abs(d) < 0.02) { pos = target; target = null; } else pos += d * Math.min(1, dt * 0.011); }
+    else if (px === null && Math.abs(vel) > 0.0004) { pos += vel * dt; vel *= Math.pow(0.9955, dt); }
+    show();
+  }
+  requestAnimationFrame(tick);
+}
+function rot(d){ vel = 0; target = Math.round((target !== null ? target : pos) + d); }
+
+/* aylantirish, yaqinlashtirish */
+function layoutTurn(reset){
+  const W = turn.clientWidth, H = turn.clientHeight; Hz = H; Wz = Math.max(W, H * 16 / 9);
+  zoomer.style.width = Wz + 'px'; zoomer.style.height = Hz + 'px';
+  if (reset) { zoom = 1; ox = (W - Wz) / 2; oy = 0; }
+  applyZoom();
+}
+function applyZoom(){
+  const W = turn.clientWidth, H = turn.clientHeight;
+  if (zoom <= 1.001) { zoom = 1; ox = (W - Wz) / 2; oy = 0; }
+  else { ox = Math.min(0, Math.max(W - Wz * zoom, ox)); oy = Math.min(0, Math.max(H - Hz * zoom, oy)); }
+  zoomer.style.transform = `translate(${ox}px,${oy}px) scale(${zoom})`;
+  turn.classList.toggle('zoomed', zoom > 1.01); $('#zout').disabled = zoom <= 1.01; $('#zin').disabled = zoom >= 3.99;
+  clearTimeout(idleT); idleT = setTimeout(sharpen, 160);
+}
+function zoomAt(f, cx, cy){
+  const nz = Math.max(1, Math.min(4, zoom * f)); const r = turn.getBoundingClientRect();
+  const x = cx - r.left, y = cy - r.top; ox = x - (x - ox) * nz / zoom; oy = y - (y - oy) * nz / zoom; zoom = nz; applyZoom();
+}
+const ptrs = new Map(); let px = null, moved = 0, lastMove = 0, pinch = 0;
+turn.addEventListener('pointerdown', e => {
+  if (e.target.closest('.zoomctl')) return;
+  ptrs.set(e.pointerId, [e.clientX, e.clientY]); turn.setPointerCapture(e.pointerId);
+  if (ptrs.size === 1) { px = e.clientX; moved = 0; vel = 0; target = null; lastMove = performance.now(); turn.classList.add('drag'); }
+  $('#hint').classList.add('off');
+});
+turn.addEventListener('pointermove', e => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  const dx = e.clientX - p[0], dy = e.clientY - p[1]; ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (ptrs.size === 2) { const a = [...ptrs.values()], d = Math.hypot(a[0][0]-a[1][0], a[0][1]-a[1][1]);
+    if (pinch) zoomAt(d / pinch, (a[0][0]+a[1][0])/2, (a[0][1]+a[1][1])/2); pinch = d; moved = 99; return; }
+  moved += Math.abs(dx) + Math.abs(dy);
+  if (zoom > 1.01) { ox += dx; oy += dy; applyZoom(); return; }
+  const dF = -dx * (N * 0.5) / Math.min(turn.clientWidth, 1100); pos += dF;
+  const t = performance.now(), dt = Math.max(4, t - lastMove); lastMove = t; vel = vel * 0.5 + 0.5 * dF / dt;
+});
+function up(e){
+  ptrs.delete(e.pointerId); pinch = 0; if (ptrs.size) return;
+  if (px === null) return; px = null; turn.classList.remove('drag');
+  if (performance.now() - lastMove > 90 || zoom > 1.01) vel = 0;
+  if (moved < 6) { vel = 0; const el = document.elementFromPoint(e.clientX, e.clientY); pick(el && el.dataset && el.dataset.k ? el.dataset.k : null); }
+}
+turn.addEventListener('pointerup', up); turn.addEventListener('pointercancel', up);
+turn.addEventListener('wheel', e => { e.preventDefault(); zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY); }, { passive:false });
+turn.addEventListener('dblclick', e => { if (zoom > 1.01) { zoom = 1; applyZoom(); } else zoomAt(2, e.clientX, e.clientY); });
+$('#zin').onclick = () => { const r = turn.getBoundingClientRect(); zoomAt(1.5, r.left + r.width/2, r.top + r.height/2); };
+$('#zout').onclick = () => { const r = turn.getBoundingClientRect(); zoomAt(1/1.5, r.left + r.width/2, r.top + r.height/2); };
+let sdrag = false;
+function scrubTo(e){ const r = scrub.getBoundingClientRect(); const f = Math.min(0.999, Math.max(0, (e.clientX - r.left) / r.width));
+  const cur = ((pos % N) + N) % N; let d = f * N - cur; if (d > N/2) d -= N; if (d < -N/2) d += N; vel = 0; target = null; pos += d; }
+scrub.addEventListener('pointerdown', e => { sdrag = true; scrub.setPointerCapture(e.pointerId); scrubTo(e); $('#hint').classList.add('off'); });
+scrub.addEventListener('pointermove', e => { if (sdrag) scrubTo(e); });
+scrub.addEventListener('pointerup', () => sdrag = false); scrub.addEventListener('pointercancel', () => sdrag = false);
+scrub.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { rot(-N/36); e.preventDefault(); } else if (e.key === 'ArrowRight') { rot(N/36); e.preventDefault(); } });
+addEventListener('keydown', e => { if (!document.body.classList.contains('v-floor') || e.target === scrub) return;
+  if (e.key === 'ArrowLeft') rot(-N/8); else if (e.key === 'ArrowRight') rot(N/8); else if (e.key === 'Escape') location.hash = ''; });
+
+/* ================= Yo'nalish ================= */
+function go(n){ location.hash = '#/qavat/' + n; }
+$('#back').onclick = () => { location.hash = ''; };
+function route(){
+  const m = /^#\/qavat\/(\d+)/.exec(location.hash); const n = m ? +m[1] : 0;
+  if (n >= 2 && n <= 10) {
+    floorN = n; document.body.className = 'v-floor'; $('#ftitle').textContent = n + '-qavat';
+    frail.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.textContent === n));
+    document.title = 'Zumrad Residence, ' + n + '-qavat';
+    pick(null); requestAnimationFrame(() => layoutTurn(true)); loadFrames().then(() => { shown = -1; show(); });
+    setTimeout(() => $('#hint').classList.add('off'), 6000);
+  } else {
+    document.body.className = 'v-building'; document.title = 'Zumrad Residence';
+    for (const k in bandPoly) hl(k, false); requestAnimationFrame(layoutBuilding);
+  }
+}
+addEventListener('resize', () => { if (document.body.classList.contains('v-building')) layoutBuilding(); else layoutTurn(false); });
+addEventListener('hashchange', route); route();
+if ('requestIdleCallback' in window) requestIdleCallback(() => fetch('floor/frames.json'));
+
+/* ================= Muhit: rasm, quyosh yoyi, qor va yomg'ir ================= */
+// kun vaqti kalit kadrlari (Toshkent, 15-sentabr; t = soat)
+const DAY = [
+  { k:'tong',  t:6.97 },  { k:'t0800', t:8 },     { k:'t0915', t:9.25 }, { k:'t1030', t:10.5 },
+  { k:'peshin',t:12.3 },  { k:'t1345', t:13.75 }, { k:'t1500', t:15 },   { k:'t1615', t:16.25 },
+  { k:'shom',  t:17.62 }, { k:'t1835', t:18.58 }, { k:'t1905', t:19.08 },{ k:'tun',   t:20.5 },
+];
+const TIMES = [ { k:'tong', name:'Tong', t:6.97 }, { k:'peshin', name:'Peshin', t:12.3 }, { k:'shom', name:'Shom', t:17.62 }, { k:'tun', name:'Tun', t:20.5 } ];
+const WX = [ { k:'yomgir', name:'Yomg\'ir', sub:'bulutli', fx:'rain' }, { k:'qish', name:'Qish', sub:'qor', fx:'snow' } ];
+const T0 = DAY[0].t, T1 = DAY[DAY.length - 1].t, SUNRISE = 6.03, SUNSET = 18.53;
+const fx = (() => {
+  const cv = $('#snow'), cx = cv.getContext('2d');
+  const still = matchMedia('(prefers-reduced-motion:reduce)');
+  const sprites = [];
+  for (const [r, a] of [[2.2, .8], [3.4, .88], [5.8, .9]]) {
+    const c = document.createElement('canvas'), d = Math.ceil(r * 4); c.width = c.height = d;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(d/2, d/2, 0, d/2, d/2, d/2);
+    gr.addColorStop(0, `rgba(255,255,255,${a})`); gr.addColorStop(.35, `rgba(250,252,255,${a*.8})`); gr.addColorStop(1, 'rgba(250,252,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, d, d); sprites.push(c);
+  }
+  let mode = '', W = 0, H = 0, dpr = 1, F = [], last = 0, raf = 0;
+  const mkSnow = (y) => { const z = Math.random(), L = z < .62 ? 0 : z < .92 ? 1 : 2;
+    return { x: Math.random() * W, y: y ?? Math.random() * H, L, s: [.55, .8, 1.15][L] * (.75 + Math.random() * .5),
+      v: [16, 30, 52][L] * (.8 + Math.random() * .4), ph: Math.random() * 6.3, f: .25 + Math.random() * .5, amp: [8, 14, 22][L] * Math.random() }; };
+  const mkRain = (y) => { const L = Math.random() < .7 ? 0 : 1;
+    return { x: Math.random() * (W + 200) - 100, y: y ?? Math.random() * H, L, len: [11, 22][L] * (.8 + Math.random() * .5),
+      v: [620, 980][L] * (.85 + Math.random() * .3), a: [.16, .28][L] * (.7 + Math.random() * .6) }; };
+  const mk = (y) => mode === 'rain' ? mkRain(y) : mkSnow(y);
+  function fill() {
+    const n = mode === 'snow' ? Math.round(Math.min(560, Math.max(120, W * H / 3200)))
+            : mode === 'rain' ? Math.round(Math.min(700, Math.max(160, W * H / 2200))) : 0;
+    F = []; while (F.length < n) F.push(mk());
+  }
+  function size() {
+    dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); fill(); draw(0);
+  }
+  const WIND = .2;
+  function draw(dt) {
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, H);
+    if (mode === 'snow') {
+      const t = performance.now() / 1000;
+      for (const p of F) {
+        if (dt) { p.y += p.v * dt; p.x += (6 + Math.sin(t * p.f + p.ph) * p.amp * p.f) * dt * (p.L + 1) * .5;
+          if (p.y > H + 12) Object.assign(p, mkSnow(-12)); if (p.x > W + 12) p.x -= W + 24; if (p.x < -12) p.x += W + 24; }
+        const sp = sprites[p.L], d = sp.width * p.s / 2; cx.drawImage(sp, p.x - d / 2, p.y - d / 2, d, d);
+      }
+    } else if (mode === 'rain') {
+      cx.lineCap = 'round';
+      for (const L of [0, 1]) {
+        cx.lineWidth = L ? 1.3 : .8;
+        for (const p of F) {
+          if (p.L !== L) continue;
+          if (dt) { p.y += p.v * dt; p.x += p.v * WIND * dt; if (p.y > H + 30) Object.assign(p, mkRain(-30)); }
+          cx.strokeStyle = `rgba(222,232,240,${p.a})`;
+          cx.beginPath(); cx.moveTo(p.x, p.y); cx.lineTo(p.x - p.len * WIND, p.y - p.len); cx.stroke();
+        }
+      }
+    }
+  }
+  function loop(ts) {
+    raf = 0; const dt = Math.min(.05, last ? (ts - last) / 1000 : 0); last = ts;
+    if (!mode || document.hidden || !document.body.classList.contains('v-building')) { last = 0; return; }
+    draw(dt); raf = requestAnimationFrame(loop);
+  }
+  function go() { if (mode && !still.matches && !raf) { last = 0; raf = requestAnimationFrame(loop); } else draw(0); }
+  new ResizeObserver(size).observe(cv);
+  document.addEventListener('visibilitychange', go); addEventListener('hashchange', () => setTimeout(go, 50));
+  still.addEventListener?.('change', go);
+  let swapT = 0;
+  return { set(m) {
+    if (m === mode) return;
+    clearTimeout(swapT); cv.style.opacity = 0;
+    swapT = setTimeout(() => { mode = m; fill(); draw(0); cv.style.opacity = 1; go(); }, mode ? 700 : 0);
+  }, size };
+})();
+
+const env = (() => {
+  const wrap = $('#envs'), envEl = $('#env'), gT = $('#env .g-time .btns'), gW = $('#env .g-wx .btns');
+  const sky = $('#sky'), sunEl = $('#sun'), clock = $('#clock');
+  const imgs = {}, btns = {}, ready = {};
+  const SRC = k => ({ src: `hero-${k}-2560.jpg`, srcset: `hero-${k}-1600.jpg 1600w, hero-${k}-2560.jpg 2560w` });
+  const mk = (k, label, z) => { const im = new Image(); im.alt = 'Zumrad Residence: ' + label; im.width = 2560; im.height = 1440; im.decoding = 'async';
+    im.sizes = '(max-width:820px) 260vw, 100vw'; im.style.zIndex = z; wrap.appendChild(im); imgs[k] = im; return im; };
+  function hhmm(t) { const h = Math.floor(t), m = Math.round((t - h) * 60); return String(h + (m === 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+  DAY.forEach(d => mk(d.k, 'kun vaqti ' + hhmm(d.t), 1));
+  WX.forEach(w => mk(w.k, w.name.toLowerCase(), 5));
+  const mkBtn = (k, name, sub, host) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', 'false');
+    b.innerHTML = `<b>${name}</b><span>${sub}</span>`; host.appendChild(b); btns[k] = b; return b; };
+  TIMES.forEach(x => mkBtn(x.k, x.name, hhmm(x.t), gT).onclick = () => goTime(x.t));
+  WX.forEach(w => mkBtn(w.k, w.name, w.sub, gW).onclick = () => setWx(w.k));
+
+  // yuklash: tasvir dekod qilinib, qatlam sifatida doim tayyor turadi (faqat opacity o'zgaradi)
+  const loading = {};
+  const load = k => loading[k] || (loading[k] = new Promise(res => { const im = imgs[k];
+    const done = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => { ready[k] = true; paint(); res(); });
+    im.onload = done; im.onerror = () => res(); Object.assign(im, SRC(k)); if (im.complete && im.naturalWidth) done(); }));
+
+  // vaqt <-> kadr indeksi (S). Animatsiya S bo'yicha: har bir kadrdan keyingisiga teng sur'atda o'tadi
+  const N = DAY.length;
+  const sOfT = t => { t = Math.min(T1, Math.max(T0, t)); let i = 0; while (i < N - 2 && t > DAY[i + 1].t) i++; return i + (t - DAY[i].t) / (DAY[i + 1].t - DAY[i].t); };
+  const tOfS = s => { s = Math.min(N - 1, Math.max(0, s)); const i = Math.min(N - 2, Math.floor(s)); return DAY[i].t + (DAY[i + 1].t - DAY[i].t) * (s - i); };
+
+  let S = sOfT(17.62), W = '';
+  const wa = { yomgir: 0, qish: 0 };
+  function paint() {
+    // faqat yuklangan kadrlar orasida aralashtirish (yuklanmaganlari o'tkazib yuboriladi)
+    let lo = -1, hi = -1;
+    for (let i = Math.floor(S); i >= 0; i--) if (ready[DAY[i].k]) { lo = i; break; }
+    for (let i = Math.ceil(S); i < N; i++) if (ready[DAY[i].k]) { hi = i; break; }
+    if (lo < 0) lo = hi; if (hi < 0) hi = lo;
+    const f = lo === hi || lo < 0 ? 0 : (S - lo) / (hi - lo);
+    for (let i = 0; i < N; i++) { const im = imgs[DAY[i].k];
+      const o = i === lo ? 1 : i === hi ? f : 0; im.style.opacity = o; im.style.zIndex = i === hi && hi !== lo ? 2 : 1; }
+    for (const w of WX) { const im = imgs[w.k]; im.style.opacity = wa[w.k]; im.style.zIndex = w.k === W ? 6 : 5; }
+    const T = tOfS(S);
+    const u = (T - SUNRISE) / (T1 - SUNRISE), x = 8 + 384 * u;
+    let y; if (T <= SUNSET) { const q = (x - 8) / 332; y = 40 - 132 * q * (1 - q); } else y = 40 + 8 * (T - SUNSET) / (T1 - SUNSET);
+    sunEl.style.left = (x / 4) + '%'; sunEl.style.top = (6 + y / 44 * 24) + 'px';
+    sunEl.classList.toggle('night', T > SUNSET + 0.15);
+    clock.textContent = hhmm(T); sky.setAttribute('aria-valuenow', T.toFixed(2)); sky.setAttribute('aria-valuetext', hhmm(T));
+    for (const x of TIMES) btns[x.k].setAttribute('aria-checked', String(!W && Math.abs(T - x.t) < 0.2));
+    for (const w of WX) btns[w.k].setAttribute('aria-checked', String(W === w.k));
+    envEl.classList.toggle('wx', !!W);
+  }
+
+  // animatsiya: S (kun) va ob-havo qatlamlari bitta tsiklda
+  let raf = 0;
+  const easeIO = x => -(Math.cos(Math.PI * x) - 1) / 2;
+  const still = () => matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function run(a) { cancelAnimationFrame(raf); const t0 = performance.now(), s0 = S, w0 = { ...wa };
+    const D = Math.max(a.D || 0, a.wt ? a.WD : 0);
+    (function st(now) { const el = now - t0;
+      if (a.s1 != null) S = s0 + (a.s1 - s0) * easeIO(Math.min(1, el / a.D));
+      if (a.wt) { const k = easeIO(Math.min(1, el / a.WD)); for (const w in a.wt) wa[w] = w0[w] + (a.wt[w] - w0[w]) * k; }
+      paint(); if (el < D) raf = requestAnimationFrame(st); else { if (a.after) a.after(); paint(); save(); } })(t0);
+  }
+  function goTime(t) {
+    const s1 = sOfT(t), steps = Math.abs(s1 - S);
+    const D = still() ? 1 : Math.min(6500, Math.max(1500, steps * 560));
+    const lo = Math.floor(Math.min(S, s1)), hi = Math.ceil(Math.max(S, s1));
+    for (let i = lo; i <= hi; i++) load(DAY[i].k);            // kutmaymiz: yuklanganlari darhol qo'shiladi
+    const hadW = !!W; W = ''; fx.set('');
+    run({ s1, D, wt: hadW ? { yomgir: 0, qish: 0 } : null, WD: still() ? 1 : Math.max(2400, Math.min(D, 3200)) });
+  }
+  function setWx(k) {
+    if (W === k) return; const w = WX.find(x => x.k === k);
+    load(k).then(() => { if (W !== k) return; fx.set(w.fx);
+      run({ wt: { ...wa, [k]: 1 }, WD: still() ? 1 : 2400, after: () => { for (const x of WX) if (x.k !== k) wa[x.k] = 0; } }); });
+    W = k; paint();
+  }
+  function fadeWxOut() { run({ wt: { yomgir: 0, qish: 0 }, WD: 1600 }); }
+  function save() { try { localStorage.setItem('zr-env2', JSON.stringify({ T: tOfS(S), W })); } catch (_) {} }
+
+  // yoyni sudrash
+  const tAt = cx => { const r = sky.getBoundingClientRect(); const x = (cx - r.left) / r.width * 400; return SUNRISE + (x - 8) / 384 * (T1 - SUNRISE); };
+  let drag = false, dragRaf = 0, want = null;
+  sky.addEventListener('pointerdown', e => { drag = true; try { sky.setPointerCapture(e.pointerId); } catch (_) {}
+    DAY.forEach(d => load(d.k)); if (W) { W = ''; fx.set(''); fadeWxOut(); } else cancelAnimationFrame(raf); scrubTo(e.clientX); });
+  sky.addEventListener('pointermove', e => { if (drag) scrubTo(e.clientX); });
+  const endDrag = () => { if (drag) { drag = false; save(); } };
+  sky.addEventListener('pointerup', endDrag); sky.addEventListener('pointercancel', endDrag);
+  // sudrashda ham sakramasin: S maqsadga yumshoq yetib boradi
+  function scrubTo(cx) { want = sOfT(tAt(cx)); if (!dragRaf) dragRaf = requestAnimationFrame(follow); }
+  function follow() { dragRaf = 0; if (want == null) return; const d = want - S; S += Math.abs(d) < 0.003 ? d : d * 0.22; paint();
+    if (Math.abs(want - S) > 0.0005) dragRaf = requestAnimationFrame(follow); else want = null; }
+  sky.addEventListener('keydown', e => { const d = { ArrowLeft: -0.25, ArrowRight: 0.25, ArrowDown: -0.25, ArrowUp: 0.25, PageDown: -1, PageUp: 1 }[e.key];
+    if (e.key === 'Home') { e.preventDefault(); goTime(T0); } else if (e.key === 'End') { e.preventDefault(); goTime(T1); }
+    else if (d) { e.preventDefault(); goTime(tOfS(S) + d); } });
+
+  // boshlanish
+  let st = null; try { st = JSON.parse(localStorage.getItem('zr-env2') || 'null'); } catch (_) {}
+  if (st && typeof st.T === 'number') { S = sOfT(st.T); W = WX.some(w => w.k === st.W) ? st.W : ''; } else W = 'qish';
+  if (W) { wa[W] = 1; load(W).then(() => fx.set(WX.find(w => w.k === W).fx)); }
+  [Math.floor(S), Math.ceil(S)].forEach(i => load(DAY[i].k));
+  paint();
+  // qolganlari: joriy vaqtga yaqinidan boshlab, birin-ketin
+  setTimeout(async () => { const order = DAY.map((d, i) => [i, d.k]).sort((a, b) => Math.abs(a[0] - S) - Math.abs(b[0] - S)).map(x => x[1]).concat(WX.map(w => w.k));
+    for (const k of order) await load(k); }, 400);
+  return { goTime, setWx };
+})();
+
+/* telefonda muhit paneli rasm ostiga ko'chadi */
+(() => {
+  const envEl = $('#env'), scn = $('#scene'), col = $('.rail-col'), mq = matchMedia('(max-width:820px), (max-aspect-ratio:1/1)');
+  const place = () => { if (mq.matches) { if (envEl.parentNode !== col) col.prepend(envEl); } else if (envEl.parentNode !== scn) scn.appendChild(envEl); };
+  mq.addEventListener('change', place); place();
+})();
+</script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="36db393a-5d94-4eae-9663-7955aaa970b1" data-app-host="app.netlify.com" data-account-tier="free"></script>
