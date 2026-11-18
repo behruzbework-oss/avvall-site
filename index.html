@@ -629,7 +629,7 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
     if(tel.value.replace(/\D/g,'').length<9){note.textContent='Telefon raqamni to\'liq yozing, masalan +998 90 123 45 67.';note.classList.add('err');tel.focus();return}
     var b=form.querySelector('button'); b.disabled=true; b.textContent='Yuborilmoqda…';
     fetch('https://avvall-bot.behruzbework.workers.dev/lead',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form)).toString()})
-      .then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){if(!j.ok)throw 0; form.reset(); note.textContent='So\'rovingiz yuborildi. Tez orada bog\'lanamiz.'; note.classList.add('ok')})
+      .then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){if(!j.ok)throw 0; form.reset(); note.textContent='So\'rovingiz yuborildi. Tez orada bog\'lanamiz.'; if(j.tg){var a=document.createElement('a');a.href=j.tg;a.target='_blank';a.rel='noopener';a.textContent=' Javobni Telegram\'da olish';note.appendChild(a)} note.classList.add('ok')})
       .catch(function(){note.textContent='So\'rovni yuborib bo\'lmadi. Iltimos, telefon yoki Telegram orqali bog\'laning.'; note.classList.add('err')})
       .finally(function(){b.disabled=false; b.textContent='So\'rov yuborish'});
   });
