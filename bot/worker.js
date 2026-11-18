@@ -34,6 +34,7 @@ async function tg(env, method, body) {
   const r = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   const j = await r.json(); if (!j.ok) console.log('tg', method, JSON.stringify(j)); return j;
 }
+const ORIGINS = ['https://avvall.uz', 'https://www.avvall.uz'];
 let schemaDone = false;
 async function schema(env) {
   if (schemaDone) return;
@@ -44,7 +45,7 @@ async function schema(env) {
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS pending(uid INT PRIMARY KEY, lead_id INT, kind TEXT, at INT)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS team(id INT PRIMARY KEY, role TEXT DEFAULT 'manager', mention INT DEFAULT 1, dm INT DEFAULT 1)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbox(id INTEGER PRIMARY KEY AUTOINCREMENT, lead_id INT, text TEXT, send_at INT, status TEXT DEFAULT 'wait', created_by INT, via TEXT, info TEXT)`)]);
-  for (const sql of ['ALTER TABLE leads ADD COLUMN card_topic TEXT', 'ALTER TABLE leads ADD COLUMN client_chat INT', 'ALTER TABLE leads ADD COLUMN client_last INT', 'ALTER TABLE leads ADD COLUMN tg_user TEXT'])
+  for (const sql of ['ALTER TABLE leads ADD COLUMN card_topic TEXT', 'ALTER TABLE leads ADD COLUMN client_chat INT', 'ALTER TABLE leads ADD COLUMN client_last INT', 'ALTER TABLE leads ADD COLUMN tg_user TEXT', 'ALTER TABLE leads ADD COLUMN claim TEXT'])
     try { await env.DB.prepare(sql).run(); } catch { }
   schemaDone = true;
 }
@@ -115,18 +116,23 @@ async function notify(env, L, title, body) {
 // ---------- sayt formasi ----------
 async function newLead(req, env) {
   let d = {}; const ct = req.headers.get('content-type') || '';
-  if (ct.includes('json')) d = await req.json(); else d = Object.fromEntries(new URLSearchParams(await req.text()));
+  const raw = await req.text(); if (raw.length > 16000) return { ok: false, err: 'big' };
+  try { d = ct.includes('json') ? JSON.parse(raw) : Object.fromEntries(new URLSearchParams(raw)); } catch { return { ok: false, err: 'invalid' }; }
+  if (!d || typeof d !== 'object') return { ok: false, err: 'invalid' };
   if (d.manzil) return { ok: true };
   const name = String(d.ism || d.name || '').trim().slice(0, 120), phone = String(d.telefon || d.phone || '').trim().slice(0, 40);
   if (!name || phone.replace(/\D/g, '').length < 9) return { ok: false, err: 'invalid' };
   const ip = req.headers.get('cf-connecting-ip') || '';
   const recent = await env.DB.prepare('SELECT COUNT(*) c FROM leads WHERE ip=? AND created_at>?').bind(ip, now() - 600).first();
   if (ip && recent.c >= 3) return { ok: false, err: 'rate' };
-  const r = await env.DB.prepare('INSERT INTO leads(created_at,name,company,phone,message,source,ip) VALUES(?,?,?,?,?,?,?) RETURNING *')
-    .bind(now(), name, String(d.kompaniya || '').trim().slice(0, 160), phone, String(d.loyiha || d.message || '').trim().slice(0, 2000), String(d.source || 'avvall.uz').slice(0, 60), ip).first();
+  const allHour = await env.DB.prepare('SELECT COUNT(*) c FROM leads WHERE created_at>?').bind(now() - 3600).first();
+  if (allHour.c >= 60) return { ok: false, err: 'rate' };
+  const claim = [...crypto.getRandomValues(new Uint8Array(12))].map(x => x.toString(16).padStart(2, '0')).join('');
+  const r = await env.DB.prepare('INSERT INTO leads(created_at,name,company,phone,message,source,ip,claim) VALUES(?,?,?,?,?,?,?,?) RETURNING *')
+    .bind(now(), name, String(d.kompaniya || '').trim().slice(0, 160), phone, String(d.loyiha || d.message || '').trim().slice(0, 2000), String(d.source || 'avvall.uz').slice(0, 60), ip, claim).first();
   await placeCard(env, r);
   const me = await kget(env, 'botname');
-  return { ok: true, id: r.id, tg: me ? `https://t.me/${me}?start=l${r.id}` : null };
+  return { ok: true, id: r.id, tg: me ? `https://t.me/${me}?start=c${claim}` : null };
 }
 
 // ---------- tanlov klaviaturalari ----------
@@ -327,10 +333,10 @@ async function onMessage(env, m) {
     await env.DB.prepare('INSERT INTO team(id,role) VALUES(?,\'owner\')').bind(m.from.id).run();
   }
   // Mijoz botni saytdagi tugma orqali ochdi: /start l123
-  if (priv && cmd === '/start' && /^\/start l\d+/.test(text)) {
-    const id = +text.split(' ')[1].slice(1); const L = await getLead(env, id);
+  if (priv && cmd === '/start' && /^\/start c[0-9a-f]{24}$/.test(text)) {
+    const L = await env.DB.prepare('SELECT * FROM leads WHERE claim=?').bind(text.split(' ')[1].slice(1)).first(); const id = L?.id;
     if (L && !L.client_chat) {
-      await env.DB.prepare('UPDATE leads SET client_chat=?, client_last=?, tg_user=? WHERE id=?').bind(m.chat.id, now(), m.from.username || null, id).run();
+      await env.DB.prepare('UPDATE leads SET client_chat=?, client_last=?, tg_user=?, claim=NULL WHERE id=?').bind(m.chat.id, now(), m.from.username || null, id).run();
       await placeCard(env, await getLead(env, id));
       return tg(env, 'sendMessage', { chat_id: m.chat.id, text: `Rahmat, ${L.name}! So'rovingiz AVVALL jamoasiga yetib bordi. Uchrashuv vaqti va yangiliklarni shu yerga yuboramiz.` });
     }
@@ -398,6 +404,7 @@ async function onMessage(env, m) {
     }
   }
   if (!priv && (!g || m.chat.id !== g)) return;
+  if (['/stats', '/bugun', '/test'].includes(cmd) && !(await isTeam(env, m.from.id))) return priv ? dm(env, m.chat.id, 'Bu buyruq faqat AVVALL jamoasi uchun.') : undefined;
   const reply = async s => tg(env, 'sendMessage', { chat_id: m.chat.id, message_thread_id: m.message_thread_id, text: s, parse_mode: 'HTML' });
   if (cmd === '/stats') return reply(await stats(env, 30));
   if (cmd === '/bugun') return reply(await today(env));
@@ -454,9 +461,11 @@ async function tick(env) {
 export default {
   async fetch(req, env) {
     const url = new URL(req.url); await schema(env);
-    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type' };
+    const origin = req.headers.get('origin') || '';
+    const okOrigin = ORIGINS.includes(origin) || /^https:\/\/[a-z0-9-]+\.netlify\.app$/.test(origin);
+    const cors = { 'access-control-allow-origin': okOrigin ? origin : 'https://avvall.uz', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type', vary: 'origin' };
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
-    if (url.pathname === '/lead' && req.method === 'POST') return json(await newLead(req, env), 200, cors);
+    if (url.pathname === '/lead' && req.method === 'POST') { if (origin && !okOrigin) return json({ ok: false, err: 'origin' }, 403, cors); return json(await newLead(req, env), 200, cors); }
     if (url.pathname === '/tg' && req.method === 'POST') {
       if (req.headers.get('x-telegram-bot-api-secret-token') !== await secretOf(env)) return new Response('no', { status: 403 });
       const u = await req.json();
@@ -464,6 +473,7 @@ export default {
       return new Response('ok');
     }
     if (url.pathname === '/init') {
+      if ((await kget(env, 'botname')) && (!env.INIT_KEY || url.searchParams.get('k') !== env.INIT_KEY)) return new Response('no', { status: 403 });
       const r = await tg(env, 'setWebhook', { url: `${url.origin}/tg`, secret_token: await secretOf(env), allowed_updates: ['message', 'callback_query', 'business_connection', 'business_message'] });
       await tg(env, 'setMyCommands', { commands: [{ command: 'panel', description: 'Admin panel' }, { command: 'stats', description: 'Statistika (30 kun)' }, { command: 'bugun', description: 'Bugungi uchrashuvlar' }, { command: 'test', description: 'Sinov lidi' }, { command: 'setup', description: 'Guruhni sozlash' }] });
       const me = await tg(env, 'getMe', {}); if (me.ok) await kset(env, 'botname', me.result.username);
