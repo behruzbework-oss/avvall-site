@@ -34,7 +34,7 @@ async function tg(env, method, body) {
   const r = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   const j = await r.json(); if (!j.ok) console.log('tg', method, JSON.stringify(j)); return j;
 }
-const ORIGINS = ['https://avvall.uz', 'https://www.avvall.uz'];
+const ORIGINS = ['https://avvall.uz', 'https://www.avvall.uz', 'https://dev.avvall.uz', 'https://avvall-dev.behruzbework.workers.dev'];
 let schemaDone = false;
 async function schema(env) {
   if (schemaDone) return;
