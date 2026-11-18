@@ -2,12 +2,12 @@
 <html lang="uz">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-2QOypH6dw07K4cTUvNv2FDovVSNHG+bVncw5YTIahfA=' 'sha256-Gf0YnjAfpBZi9fN322/uraKUhJLwer94Q6l2eZYUeN4=' 'sha256-FvkQTB9isIoQemzXaMKQau35KhoIuE9SaErPONcu1mA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src https://avvall-bot.behruzbework.workers.dev; form-action 'self' https://avvall-bot.behruzbework.workers.dev; base-uri 'none'; object-src 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-2QOypH6dw07K4cTUvNv2FDovVSNHG+bVncw5YTIahfA=' 'sha256-6a9NaNoKxq9w0qR9YhT+qOPvC3JmPfZkhdhFuV6iX1I=' 'sha256-FvkQTB9isIoQemzXaMKQau35KhoIuE9SaErPONcu1mA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src https://avvall-bot.behruzbework.workers.dev; form-action 'self' https://avvall-bot.behruzbework.workers.dev; base-uri 'none'; object-src 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AVVALL — Uyni qurilishidan oldin ko'ring</title>
-<meta name="description" content="Quruvchilar uchun kinematografik filmlar va interaktiv 3D showroom. Xaridor binoni, qavatni va xonadonni qurilish tugashidan oldin ko'radi va tanlaydi.">
-<meta property="og:title" content="AVVALL — Uyni qurilishidan oldin ko'ring">
+<title>AVVALL — Uyni qurilishidan avval ko'ring</title>
+<meta name="description" content="Quruvchilar uchun kinematografik filmlar va interaktiv 3D showroom. Xaridor binoni, qavatni va xonadonni qurilish tugashidan avval ko'radi va tanlaydi.">
+<meta property="og:title" content="AVVALL — Uyni qurilishidan avval ko'ring">
 <meta property="og:description" content="Quruvchilar uchun kinematografik film va interaktiv 3D showroom.">
 <meta property="og:image" content="img/hero-1280.webp">
 <meta name="theme-color" content="#16181B">
@@ -61,7 +61,7 @@ h1,h2,h3,p{margin:0}
 .nav-links a:hover::after,.nav-links a:focus-visible::after{transform:scaleX(1);transform-origin:left}
 .nav-links:hover a:not(:hover){opacity:.5}
 .nav-right{display:flex;align-items:center;gap:28px}
-.lang{font-weight:600;font-size:14px}
+.lang{display:flex;gap:2px}.lang button{min-width:40px;min-height:44px;padding:0 6px;background:none;border:0;color:var(--paper);font:600 14px/1 var(--body);opacity:.5;cursor:pointer;position:relative;transition:opacity .2s}.lang button:hover{opacity:.85}.lang button.on{opacity:1}.lang button.on::after{content:"";position:absolute;left:12px;right:12px;bottom:10px;height:1px;background:var(--signal)}.lang-m{display:none}
 .menu-btn{display:none;width:44px;height:44px;background:none;border:0;color:var(--paper);padding:0;cursor:pointer}
 .menu-btn span{display:block;width:20px;height:1.5px;background:currentColor;margin:5px auto;transition:transform .25s}
 .menu-open .menu-btn span:first-child{transform:translateY(3.25px) rotate(45deg)}
@@ -73,7 +73,7 @@ h1,h2,h3,p{margin:0}
 .hero-media{position:absolute;inset:0}
 .hero-media .layer{position:absolute;inset:0;will-change:transform}
 .hero-media img{width:100%;height:100%;object-fit:cover;object-position:50% 50%}
-.giant{position:absolute;left:0;right:0;top:var(--word-top,7.8%);text-align:center;font-family:var(--display);font-weight:400;font-size:19.4vw;line-height:.86;letter-spacing:-.04em;color:var(--paper);opacity:.92;user-select:none;will-change:transform}
+.giant{position:absolute;left:var(--pad);right:var(--pad);top:var(--word-top,16%);display:flex;justify-content:space-between;font-family:var(--display);font-weight:400;font-size:min(11.2vw,19vh);line-height:.86;letter-spacing:-.04em;color:var(--paper);opacity:.92;user-select:none;will-change:transform}
 .shade{position:absolute;pointer-events:none}
 .shade-top{inset:0 0 auto 0;height:260px;background:linear-gradient(rgba(22,24,27,.75),rgba(22,24,27,0))}
 .shade-bottom{inset:auto 0 0 0;height:46%;background:linear-gradient(rgba(22,24,27,0),rgba(22,24,27,.85) 60%,rgba(22,24,27,.96))}
@@ -251,6 +251,7 @@ footer img{width:110px}
 }
 @media (max-width:900px){
   .nav-links,.nav-right .btn,.lang{display:none}
+  .mobile-menu .lang-m{display:flex;margin-top:24px}
   .menu-btn{display:block}
   .mobile-menu{display:block;position:fixed;inset:68px 0 0 0;z-index:49;overflow-y:auto;background:var(--graphite);padding:24px var(--pad);transform:translateY(-8px);opacity:0;visibility:hidden;transition:opacity .25s,transform .25s,visibility 0s .25s}
   .menu-open .mobile-menu{opacity:1;transform:none;visibility:visible;transition:opacity .25s,transform .25s}
@@ -273,7 +274,7 @@ footer img{width:110px}
   .logo img{width:116px}
   .hero{height:auto;min-height:0;max-height:none;padding-top:70px}
   .hero-media{position:relative;inset:auto;height:86.7vw;margin:0 -28.5vw 0 -28.5vw;width:154vw;--word-top:16%}
-  .hero-media .giant{font-size:19.3vw;left:26vw;right:26vw;width:auto}
+  .hero-media .giant{font-size:8vw;left:31.5vw;right:31.5vw;width:auto;top:24%}
   .shade-top{height:100px;background:linear-gradient(var(--graphite),rgba(22,24,27,0))}
   .shade-bottom{height:45%;background:linear-gradient(rgba(22,24,27,0),var(--graphite) 75%)}
   .hero-content{position:relative;inset:auto}
@@ -328,39 +329,40 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
   </svg>
   <span class="intro-time" aria-hidden="true">00:00:00:00</span>
 </div>
-<a class="skip" href="#asosiy">Asosiy qismga o'tish</a>
+<a data-i18n="skip" class="skip" href="#asosiy">Asosiy qismga o'tish</a>
 
 <header class="site-header" id="top">
   <div class="wrap nav">
     <a class="logo" href="#top" aria-label="AVVALL, bosh sahifa"><img src="img/logo.svg" alt="AVVALL" width="161" height="31"></a>
     <ul class="nav-links">
-      <li><a href="#xizmatlar">Xizmatlar</a></li>
-      <li><a href="#showroom">Showroom</a></li>
-      <li><a href="#loyihalar">Loyihalar</a></li>
-      <li><a href="#jarayon">Jarayon</a></li>
-      <li><a href="#savollar">Savollar</a></li>
+      <li><a data-i18n="nav.services" href="#xizmatlar">Xizmatlar</a></li>
+      <li><a data-i18n="nav.showroom" href="#showroom">Showroom</a></li>
+      <li><a data-i18n="nav.projects" href="#loyihalar">Loyihalar</a></li>
+      <li><a data-i18n="nav.process" href="#jarayon">Jarayon</a></li>
+      <li><a data-i18n="nav.faq" href="#savollar">Savollar</a></li>
     </ul>
     <div class="nav-right">
-      <span class="lang" lang="uz">UZ</span>
-      <a class="btn btn-ghost" href="#aloqa">Bog'lanish</a>
+      <div class="lang" role="group" aria-label="Til / Язык / Language"><button type="button" data-lang="uz" lang="uz">UZ</button><button type="button" data-lang="ru" lang="ru">RU</button><button type="button" data-lang="en" lang="en">EN</button></div>
+      <a data-i18n="cta.contact" class="btn btn-ghost" href="#aloqa">Bog'lanish</a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menyuni ochish"><span></span><span></span></button>
     </div>
   </div>
 </header>
 <nav class="mobile-menu" id="mobile-menu" aria-label="Mobil menyu">
-    <a href="#xizmatlar">Xizmatlar</a>
-    <a href="#showroom">Showroom</a>
-    <a href="#loyihalar">Loyihalar</a>
-    <a href="#jarayon">Jarayon</a>
-    <a href="#savollar">Savollar</a>
-    <a class="btn btn-primary" href="#aloqa">Bog'lanish</a>
+    <a data-i18n="nav.services" href="#xizmatlar">Xizmatlar</a>
+    <a data-i18n="nav.showroom" href="#showroom">Showroom</a>
+    <a data-i18n="nav.projects" href="#loyihalar">Loyihalar</a>
+    <a data-i18n="nav.process" href="#jarayon">Jarayon</a>
+    <a data-i18n="nav.faq" href="#savollar">Savollar</a>
+    <div class="lang lang-m" role="group" aria-label="Til / Язык / Language"><button type="button" data-lang="uz" lang="uz">UZ</button><button type="button" data-lang="ru" lang="ru">RU</button><button type="button" data-lang="en" lang="en">EN</button></div>
+    <a data-i18n="cta.contact" class="btn btn-primary" href="#aloqa">Bog'lanish</a>
   </nav>
 
 <main id="asosiy">
 <section class="hero" aria-labelledby="hero-title">
   <div class="hero-media" role="img" aria-label="Zumrad Residence binosi, kun tongdan tungacha o'tadi">
     <div class="layer stack" data-depth="bg" aria-hidden="true"><img class="f" data-k="tong" src="img/day/tong-1600.webp" srcset="img/day/tong-1600.webp 1600w, img/day/tong-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" fetchpriority="high"><img class="f" data-k="peshin" data-src="img/day/peshin-1600.webp" data-srcset="img/day/peshin-1600.webp 1600w, img/day/peshin-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"><img class="f" data-k="shom" data-src="img/day/shom-1600.webp" data-srcset="img/day/shom-1600.webp 1600w, img/day/shom-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"><img class="f" data-k="t1905" data-src="img/day/t1905-1600.webp" data-srcset="img/day/t1905-1600.webp 1600w, img/day/t1905-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"><img class="f" data-k="tun" data-src="img/day/tun-1600.webp" data-srcset="img/day/tun-1600.webp 1600w, img/day/tun-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"></div>
-    <div class="giant" aria-hidden="true" data-depth="word">AVVALL</div>
+    <div class="giant" aria-hidden="true" data-depth="word"><span>AVV</span><span>ALL</span></div>
     <div class="layer stack" data-depth="bg" aria-hidden="true"><img class="f" data-k="tong" src="img/day/tong-cut-1600.webp" srcset="img/day/tong-cut-1600.webp 1600w, img/day/tong-cut-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"><img class="f" data-k="peshin" data-src="img/day/peshin-cut-1600.webp" data-srcset="img/day/peshin-cut-1600.webp 1600w, img/day/peshin-cut-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"><img class="f" data-k="shom" data-src="img/day/shom-cut-1600.webp" data-srcset="img/day/shom-cut-1600.webp 1600w, img/day/shom-cut-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"><img class="f" data-k="t1905" data-src="img/day/t1905-cut-1600.webp" data-srcset="img/day/t1905-cut-1600.webp 1600w, img/day/t1905-cut-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"><img class="f" data-k="tun" data-src="img/day/tun-cut-1600.webp" data-srcset="img/day/tun-cut-1600.webp 1600w, img/day/tun-cut-2560.webp 2560w" sizes="(max-width:700px) 154vw, 112vw" alt="" decoding="async"></div>
     <div class="shade shade-top"></div>
     <div class="shade shade-bottom"></div>
@@ -368,45 +370,45 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
   <div class="daybar wrap" aria-label="Kun vaqti">
     <div class="clock" aria-live="off"><span class="dot"></span><span id="clock">06:58</span></div>
     <div class="track"><div class="fill"></div>
-      <button type="button" data-i="0"><b>Tong</b><small>06:58</small></button><button type="button" data-i="1"><b>Kun</b><small>12:18</small></button><button type="button" data-i="2"><b>Shom</b><small>17:37</small></button><button type="button" data-i="3"><b>Ko'k soat</b><small>19:05</small></button><button type="button" data-i="4"><b>Tun</b><small>20:30</small></button>
+      <button type="button" data-i="0"><b data-i18n="day.tong">Tong</b><small>06:58</small></button><button type="button" data-i="1"><b data-i18n="day.kun">Kun</b><small>12:18</small></button><button type="button" data-i="2"><b data-i18n="day.shom">Shom</b><small>17:37</small></button><button type="button" data-i="3"><b data-i18n="day.kech">Kech</b><small>19:05</small></button><button type="button" data-i="4"><b data-i18n="day.tun">Tun</b><small>20:30</small></button>
     </div>
   </div>
   <div class="hero-content">
     <div class="wrap">
       <div class="hero-text">
-        <h1 class="display" id="hero-title">Uyni qurilishidan<br>oldin ko'ring.</h1>
-        <p class="hero-sub">Quruvchilar uchun kinematografik film va interaktiv 3D showroom.</p>
+        <h1 class="display" id="hero-title" data-i18n="hero.title" data-html>Uyni qurilishidan<br>avval ko'ring.</h1>
+        <p data-i18n="hero.sub" class="hero-sub">Quruvchilar uchun kinematografik film va interaktiv 3D showroom.</p>
       </div>
       <div class="actions">
-        <a class="btn btn-primary" href="https://zumrad-residence.netlify.app" target="_blank" rel="noopener">Demo showroom'ni ochish</a>
-        <a class="btn btn-ghost" href="#loyihalar">Loyihani ko'rish</a>
+        <a data-i18n="hero.demo" class="btn btn-primary" href="https://zumrad-residence.netlify.app" target="_blank" rel="noopener">Demo showroom'ni ochish</a>
+        <a data-i18n="hero.project" class="btn btn-ghost" href="#loyihalar">Loyihani ko'rish</a>
       </div>
     </div>
   </div>
 </section>
 
 <section class="statement" aria-label="AVVALL haqida">
-  <div class="wrap"><p class="display reveal-words">Bino hali chizmada, xaridor esa allaqachon uning ichida yuribdi. AVVALL quruvchilarga loyihani qurilishdan oldin sotish uchun film va 3D showroom yaratadi.</p></div>
+  <div class="wrap"><p data-i18n="statement" class="display reveal-words">Poydevor endi quyilyapti, sotuv esa kutib turmaydi. AVVALL showroom'da xaridor xonadonni hozirdanoq tayyor holatda ko'radi va ichida virtual sayr qiladi!</p></div>
 </section>
 
 <section class="services" id="xizmatlar" aria-labelledby="xizmatlar-t">
   <div class="wrap">
     <div class="sec-head">
-      <h2 class="display h2" id="xizmatlar-t">Ikki xizmat</h2>
-      <p class="lead">Ikkalasi bitta 3D modeldan tayyorlanadi, shuning uchun film va showroom bir xil ko'rinadi va narx ham tejaladi.</p>
+      <h2 data-i18n="srv.h" class="display h2" id="xizmatlar-t">Ikki xizmat</h2>
+      <p data-i18n="srv.lead" class="lead">Ikkalasi bitta 3D modeldan tayyorlanadi, shuning uchun film va showroom bir xil ko'rinadi va narx ham tejaladi.</p>
     </div>
     <div class="cards">
       <article class="card">
         <figure><img src="img/film-1600.webp" srcset="img/film-800.webp 800w, img/film-1600.webp 1600w" sizes="(max-width:900px) 100vw, 640px" alt="Bino ko'k soatda, yoritilgan fasad" loading="lazy"></figure>
-        <h3>Kinematografik film</h3>
-        <p>Bino kun va fasl bo'yicha jonlanadigan qisqa reklama filmi. Sotuv ofisi, sayt va ijtimoiy tarmoqlar uchun.</p>
-        <ul class="includes"><li>Tashqi va ichki kadrlar</li><li>Tong, kun, shom va tun</li><li>Gorizontal va vertikal versiyalar</li><li>Musiqa va ovoz bilan montaj</li></ul>
+        <h3 data-i18n="film.h">Kinematografik film</h3>
+        <p data-i18n="film.p">Bino kun va fasl bo'yicha jonlanadigan qisqa reklama filmi. Sotuv ofisi, sayt va ijtimoiy tarmoqlar uchun.</p>
+        <ul class="includes"><li data-i18n="film.l1">Tashqi va ichki kadrlar</li><li data-i18n="film.l2">Tong, kun, shom va tun</li><li data-i18n="film.l3">Gorizontal va vertikal versiyalar</li><li data-i18n="film.l4">Musiqa va ovoz bilan montaj</li></ul>
       </article>
       <article class="card">
         <figure><img src="img/showroom-1024.webp" srcset="img/showroom-800.webp 800w, img/showroom-1024.webp 1024w" sizes="(max-width:900px) 100vw, 640px" alt="Xonadon ichki ko'rinishi, yo'lak va yotoqxona eshigi" loading="lazy"></figure>
-        <h3>Interaktiv 3D showroom</h3>
-        <p>Xaridor brauzerda binoni aylantiradi, qavat va xonadon tanlaydi, ichkarida sayr qiladi. Ilova o'rnatish shart emas.</p>
-        <ul class="includes"><li>Binoni 360° aylantirish</li><li>Qavat va xonadon tanlash</li><li>Xonadon ichida 360° sayr</li><li>Narx va bo'sh xonadonlar holati</li></ul>
+        <h3 data-i18n="sr.h">Interaktiv 3D showroom</h3>
+        <p data-i18n="sr.p">Xaridor brauzerda binoni aylantiradi, qavat va xonadon tanlaydi, ichkarida sayr qiladi. Ilova o'rnatish shart emas.</p>
+        <ul class="includes"><li data-i18n="sr.l1">Binoni 360° aylantirish</li><li data-i18n="sr.l2">Qavat va xonadon tanlash</li><li data-i18n="sr.l3">Xonadon ichida 360° sayr</li><li data-i18n="sr.l4">Narx va bo'sh xonadonlar holati</li></ul>
       </article>
     </div>
   </div>
@@ -418,14 +420,14 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
     <img class="scrub-poster" src="img/floor/f00.webp" alt="Qavatning 3D kesimi, aylanib turadi" width="1280" height="720">
     <div class="wrap scrub-ui">
       <div class="scrub-head">
-        <h2 class="display h2" id="showroom-t">Showroom qanday ishlaydi</h2>
-        <p class="lead">Pastga aylantiring: qavat aylanadi, xaridor esa binodan xonadon ichigacha bir oynada yetib boradi.</p>
+        <h2 data-i18n="scrub.h" class="display h2" id="showroom-t">Showroom qanday ishlaydi</h2>
+        <p data-i18n="scrub.lead" class="lead">Pastga aylantiring: qavat aylanadi, xaridor esa binodan xonadon ichigacha bir oynada yetib boradi.</p>
       </div>
       <ol class="scrub-steps">
-        <li class="on"><span class="num">01</span><div><h3>Bino</h3><p>Binoni istalgan tomondan va kunning istalgan vaqtida ko'radi.</p></div></li>
-        <li><span class="num">02</span><div><h3>Qavat</h3><p>Qavatni bosadi va undagi xonadonlar rejasini ochadi.</p></div></li>
-        <li><span class="num">03</span><div><h3>Xonadon</h3><p>Reja, maydon, narx va holat bitta kartada.</p></div></li>
-        <li><span class="num">04</span><div><h3>360° sayr</h3><p>Xonadon ichida xonama-xona yuradi.</p></div></li>
+        <li class="on"><span class="num">01</span><div><h3 data-i18n="s1.h">Bino</h3><p data-i18n="s1.p">Binoni istalgan tomondan va kunning istalgan vaqtida ko'radi.</p></div></li>
+        <li><span class="num">02</span><div><h3 data-i18n="s2.h">Qavat</h3><p data-i18n="s2.p">Qavatni bosadi va undagi xonadonlar rejasini ochadi.</p></div></li>
+        <li><span class="num">03</span><div><h3 data-i18n="s3.h">Xonadon</h3><p data-i18n="s3.p">Reja, maydon, narx va holat bitta kartada.</p></div></li>
+        <li><span class="num">04</span><div><h3 data-i18n="s4.h">360° sayr</h3><p data-i18n="s4.p">Xonadon ichida xonama-xona yuradi.</p></div></li>
       </ol>
       <div class="scrub-meter" aria-hidden="true"><span id="deg">0°</span><div class="bar"><div></div></div><span>360°</span></div>
     </div>
@@ -437,9 +439,9 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
     <div class="project-head">
       <div>
         <h2 class="display h2" id="loyiha-t">Zumrad Residence</h2>
-        <p class="lead">Toshkentdagi turar-joy majmuasi uchun film va showroom: kun almashinuvi, to'rt fasl, qavat tanlash va xonadon ichida 360° sayr.</p>
+        <p data-i18n="proj.lead" class="lead">Toshkentdagi turar-joy majmuasi uchun film va showroom: kun almashinuvi, to'rt fasl, qavat tanlash va xonadon ichida 360° sayr.</p>
       </div>
-      <a class="btn btn-ghost" href="https://zumrad-residence.netlify.app" target="_blank" rel="noopener">Demo'ni ochish</a>
+      <a data-i18n="proj.demo" class="btn btn-ghost" href="https://zumrad-residence.netlify.app" target="_blank" rel="noopener">Demo'ni ochish</a>
     </div>
     <figure class="project-main"><img src="img/project-2560.webp" srcset="img/project-1280.webp 1280w, img/project-2560.webp 2560w" sizes="(max-width:1440px) 100vw, 1280px" alt="Zumrad Residence quyosh botayotganda" loading="lazy"></figure>
     <div class="project-row">
@@ -452,38 +454,38 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
 <section class="sec light" id="jarayon" aria-labelledby="jarayon-t">
   <div class="wrap">
     <div class="sec-head">
-      <h2 class="display h2" id="jarayon-t">Ish jarayoni</h2>
-      <p class="lead">Har bosqich oxirida natijani ko'rib tasdiqlaysiz. Keyingi bosqichga faqat sizning roziligingiz bilan o'tamiz.</p>
+      <h2 data-i18n="proc.h" class="display h2" id="jarayon-t">Ish jarayoni</h2>
+      <p data-i18n="proc.lead" class="lead">Har bosqich oxirida natijani ko'rib tasdiqlaysiz. Keyingi bosqichga faqat sizning roziligingiz bilan o'tamiz.</p>
     </div>
     <ol class="steps steps-5">
-      <li class="step"><span class="num">01</span><h3>Brif</h3><p>Chizmalar, referenslar va sotuv maqsadini olamiz.</p></li>
-      <li class="step"><span class="num">02</span><h3>3D model</h3><p>Bino va xonadonlarni aniq o'lchamda modellashtiramiz.</p></li>
-      <li class="step"><span class="num">03</span><h3>Render va film</h3><p>Yorug'lik, fasl va kadrlarni siz bilan tasdiqlaymiz.</p></li>
-      <li class="step"><span class="num">04</span><h3>Showroom</h3><p>Saytingizga va sotuv ofisi ekraniga yig'amiz.</p></li>
-      <li class="step"><span class="num">05</span><h3>Topshirish</h3><p>Narx va holatlarni o'zingiz yangilab borasiz.</p></li>
+      <li class="step"><span class="num">01</span><h3 data-i18n="p1.h">Brif</h3><p data-i18n="p1.p">Chizmalar, referenslar va sotuv maqsadini olamiz.</p></li>
+      <li class="step"><span class="num">02</span><h3 data-i18n="p2.h">3D model</h3><p data-i18n="p2.p">Bino va xonadonlarni aniq o'lchamda modellashtiramiz.</p></li>
+      <li class="step"><span class="num">03</span><h3 data-i18n="p3.h">Render va film</h3><p data-i18n="p3.p">Yorug'lik, fasl va kadrlarni siz bilan tasdiqlaymiz.</p></li>
+      <li class="step"><span class="num">04</span><h3 data-i18n="p4.h">Showroom</h3><p data-i18n="p4.p">Saytingizga va sotuv ofisi ekraniga yig'amiz.</p></li>
+      <li class="step"><span class="num">05</span><h3 data-i18n="p5.h">Topshirish</h3><p data-i18n="p5.p">Narx va holatlarni o'zingiz yangilab borasiz.</p></li>
     </ol>
   </div>
 </section>
 
 <section class="sec" style="padding-bottom:120px" aria-labelledby="foyda-t">
   <div class="wrap">
-    <div class="sec-head"><h2 class="display h2" id="foyda-t">Quruvchiga nima beradi</h2></div>
+    <div class="sec-head"><h2 data-i18n="ben.h" class="display h2" id="foyda-t">Quruvchiga nima beradi</h2></div>
     <ul class="steps steps-3">
-      <li class="step"><h3>Sotuv qurilishdan oldin boshlanadi</h3><p>Xaridor loyihani qog'ozdagi reja emas, tayyor uy sifatida ko'radi va bron qilish haqida tezroq qaror qiladi.</p></li>
-      <li class="step"><h3>Bitta material, hamma joyda</h3><p>Sayt, sotuv ofisi ekrani, Instagram va taqdimot uchun bir xil sifatli kontent.</p></li>
-      <li class="step"><h3>Uzoqdagi xaridor ham ko'radi</h3><p>Boshqa shahar yoki chet eldagi xaridor xonadonni telefonidan to'liq ko'rib chiqadi.</p></li>
+      <li class="step"><h3 data-i18n="b1.h">Sotuv qurilishdan oldin boshlanadi</h3><p data-i18n="b1.p">Xaridor loyihani qog'ozdagi reja emas, tayyor uy sifatida ko'radi va bron qilish haqida tezroq qaror qiladi.</p></li>
+      <li class="step"><h3 data-i18n="b2.h">Bitta material, hamma joyda</h3><p data-i18n="b2.p">Sayt, sotuv ofisi ekrani, Instagram va taqdimot uchun bir xil sifatli kontent.</p></li>
+      <li class="step"><h3 data-i18n="b3.h">Uzoqdagi xaridor ham ko'radi</h3><p data-i18n="b3.p">Boshqa shahar yoki chet eldagi xaridor xonadonni telefonidan to'liq ko'rib chiqadi.</p></li>
     </ul>
   </div>
 </section>
 
 <section class="faq" id="savollar" aria-labelledby="savollar-t">
   <div class="wrap">
-    <h2 class="display h2" id="savollar-t">Savollar</h2>
+    <h2 data-i18n="faq.h" class="display h2" id="savollar-t">Savollar</h2>
     <div class="faq-list">
-      <details open><summary>Qancha vaqt oladi?<span class="ic" aria-hidden="true"></span></summary><p>Loyiha hajmiga bog'liq. Chizmalar va brifni ko'rganimizdan keyin aniq muddatni yozma ravishda beramiz.</p></details>
-      <details><summary>Bizda faqat chizmalar bor. Yetarlimi?<span class="ic" aria-hidden="true"></span></summary><p>Ha. Arxitektura va planirovka chizmalaridan 3D modelni o'zimiz quramiz.</p></details>
-      <details><summary>Showroom bizning saytimizda ishlaydimi?<span class="ic" aria-hidden="true"></span></summary><p>Ha. Alohida havola sifatida ham, saytingiz ichida ham ishlaydi.</p></details>
-      <details><summary>Narx va bo'sh xonadonlarni kim yangilaydi?<span class="ic" aria-hidden="true"></span></summary><p>Siz. Oddiy jadval orqali yangilaysiz, o'zgarish showroom'da darhol ko'rinadi.</p></details>
+      <details open><summary data-i18n="q1">Qancha vaqt oladi?<span class="ic" aria-hidden="true"></span></summary><p data-i18n="a1">Loyiha hajmiga bog'liq. Chizmalar va brifni ko'rganimizdan keyin aniq muddatni yozma ravishda beramiz.</p></details>
+      <details><summary data-i18n="q2">Bizda faqat chizmalar bor. Yetarlimi?<span class="ic" aria-hidden="true"></span></summary><p data-i18n="a2">Ha. Arxitektura va planirovka chizmalaridan 3D modelni o'zimiz quramiz.</p></details>
+      <details><summary data-i18n="q3">Showroom bizning saytimizda ishlaydimi?<span class="ic" aria-hidden="true"></span></summary><p data-i18n="a3">Ha. Alohida havola sifatida ham, saytingiz ichida ham ishlaydi.</p></details>
+      <details><summary data-i18n="q4">Narx va bo'sh xonadonlarni kim yangilaydi?<span class="ic" aria-hidden="true"></span></summary><p data-i18n="a4">Siz. Oddiy jadval orqali yangilaysiz, o'zgarish showroom'da darhol ko'rinadi.</p></details>
     </div>
   </div>
 </section>
@@ -491,28 +493,29 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
 <section class="sec contact" id="aloqa" aria-labelledby="aloqa-t">
   <div class="wrap">
     <div>
-      <h2 class="display" id="aloqa-t">Loyihangizni avval ko'rsating.</h2>
-      <p class="lead">Chizmalaringizni yuboring. Qaysi xizmat kerakligini, muddat va narxni birga aniqlaymiz.</p>
+      <h2 data-i18n="ct.h" class="display" id="aloqa-t">Loyihangizni avval ko'rsating.</h2>
+      <p data-i18n="ct.lead" class="lead">Chizmalaringizni yuboring. Qaysi xizmat kerakligini, muddat va narxni birga aniqlaymiz.</p>
       <address class="contacts">
         <span>[telefon raqam]</span>
         <span>Telegram: [username]</span>
-        <span>Toshkent, O'zbekiston</span>
+        <span data-i18n="city">Toshkent, O'zbekiston</span>
       </address>
     </div>
     <form class="form" name="avval-sorov" method="POST" novalidate>
-      <input type="hidden" name="form-name" value="avval-sorov">
+      <input type="hidden" name="form-name" value="avval-sorov"><input type="hidden" name="source" value="avvall.uz">
       <p class="hp"><label>Bo'sh qoldiring <input name="manzil" tabindex="-1" autocomplete="off"></label></p>
-      <div class="field"><label for="f-name">Ismingiz</label><input id="f-name" name="ism" autocomplete="name" placeholder="Ism va familiya" required></div>
-      <div class="field"><label for="f-co">Kompaniya</label><input id="f-co" name="kompaniya" autocomplete="organization" placeholder="Kompaniya nomi"></div>
-      <div class="field"><label for="f-tel">Telefon</label><input id="f-tel" name="telefon" type="tel" autocomplete="tel" inputmode="tel" placeholder="+998" required></div>
-      <div class="field"><label for="f-msg">Loyiha haqida</label><textarea id="f-msg" name="loyiha" placeholder="Masalan: 12 qavatli bino, 2027 yil"></textarea></div>
-      <button class="btn btn-primary" type="submit">So'rov yuborish</button>
+      <div class="field"><label data-i18n="f.name" for="f-name">Ismingiz</label><input id="f-name" name="ism" autocomplete="name" placeholder="Ism va familiya" data-i18n-ph="ph.name" required></div>
+      <div class="field"><label data-i18n="f.co" for="f-co">Kompaniya</label><input id="f-co" name="kompaniya" autocomplete="organization" placeholder="Kompaniya nomi" data-i18n-ph="ph.co"></div>
+      <div class="field"><label data-i18n="f.tel" for="f-tel">Telefon</label><input id="f-tel" name="telefon" type="tel" autocomplete="tel" inputmode="tel" placeholder="+998" required></div>
+      <div class="field"><label data-i18n="f.msg" for="f-msg">Loyiha haqida</label><textarea id="f-msg" name="loyiha" placeholder="Masalan: 12 qavatli bino, 2027 yil" data-i18n-ph="ph.msg"></textarea></div>
+      <button data-i18n="f.send" class="btn btn-primary" type="submit">So'rov yuborish</button>
       <p class="form-note" role="status" aria-live="polite"></p>
     </form>
   </div>
 </section>
 </main>
 
+<script type="application/json" id="i18n">{"ru": {"nav.services": "Услуги", "nav.showroom": "Шоурум", "nav.projects": "Проекты", "nav.process": "Процесс", "nav.faq": "Вопросы", "cta.contact": "Связаться", "skip": "Перейти к содержанию", "day.tong": "Утро", "day.kun": "День", "day.shom": "Закат", "day.kech": "Вечер", "day.tun": "Ночь", "hero.title": "Увидьте дом<br>до его постройки.", "hero.sub": "Кинематографичный фильм и интерактивный 3D-шоурум для девелоперов.", "hero.demo": "Открыть демо-шоурум", "hero.project": "Смотреть проект", "statement": "Фундамент только заливают, а продажи ждать не будут. В шоуруме AVVALL покупатель уже сейчас видит квартиру готовой и проходит по ней виртуально!", "srv.h": "Две услуги", "srv.lead": "Обе делаются из одной 3D-модели, поэтому фильм и шоурум выглядят одинаково, а бюджет экономится.", "film.h": "Кинематографичный фильм", "film.p": "Короткий рекламный фильм, в котором здание оживает в разное время суток и года. Для офиса продаж, сайта и соцсетей.", "film.l1": "Экстерьер и интерьер", "film.l2": "Утро, день, закат и ночь", "film.l3": "Горизонтальная и вертикальная версии", "film.l4": "Монтаж с музыкой и озвучкой", "sr.h": "Интерактивный 3D-шоурум", "sr.p": "Покупатель вращает здание в браузере, выбирает этаж и квартиру и гуляет внутри. Ничего устанавливать не нужно.", "sr.l1": "Вращение здания на 360°", "sr.l2": "Выбор этажа и квартиры", "sr.l3": "Прогулка по квартире на 360°", "sr.l4": "Цены и свободные квартиры", "scrub.h": "Как работает шоурум", "scrub.lead": "Прокрутите вниз: этаж поворачивается, а покупатель в одном окне проходит путь от здания до квартиры.", "s1.h": "Здание", "s1.p": "Смотрит на здание с любой стороны и в любое время суток.", "s2.h": "Этаж", "s2.p": "Нажимает на этаж и открывает планировки квартир.", "s3.h": "Квартира", "s3.p": "Планировка, площадь, цена и статус в одной карточке.", "s4.h": "Прогулка 360°", "s4.p": "Проходит по квартире из комнаты в комнату.", "proj.lead": "Фильм и шоурум для жилого комплекса в Ташкенте: смена времени суток, четыре сезона, выбор этажа и прогулка по квартире на 360°.", "proj.demo": "Открыть демо", "proc.h": "Как мы работаем", "proc.lead": "В конце каждого этапа вы смотрите и утверждаете результат. К следующему этапу переходим только с вашего согласия.", "p1.h": "Бриф", "p1.p": "Получаем чертежи, референсы и цели продаж.", "p2.h": "3D-модель", "p2.p": "Моделируем здание и квартиры в точных размерах.", "p3.h": "Рендер и фильм", "p3.p": "Согласовываем с вами свет, сезоны и кадры.", "p4.h": "Шоурум", "p4.p": "Собираем для вашего сайта и экрана в офисе продаж.", "p5.h": "Сдача", "p5.p": "Цены и статусы вы обновляете сами.", "ben.h": "Что это даёт девелоперу", "b1.h": "Продажи начинаются до стройки", "b1.p": "Покупатель видит не план на бумаге, а готовый дом, и быстрее решается на бронь.", "b2.h": "Один материал для всех каналов", "b2.p": "Одинаково качественный контент для сайта, офиса продаж, Instagram и презентаций.", "b3.h": "Удалённый покупатель тоже видит", "b3.p": "Покупатель из другого города или из-за рубежа полностью осматривает квартиру с телефона.", "faq.h": "Вопросы", "q1": "Сколько это занимает времени?", "a1": "Зависит от объёма проекта. Изучив чертежи и бриф, мы письменно назовём точный срок.", "q2": "У нас есть только чертежи. Этого достаточно?", "a2": "Да. Мы сами строим 3D-модель по архитектурным чертежам и планировкам.", "q3": "Шоурум будет работать на нашем сайте?", "a3": "Да. И отдельной ссылкой, и внутри вашего сайта.", "q4": "Кто обновляет цены и свободные квартиры?", "a4": "Вы. Через простую таблицу, и изменения сразу видны в шоуруме.", "ct.h": "Покажите проект до стройки.", "ct.lead": "Пришлите чертежи. Вместе определим нужную услугу, сроки и стоимость.", "city": "Ташкент, Узбекистан", "f.name": "Ваше имя", "f.co": "Компания", "f.tel": "Телефон", "f.msg": "О проекте", "f.send": "Отправить заявку", "ph.name": "Имя и фамилия", "ph.co": "Название компании", "ph.msg": "Например: 12-этажный дом, 2027 год", "m.name": "Укажите имя.", "m.tel": "Укажите телефон полностью, например +998 90 123 45 67.", "m.sending": "Отправляем…", "m.ok": "Заявка отправлена. Скоро свяжемся.", "m.tg": " Получить ответ в Telegram", "m.fail": "Не удалось отправить заявку. Пожалуйста, свяжитесь по телефону или в Telegram.", "meta.title": "AVVALL — Увидьте дом до его постройки", "meta.desc": "Кинематографичные фильмы и интерактивные 3D-шоурумы для девелоперов. Покупатель видит и выбирает здание, этаж и квартиру до окончания стройки."}, "en": {"nav.services": "Services", "nav.showroom": "Showroom", "nav.projects": "Projects", "nav.process": "Process", "nav.faq": "FAQ", "cta.contact": "Contact", "skip": "Skip to content", "day.tong": "Dawn", "day.kun": "Day", "day.shom": "Sunset", "day.kech": "Evening", "day.tun": "Night", "hero.title": "See the home<br>before it's built.", "hero.sub": "Cinematic films and interactive 3D showrooms for developers.", "hero.demo": "Open the demo showroom", "hero.project": "View the project", "statement": "The foundation is only just being poured, but sales won't wait. In an AVVALL showroom, buyers see the finished apartment today and walk through it virtually!", "srv.h": "Two services", "srv.lead": "Both are made from one 3D model, so the film and the showroom match and you save on cost.", "film.h": "Cinematic film", "film.p": "A short promo film where the building comes alive through the day and the seasons. For your sales office, website and social media.", "film.l1": "Exterior and interior shots", "film.l2": "Dawn, day, sunset and night", "film.l3": "Horizontal and vertical versions", "film.l4": "Edit with music and voice-over", "sr.h": "Interactive 3D showroom", "sr.p": "Buyers rotate the building in the browser, pick a floor and an apartment, and walk inside. No app to install.", "sr.l1": "Rotate the building 360°", "sr.l2": "Choose a floor and an apartment", "sr.l3": "360° walk-through inside", "sr.l4": "Prices and availability", "scrub.h": "How the showroom works", "scrub.lead": "Scroll down: the floor turns, and the buyer goes from the building to inside the apartment in one window.", "s1.h": "Building", "s1.p": "Sees the building from any side, at any time of day.", "s2.h": "Floor", "s2.p": "Taps a floor and opens its apartment plans.", "s3.h": "Apartment", "s3.p": "Plan, area, price and status on one card.", "s4.h": "360° walk", "s4.p": "Walks through the apartment room by room.", "proj.lead": "Film and showroom for a residential complex in Tashkent: time of day, four seasons, floor selection and a 360° walk-through.", "proj.demo": "Open the demo", "proc.h": "How we work", "proc.lead": "At the end of each stage you review and approve the result. We move on only with your approval.", "p1.h": "Brief", "p1.p": "We collect drawings, references and sales goals.", "p2.h": "3D model", "p2.p": "We model the building and apartments to exact dimensions.", "p3.h": "Renders and film", "p3.p": "We agree light, seasons and shots with you.", "p4.h": "Showroom", "p4.p": "We build it for your website and sales-office screen.", "p5.h": "Handover", "p5.p": "You update prices and availability yourself.", "ben.h": "What it gives the developer", "b1.h": "Sales start before construction", "b1.p": "Buyers see a finished home, not a plan on paper, and decide to reserve sooner.", "b2.h": "One asset, everywhere", "b2.p": "The same high-quality content for your website, sales office, Instagram and presentations.", "b3.h": "Remote buyers see it too", "b3.p": "A buyer in another city or abroad can view the whole apartment from their phone.", "faq.h": "FAQ", "q1": "How long does it take?", "a1": "It depends on the size of the project. Once we see the drawings and brief, we give you an exact timeline in writing.", "q2": "We only have drawings. Is that enough?", "a2": "Yes. We build the 3D model ourselves from the architectural and floor-plan drawings.", "q3": "Will the showroom work on our website?", "a3": "Yes. Both as a separate link and embedded in your site.", "q4": "Who updates prices and availability?", "a4": "You do, through a simple spreadsheet. Changes appear in the showroom right away.", "ct.h": "Show your project before it's built.", "ct.lead": "Send us your drawings. Together we'll work out which service you need, the timeline and the price.", "city": "Tashkent, Uzbekistan", "f.name": "Your name", "f.co": "Company", "f.tel": "Phone", "f.msg": "About the project", "f.send": "Send request", "ph.name": "First and last name", "ph.co": "Company name", "ph.msg": "For example: 12-storey building, 2027", "m.name": "Please enter your name.", "m.tel": "Please enter the full phone number, e.g. +998 90 123 45 67.", "m.sending": "Sending…", "m.ok": "Request sent. We'll be in touch soon.", "m.tg": " Get the reply on Telegram", "m.fail": "We couldn't send your request. Please contact us by phone or Telegram.", "meta.title": "AVVALL — See the home before it's built", "meta.desc": "Cinematic films and interactive 3D showrooms for developers. Buyers see and choose the building, floor and apartment before construction ends."}, "uz": {"statement": "Poydevor endi quyilyapti, sotuv esa kutib turmaydi. AVVALL showroom'da xaridor xonadonni hozirdanoq tayyor holatda ko'radi va ichida virtual sayr qiladi!", "m.name": "Ismingizni yozing.", "m.tel": "Telefon raqamni to'liq yozing, masalan +998 90 123 45 67.", "m.sending": "Yuborilmoqda…", "m.ok": "So'rovingiz yuborildi. Tez orada bog'lanamiz.", "m.tg": " Javobni Telegram'da olish", "m.fail": "So'rovni yuborib bo'lmadi. Iltimos, telefon yoki Telegram orqali bog'laning.", "meta.title": "AVVALL — Uyni qurilishidan avval ko'ring", "meta.desc": "Quruvchilar uchun kinematografik filmlar va interaktiv 3D showroom. Xaridor binoni, qavatni va xonadonni qurilish tugashidan avval ko'radi va tanlaydi."}}</script>
 <footer>
   <div class="wrap">
     <img src="img/logo.svg" alt="AVVALL" width="126" height="25">
@@ -534,6 +537,8 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
   var btns=hero.querySelectorAll('.track button'), fill=hero.querySelector('.track .fill'), clock=document.getElementById('clock');
   var cur=0, anim=null;
   function lerp(a,b,t){return a+(b-a)*t}
+  // word: graphite in daylight, paper at night
+  function wordColor(n){var c=[Math.round(lerp(22,244,n)),Math.round(lerp(24,244,n)),Math.round(lerp(27,242,n))];word.style.color='rgb('+c+')';word.style.opacity=lerp(.78,.92,n)}
   function setT(t){
     cur=t;
     for(var s=0;s<frames.length;s++)for(var i=0;i<frames[s].length;i++){
@@ -544,9 +549,7 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
     var h=lerp(HOURS[i0],HOURS[i0+1],f), n=lerp(NIGHT[i0],NIGHT[i0+1],f);
     var hh=Math.floor(h), mm=Math.round((h-hh)*60); if(mm===60){hh++;mm=0}
     clock.textContent=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
-    // word: graphite in daylight, paper at night
-    var c=[Math.round(lerp(22,244,n)),Math.round(lerp(24,244,n)),Math.round(lerp(27,242,n))];
-    word.style.color='rgb('+c+')'; word.style.opacity=lerp(.78,.92,n);
+    wordColor(n);
     fill.style.width=(t/4*100)+'%';
     for(var k=0;k<btns.length;k++)btns[k].classList.toggle('on',Math.round(t)===k);
   }
@@ -557,11 +560,30 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
     var from=cur, t0=performance.now(), d=ms||Math.max(700,Math.abs(to-from)*900);
     (function step(now){var x=clamp((now-t0)/d,0,1);setT(from+(to-from)*ease(x));if(x<1)anim=requestAnimationFrame(step)})(t0);
   }
-  for(var k=0;k<btns.length;k++)btns[k].addEventListener('click',function(){go(+this.dataset.i)});
+  /* autoplay: the day keeps turning slowly; a click pauses it for a while */
+  var HOLD=4200, TR=2600, timer=null, resumeT=null, auto=!reduce;
+  function wrapToDawn(){ // night fades back into dawn, no rewinding
+    if(anim)cancelAnimationFrame(anim);
+    frames.forEach(function(l){for(var i=0;i<l.length;i++){l[i].style.zIndex=i===4?10:(i===0?5:0);l[i].style.opacity=(i===4||i===0)?1:0}});
+    var t0=performance.now();
+    (function step(now){var x=clamp((now-t0)/TR,0,1),e=ease(x);
+      frames.forEach(function(l){l[4].style.opacity=1-e});
+      wordColor(1-e); fill.style.width=((1-e)*100)+'%';
+      if(x<1)anim=requestAnimationFrame(step); else setT(0)})(t0);
+  }
+  function next(){
+    clearTimeout(timer); if(!auto)return;
+    var r=hero.getBoundingClientRect();
+    if(!document.hidden&&r.bottom>0){var n=Math.round(cur)+1; if(n>4)wrapToDawn(); else go(n,TR)}
+    timer=setTimeout(next,TR+HOLD);
+  }
+  function play(delay){if(reduce)return;auto=true;clearTimeout(timer);timer=setTimeout(next,delay)}
+  for(var k=0;k<btns.length;k++)btns[k].addEventListener('click',function(){
+    auto=false;clearTimeout(timer);clearTimeout(resumeT);go(+this.dataset.i);resumeT=setTimeout(function(){play(0)},15000)});
   function decodeAll(){var ps=[];frames.forEach(function(l){[].forEach.call(l,function(im){ps.push(im.decode?im.decode().catch(function(){}):Promise.resolve())})});return Promise.all(ps)}
   setT(0);
   var started=false;
-  function start(){if(started)return;started=true;doc.classList.add('loaded');if(reduce){setT(4);return}setTimeout(function(){go(4,5200)},700)}
+  function start(){if(started)return;started=true;doc.classList.add('loaded');play(HOLD)}
   var introOn=doc.classList.contains('intro-on');
   if(introOn){
     var intro=document.querySelector('.intro'), tc=intro.querySelector('.intro-time'), t0=performance.now(), done=false;
@@ -591,7 +613,8 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
 
   /* ---------- statement: words light up as you read ---------- */
   var rw=document.querySelector('.reveal-words'), wl=[];
-  (function(){var t=rw.textContent.trim().split(/\s+/);rw.textContent='';t.forEach(function(w,i){var s=document.createElement('span');s.className='w';s.textContent=w;rw.appendChild(s);if(i<t.length-1)rw.appendChild(document.createTextNode(' '));wl.push(s)})})();
+  function splitWords(txt){var t=txt.trim().split(/\s+/);rw.textContent='';wl=[];t.forEach(function(w,i){var s=document.createElement('span');s.className='w';s.textContent=w;rw.appendChild(s);if(i<t.length-1)rw.appendChild(document.createTextNode(' '));wl.push(s)})}
+  splitWords(rw.textContent);
   function words(){
     var r=rw.getBoundingClientRect(), vh=window.innerHeight;
     var p=reduce?1:clamp((vh*.85-r.top)/(r.height+vh*.35),0,1), n=p*wl.length;
@@ -622,18 +645,42 @@ if(!seen&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.class
   menu.addEventListener('click',function(e){if(e.target.tagName==='A')setMenu(false)});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&btn.getAttribute('aria-expanded')==='true'){setMenu(false);btn.focus()}});
 
+  /* ---------- languages: uz / ru / en ---------- */
+  var I18N={}; try{I18N=JSON.parse(document.getElementById('i18n').textContent)}catch(e){}
+  var lang='uz', metaD=document.querySelector('meta[name="description"]');
+  var tnodes=[].map.call(document.querySelectorAll('[data-i18n]'),function(el){
+    var html=el.hasAttribute('data-html'), tn=null;
+    if(!html)for(var i=0;i<el.childNodes.length;i++){var c=el.childNodes[i];if(c.nodeType===3&&c.nodeValue.trim()){tn=c;break}}
+    return {el:el,key:el.getAttribute('data-i18n'),html:html,tn:tn,uz:html?el.innerHTML:(tn?tn.nodeValue:'')}});
+  var pnodes=[].map.call(document.querySelectorAll('[data-i18n-ph]'),function(el){return {el:el,key:el.getAttribute('data-i18n-ph'),uz:el.placeholder}});
+  function T(k){return (I18N[lang]&&I18N[lang][k])||(I18N.uz&&I18N.uz[k])||''}
+  function setLang(l){
+    if(!I18N[l]&&l!=='uz')l='uz'; lang=l; var L=I18N[l]||{};
+    tnodes.forEach(function(n){var v=l==='uz'?n.uz:L[n.key]; if(n.key==='statement'){splitWords(T('statement'));return}
+      if(v==null)return; if(n.html)n.el.innerHTML=v; else if(n.tn)n.tn.nodeValue=v});
+    pnodes.forEach(function(n){n.el.placeholder=l==='uz'?n.uz:(L[n.key]||n.uz)});
+    doc.lang=l; document.title=T('meta.title'); if(metaD)metaD.content=T('meta.desc');
+    [].forEach.call(document.querySelectorAll('.lang button'),function(b){var on=b.dataset.lang===l;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+    var src=document.querySelector('input[name="source"]'); if(src)src.value='avvall.uz · '+l.toUpperCase();
+    try{localStorage.setItem('avvall-lang',l)}catch(e){}
+    words();
+  }
+  [].forEach.call(document.querySelectorAll('.lang button'),function(b){b.addEventListener('click',function(){setLang(b.dataset.lang)})});
+  var q=(location.search.match(/[?&]lang=(uz|ru|en)/)||[])[1], saved=null; try{saved=localStorage.getItem('avvall-lang')}catch(e){}
+  setLang(q||saved||'uz');
+
   /* ---------- form ---------- */
   var form=document.querySelector('.form'), note=form.querySelector('.form-note');
   form.addEventListener('submit',function(e){
     e.preventDefault(); note.className='form-note';
     var name=form.ism, tel=form.telefon;
-    if(!name.value.trim()){note.textContent='Ismingizni yozing.';note.classList.add('err');name.focus();return}
-    if(tel.value.replace(/\D/g,'').length<9){note.textContent='Telefon raqamni to\'liq yozing, masalan +998 90 123 45 67.';note.classList.add('err');tel.focus();return}
-    var b=form.querySelector('button'); b.disabled=true; b.textContent='Yuborilmoqda…';
+    if(!name.value.trim()){note.textContent=T('m.name');note.classList.add('err');name.focus();return}
+    if(tel.value.replace(/\D/g,'').length<9){note.textContent=T('m.tel');note.classList.add('err');tel.focus();return}
+    var b=form.querySelector('button'); b.disabled=true; var bn=tnodes.filter(function(x){return x.el===b})[0]; bn.tn.nodeValue=T('m.sending');
     fetch('https://avvall-bot.behruzbework.workers.dev/lead',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form)).toString()})
-      .then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){if(!j.ok)throw 0; form.reset(); note.textContent='So\'rovingiz yuborildi. Tez orada bog\'lanamiz.'; if(j.tg){var a=document.createElement('a');a.href=j.tg;a.target='_blank';a.rel='noopener';a.textContent=' Javobni Telegram\'da olish';note.appendChild(a)} note.classList.add('ok')})
-      .catch(function(){note.textContent='So\'rovni yuborib bo\'lmadi. Iltimos, telefon yoki Telegram orqali bog\'laning.'; note.classList.add('err')})
-      .finally(function(){b.disabled=false; b.textContent='So\'rov yuborish'});
+      .then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){if(!j.ok)throw 0; form.reset(); note.textContent=T('m.ok'); if(j.tg){var a=document.createElement('a');a.href=j.tg;a.target='_blank';a.rel='noopener';a.textContent=T('m.tg');note.appendChild(a)} note.classList.add('ok')})
+      .catch(function(){note.textContent=T('m.fail'); note.classList.add('err')})
+      .finally(function(){b.disabled=false; bn.tn.nodeValue=lang==='uz'?bn.uz:T('f.send')});
   });
 })();
 </script>
