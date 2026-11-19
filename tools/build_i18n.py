@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """AVVALL: index.html (UZ, manba) dan /ru/ va /en/ statik sahifalarini, SEO blokini,
 CSP hashlarini, sitemap.xml va robots.txt ni yaratadi.  Ishlatish: python3 tools/build_i18n.py"""
+import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import re, json, hashlib, base64, datetime, os, copy
 from bs4 import BeautifulSoup, NavigableString
 
@@ -89,6 +91,7 @@ def translate(l):
     for el in soup.select('[data-i18n-aria]'):
         v = DICT[l].get(el['data-i18n-aria'])
         if v: el['aria-label'] = v
+    for el in soup.select('[data-lpath]'): el['href'] = LANGS[l][0].rstrip('/') + el['href']
     soup.title.string = T(l, 'meta.title')
     for sel, attr, val in [('meta[name=description]', 'content', T(l, 'meta.desc')),
                            ('meta[property="og:title"]', 'content', T(l, 'meta.title')),
@@ -120,11 +123,18 @@ for l in ('ru', 'en'):
     page = fix_csp(mark_current(translate(l), l))
     open(os.path.join(ROOT, l, 'index.html'), 'w', encoding='utf-8').write(page)
 
+# --- qo'shimcha sahifalar ---
+from build_pages import build as build_pages
+extra = build_pages(ROOT)
+
 # --- sitemap / robots ---
 today = datetime.date.today().isoformat()
 alts = ''.join(f'\n    <xhtml:link rel="alternate" hreflang="{x}" href="{SITE}{p}"/>' for x, (p, _) in LANGS.items()) + \
        f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}/"/>'
 urls = ''.join(f'\n  <url>\n    <loc>{SITE}{p}</loc>\n    <lastmod>{today}</lastmod>{alts}\n  </url>' for p, _ in LANGS.values())
+for g in extra:
+    a = ''.join(f'\n    <xhtml:link rel="alternate" hreflang="{x}" href="{u}"/>' for x, u in g.items()) + f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{g["uz"]}"/>'
+    urls += ''.join(f'\n  <url>\n    <loc>{u}</loc>\n    <lastmod>{today}</lastmod>{a}\n  </url>' for u in g.values())
 open(os.path.join(ROOT, 'sitemap.xml'), 'w').write(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
     'xmlns:xhtml="http://www.w3.org/1999/xhtml">' + urls + '\n</urlset>\n')
