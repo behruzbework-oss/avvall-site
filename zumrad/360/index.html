@@ -106,12 +106,16 @@ const LINKS = {
   G1:['L2','G2'], G2:['G1','G3'], G3:['G2'],
   T1:['H3','T2'], T2:['T1']
 };
-const ROOMS = { L:'Mehmonxona', K:'Oshxona', B:'Yotoqxona', H:'Dahliz', G:'Loggiya', T:'Hammom' };
-const START_YAW = { L1:200, K1:215, B1:-45, H1:0, G1:-90, T1:200 }; // gradus, sharqdan soat miliga teskari
+let ROOMS = { L:'Mehmonxona', K:'Oshxona', B:'Yotoqxona', H:'Dahliz', G:'Loggiya', T:'Hammom' };
+let START_YAW = { L1:200, K1:215, B1:-45, H1:0, G1:-90, T1:200 }; // gradus, sharqdan soat miliga teskari
 const EYE = 1.55;
 // belgi turadigan ko'rinadigan bo'sh pol nuqtasi (mebel to'sgan yo'nalishlar uchun)
 const MARKS = {"H3>T1": [0.07, -2.05], "K1>K3": [0.81, -5.2], "B3>B1": [4.62, -4.74], "T1>H3": [0.07, -2.05]};
-const READY = new Set(/*READY*/['B1', 'B2', 'B3', 'G1', 'G2', 'G3', 'H1', 'H2', 'H3', 'K1', 'K2', 'K3', 'L1', 'L2', 'L3', 'T1', 'T2']/*END*/);
+let READY = new Set(/*READY*/['B1', 'B2', 'B3', 'G1', 'G2', 'G3', 'H1', 'H2', 'H3', 'K1', 'K2', 'K3', 'L1', 'L2', 'L3', 'T1', 'T2']/*END*/);
+// Admin paneldan boshqariladigan sozlamalar: xona nomlari, tartib, boshlang'ich xona, almashtirilgan rasmlar, oddiy sayrlar (A/B/C)
+let TOUR = null, BUILTIN = true, ORDER = ['L','K','B','H','G','T'], PANOS = {}, TNAME = 'D xonadon';
+const roomOf = id => BUILTIN ? id[0] : id;
+const panoSrc = id => PANOS[id] ? '/pano/' + PANOS[id] + '.jpg' : './p/' + id + '.jpg';
 const $ = s => document.querySelector(s);
 const canvas = $('#c'), gl = canvas.getContext('webgl', { antialias:false, alpha:false });
 const hsLayer = $('#hs'), fade = $('#fade'), hint = $('#hint'), where = $('#where'), roomsEl = $('#rooms');
@@ -130,7 +134,7 @@ const uM = gl.getUniformLocation(prog,'m'), uK = gl.getUniformLocation(prog,'k')
 const MAXTEX = gl.getParameter(gl.MAX_TEXTURE_SIZE);
 
 const imgs = {}, texs = {};
-function loadImg(id){ return imgs[id] || (imgs[id] = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error(id)); im.src = './p/' + id + '.jpg'; })); }
+function loadImg(id){ return imgs[id] || (imgs[id] = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error(id)); im.src = panoSrc(id); })); }
 function texFor(id, im){
   if (texs[id]) return texs[id];
   let src = im;
@@ -154,7 +158,7 @@ addEventListener('resize', resize);
 const hsEls = {};
 function buildHotspots(){
   hsLayer.innerHTML=''; for (const k in hsEls) delete hsEls[k];
-  for (const id of LINKS[cur]) { if (!READY.has(id)) continue; const b=document.createElement('button'); b.type='button'; b.className='hs' + (id[0]!==cur[0] ? ' other':'' );
+  for (const id of (LINKS[cur]||[])) { if (!READY.has(id)) continue; const b=document.createElement('button'); b.type='button'; b.className='hs' + (id[0]!==cur[0] ? ' other':'' );
     const lab = id[0]!==cur[0] ? ROOMS[id[0]] : '';
     b.innerHTML = '<i></i>' + (lab ? '<span>'+lab+'</span>' : ''); b.setAttribute('aria-label', (lab || ROOMS[id[0]]) + ' tomon ko\'chish');
     b.onclick = e => { e.stopPropagation(); go(id); }; hsLayer.appendChild(b); hsEls[id]=b; }
@@ -175,15 +179,15 @@ function draw(){
     gl.bindTexture(gl.TEXTURE_2D, texs[cur]); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); placeHotspots(); mmLook(); }
   requestAnimationFrame(draw);
 }
-function markRooms(){ for (const b of roomsEl.children) b.classList.toggle('on', b.dataset.r===cur[0]); where.textContent='D xonadon, '+ROOMS[cur[0]].toLowerCase(); }
+function markRooms(){ const r=roomOf(cur); for (const b of roomsEl.children) b.classList.toggle('on', b.dataset.r===r); where.textContent=TNAME+', '+(ROOMS[r]||'').toLowerCase(); }
 let busy=false;
 async function go(id, keepYaw){
   if (busy || id===cur) return; busy=true; fade.classList.add('on');
   try {
     const [im] = await Promise.all([loadImg(id), new Promise(r=>setTimeout(r,200))]);
     if (cur && !keepYaw) { const a=PTS[cur], b=PTS[id]; yaw=Math.atan2(b[1]-a[1], b[0]-a[0]); pitch=0; }
-    cur=id; texFor(id, im); buildHotspots(); markRooms(); mmMove(id); dirty=true;
-    for (const n of LINKS[id]) loadImg(n).catch(()=>{});
+    cur=id; texFor(id, im); buildHotspots(); markRooms(); if (BUILTIN) mmMove(id); dirty=true;
+    for (const n of (LINKS[id]||[])) loadImg(n).catch(()=>{});
   } catch(e) { where.textContent="Rasm yuklanmadi, qayta urinib ko'ring"; }
   fade.classList.remove('on'); $('#load').classList.add('off'); busy=false;
 }
@@ -193,10 +197,10 @@ const MM = { s:120, cx:5.5, cy:-4.4, ox:990-90, oy:510-60 };
 const mmXY = ([x,y]) => [MM.ox + (x-MM.cx)*MM.s, MM.oy - (y-MM.cy)*MM.s];
 const mmMe = $('#mmMe'), mmCone = $('#mmCone'), mmPts = $('#mmPts'), mmDot = {};
 let mmPos = null, mmAnim = 0, mmRot = null;
-for (const id in PTS) { if (!READY.has(id)) continue; const [px,py]=mmXY(PTS[id]); const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+function buildMM(){ for (const id in PTS) { if (!READY.has(id)) continue; const [px,py]=mmXY(PTS[id]); const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
   c.setAttribute('cx',px); c.setAttribute('cy',py); c.setAttribute('r',15); c.setAttribute('class','pt'); c.setAttribute('tabindex','0'); c.setAttribute('role','button');
   c.setAttribute('aria-label', ROOMS[id[0]]+' '+id[1]+'-nuqtaga o\'tish'); c.onclick=()=>{ go(id); hint.classList.add('off'); };
-  c.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(id); } }; mmPts.appendChild(c); mmDot[id]=c; }
+  c.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(id); } }; mmPts.appendChild(c); mmDot[id]=c; } }
 function mmSet(){ if (!mmPos) return; mmMe.setAttribute('transform',`translate(${mmPos[0].toFixed(1)} ${mmPos[1].toFixed(1)})`); }
 function mmMove(id){
   for (const k in mmDot) mmDot[k].classList.toggle('here', k===id);
@@ -211,8 +215,8 @@ function mmLook(){ // konus: qarash yo'nalishi va gorizontal ko'rish burchagi
   mmCone.setAttribute('d',`M0 0 L${(L*Math.cos(a)).toFixed(1)} ${(-L*Math.sin(a)).toFixed(1)} A${L} ${L} 0 0 1 ${(L*Math.cos(a)).toFixed(1)} ${(L*Math.sin(a)).toFixed(1)} Z`);
   mmCone.setAttribute('transform',`rotate(${(-yaw*180/Math.PI).toFixed(2)})`);
 }
-for (const r in ROOMS) { if (!READY.has(r+'1')) continue; const b=document.createElement('button'); b.type='button'; b.textContent=ROOMS[r]; b.dataset.r=r;
-  b.onclick=()=>{ const id=r+'1'; if (cur && cur[0]===r) return; yaw=(START_YAW[id]||0)*Math.PI/180; pitch=0; go(id,true); hint.classList.add('off'); }; roomsEl.appendChild(b); }
+function buildRooms(){ roomsEl.innerHTML=''; for (const r of ORDER) { const id = BUILTIN ? r+'1' : r; if (!READY.has(id)) continue; const b=document.createElement('button'); b.type='button'; b.textContent=ROOMS[r]; b.dataset.r=r;
+  b.onclick=()=>{ if (cur && roomOf(cur)===r) return; yaw=(START_YAW[id]||0)*Math.PI/180; pitch=0; go(id,true); hint.classList.add('off'); }; roomsEl.appendChild(b); } }
 
 // boshqaruv: sudrab qarash, chimdib yoki g'ildirak bilan yaqinlashtirish, klaviatura
 const ptrs=new Map(); let pinch=0, vy=0, vp=0, lastT=0, coast=0;
@@ -232,9 +236,29 @@ addEventListener('keydown', e=>{ const s=0.08; if(e.key==='ArrowLeft'){yaw+=s;} 
 setTimeout(()=>hint.classList.add('off'), 7000);
 
 resize(); requestAnimationFrame(draw);
-{ const f=+new URLSearchParams(location.search).get('f'); if (f>=2&&f<=10) $('#brand').href='/#/qavat/'+f; }
-const startId = (location.hash||'').slice(1); yaw=(START_YAW[PTS[startId]?startId:'L1']||200)*Math.PI/180;
-go(PTS[startId]?startId:'L1', true);
+(async function init(){
+  const qs=new URLSearchParams(location.search), f=+qs.get('f'), tid=(qs.get('t')||'D').replace(/[^A-Za-z0-9_-]/g,'');
+  if (f>=2&&f<=10) $('#brand').href='/#/qavat/'+f;
+  let startRoom='L';
+  try {
+    const cfg = await fetch('/api/config',{cache:'no-cache'}).then(r=>r.ok?r.json():null);
+    const t = cfg && cfg.tours && (cfg.tours[tid] || cfg.tours.D);
+    if (t && t.rooms && t.rooms.length) {
+      TOUR=t; BUILTIN=!!t.builtin; TNAME=t.name||TNAME; ROOMS={}; START_YAW={}; ORDER=[];
+      for (const r of t.rooms) { ROOMS[r.id]=r.name; ORDER.push(r.id); START_YAW[BUILTIN ? r.id+'1' : r.id]=r.yaw||0; }
+      startRoom=t.start||ORDER[0];
+      if (BUILTIN) PANOS=t.panos||{};
+      else { PANOS={}; READY=new Set(); for (const r of t.rooms) if (r.pano) { PANOS[r.id]=r.pano; READY.add(r.id); PTS[r.id]=[0,0]; LINKS[r.id]=[]; } }
+    }
+  } catch(e) {}
+  document.title='Zumrad Residence: '+TNAME+' 360°'; canvas.setAttribute('aria-label', TNAME+'ning 360 darajali ko\'rinishi. Sudrab atrofga qarang.');
+  if (BUILTIN) buildMM(); else { $('#mm').remove(); hint.textContent="Atrofga qarash uchun sudrang. Xonalar pastda."; }
+  buildRooms();
+  const hashId=(location.hash||'').slice(1);
+  const first = BUILTIN ? (PTS[hashId] && READY.has(hashId) ? hashId : startRoom+'1') : (READY.has(hashId) ? hashId : (READY.has(startRoom) ? startRoom : [...READY][0]));
+  if (!first) { $('#load').textContent="Bu xonadon uchun 360 sayr hali tayyor emas"; return; }
+  yaw=(START_YAW[first]||0)*Math.PI/180; go(first, true);
+})();
 </script>
 </body>
 </html>

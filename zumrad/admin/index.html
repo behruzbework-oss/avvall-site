@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Showroom boshqaruvi — Zumrad Residence</title>
+<style>
+@font-face { font-family:"Sofia Cond"; src:url(/fonts/sofia-sans-extra-condensed-latin-600-normal.woff2) format("woff2"); font-weight:600; font-display:swap; }
+@font-face { font-family:"Sofia"; src:url(/fonts/sofia-sans-latin-400-normal.woff2) format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"Sofia"; src:url(/fonts/sofia-sans-latin-600-normal.woff2) format("woff2"); font-weight:600; font-display:swap; }
+:root { --ground:#13241E; --raised:#1B3129; --line:rgba(236,230,218,.16); --stone:#ECE6DA; --stone-2:#A9B6AD; --verd:#8FB8A3; --warn:#E8B07A; --bad:#E58A7A; }
+* { box-sizing:border-box; }
+html,body { margin:0; background:var(--ground); color:var(--stone); font:400 15px/1.45 "Sofia",system-ui,sans-serif; }
+button,input,select { font:inherit; color:inherit; }
+a { color:var(--verd); }
+header { position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:16px; padding:14px 24px; background:rgba(19,36,30,.96); border-bottom:1px solid var(--line); }
+header h1 { margin:0; font:600 26px/1 "Sofia Cond",sans-serif; letter-spacing:.01em; }
+header .who { margin-left:auto; color:var(--stone-2); font-size:13.5px; }
+.tabs { display:flex; gap:4px; padding:0 24px; border-bottom:1px solid var(--line); }
+.tabs button { background:none; border:0; padding:14px 14px 12px; cursor:pointer; color:var(--stone-2); border-bottom:2px solid transparent; font-weight:600; }
+.tabs button.on { color:var(--stone); border-color:var(--verd); }
+main { padding:24px; max-width:1180px; }
+.panel[hidden] { display:none; }
+.lead { color:var(--stone-2); margin:0 0 18px; max-width:70ch; }
+.btn { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:0 16px; border-radius:3px; border:1px solid var(--line); background:var(--raised); cursor:pointer; text-decoration:none; color:var(--stone); }
+.btn:hover { border-color:var(--stone-2); }
+.btn.pri { background:var(--verd); border-color:var(--verd); color:var(--ground); font-weight:600; }
+.btn.pri:disabled { opacity:.45; cursor:default; }
+.btn.sm { min-height:32px; padding:0 10px; font-size:13.5px; }
+.btn.danger { color:var(--bad); }
+:focus-visible { outline:2px solid var(--verd); outline-offset:2px; }
+input[type=text], input[type=number], select { background:#0F1E19; border:1px solid var(--line); border-radius:3px; padding:7px 9px; min-height:36px; width:100%; }
+input:focus, select:focus { outline:none; border-color:var(--verd); }
+/* narx jadvali */
+.grid { width:100%; border-collapse:collapse; }
+.grid th, .grid td { border-bottom:1px solid var(--line); padding:8px 8px; vertical-align:top; }
+.grid thead th { text-align:left; font:600 22px/1 "Sofia Cond",sans-serif; padding-bottom:10px; }
+.grid thead th small { display:block; font:400 12.5px/1.4 "Sofia",sans-serif; color:var(--stone-2); margin-top:4px; }
+.grid tbody th { font:600 22px/1 "Sofia Cond",sans-serif; width:86px; white-space:nowrap; padding-top:14px; color:var(--stone-2); }
+.cell { display:grid; grid-template-columns:1fr 92px; gap:6px; }
+.cell .area { grid-column:1 / -1; display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--stone-2); }
+.cell .area input { width:74px; min-height:28px; padding:3px 6px; }
+select.st-free { border-color:rgba(143,184,163,.5); } select.st-reserved { border-color:var(--warn); color:var(--warn); } select.st-sold { border-color:var(--bad); color:var(--bad); }
+.tools { display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin:0 0 18px; padding:14px; border:1px solid var(--line); border-radius:3px; background:var(--raised); }
+.tools label { display:grid; gap:4px; font-size:12.5px; color:var(--stone-2); }
+.tools input, .tools select { min-width:120px; }
+/* 360 */
+.types { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin-bottom:26px; }
+.types label { display:grid; gap:6px; padding:12px; border:1px solid var(--line); border-radius:3px; background:var(--raised); }
+.types b { font:600 26px/1 "Sofia Cond",sans-serif; }
+.tour { border:1px solid var(--line); border-radius:3px; margin-bottom:18px; background:var(--raised); }
+.tour > .hd { display:flex; gap:10px; align-items:center; padding:12px 14px; border-bottom:1px solid var(--line); }
+.tour > .hd input { max-width:280px; font-weight:600; }
+.tour > .hd .sp { flex:1; }
+.tag { font-size:12px; color:var(--stone-2); border:1px solid var(--line); padding:2px 8px; border-radius:20px; }
+.room { display:grid; grid-template-columns:28px minmax(140px,220px) 110px 92px 1fr auto; gap:10px; align-items:center; padding:10px 14px; border-bottom:1px solid var(--line); }
+.room:last-child { border-bottom:0; }
+.room .ord { display:grid; gap:2px; }
+.room .ord button { background:none; border:1px solid var(--line); border-radius:2px; height:18px; padding:0; cursor:pointer; color:var(--stone-2); font-size:10px; line-height:1; }
+.room .start { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--stone-2); white-space:nowrap; }
+.room .yaw { display:flex; align-items:center; gap:4px; font-size:12px; color:var(--stone-2); }
+.room .yaw input { width:64px; }
+.thumbs { display:flex; gap:8px; flex-wrap:wrap; }
+.th { position:relative; width:120px; }
+.th img, .th .empty { width:120px; height:60px; object-fit:cover; display:block; border:1px solid var(--line); border-radius:2px; background:#0F1E19; }
+.th .empty { display:grid; place-items:center; color:var(--stone-2); font-size:12px; }
+.th small { display:flex; justify-content:space-between; gap:4px; font-size:11.5px; color:var(--stone-2); margin-top:3px; }
+.th small button { background:none; border:0; padding:0; color:var(--verd); cursor:pointer; font-size:11.5px; }
+.th.changed img { outline:2px solid var(--verd); }
+.th .bar { position:absolute; left:0; bottom:20px; height:3px; background:var(--verd); width:0; transition:width .2s; }
+/* saqlash paneli */
+.save { position:sticky; bottom:0; display:flex; align-items:center; gap:14px; padding:12px 24px; background:rgba(19,36,30,.97); border-top:1px solid var(--line); }
+.save .msg { color:var(--stone-2); font-size:14px; }
+.save .msg.err { color:var(--bad); } .save .msg.ok { color:var(--verd); }
+.gate { max-width:520px; margin:12vh auto; padding:0 24px; }
+.gate h1 { font:600 40px/1.05 "Sofia Cond",sans-serif; margin:0 0 14px; }
+.gate ol { padding-left:20px; color:var(--stone-2); }
+.toast { position:fixed; right:20px; bottom:80px; background:var(--raised); border:1px solid var(--line); padding:10px 14px; border-radius:3px; max-width:360px; font-size:14px; }
+@media (max-width:860px) {
+  main { padding:16px; } header { padding:12px 16px; } .tabs { padding:0 8px; overflow-x:auto; }
+  .grid thead { display:none; } .grid, .grid tbody, .grid tr, .grid td, .grid th { display:block; width:100%; }
+  .grid tr { border:1px solid var(--line); border-radius:3px; margin-bottom:12px; padding:6px 10px; }
+  .grid tbody th { padding:6px 0; } .grid td { border:0; padding:6px 0; }
+  .grid td::before { content:attr(data-k) ' xonadon'; display:block; font:600 18px/1 "Sofia Cond",sans-serif; margin-bottom:6px; }
+  .types { grid-template-columns:1fr 1fr; }
+  .room { grid-template-columns:28px 1fr; } .room > :nth-child(n+3) { grid-column:2; }
+}
+</style>
+</head>
+<body>
+<div id="gate" class="gate" hidden>
+  <h1>Showroom boshqaruvi</h1>
+  <p id="gateMsg">Kirish uchun Telegram'dagi AVVALL botidan bir martalik havola oling:</p>
+  <ol><li>@avvall_lead_bot ga shaxsiy chatda <b>/admin</b> deb yozing yoki paneldagi "🏢 Showroom: narx va 360" tugmasini bosing.</li><li>Kelgan "Admin panelni ochish" tugmasini bosing. Havola 15 daqiqa ishlaydi va bir marta ochiladi.</li></ol>
+</div>
+
+<div id="app" hidden>
+  <header><h1>Zumrad Residence · boshqaruv</h1><a class="btn sm" href="/" target="_blank" rel="noopener">Showroom'ni ochish ↗</a><span class="who" id="who"></span><button class="btn sm" id="logout" type="button">Chiqish</button></header>
+  <nav class="tabs" role="tablist"><button type="button" class="on" data-tab="prices">Narx va holat</button><button type="button" data-tab="tours">360 sayrlar</button></nav>
+  <main>
+    <section class="panel" id="p-prices">
+      <p class="lead">Har bir xonadonning narxi va holatini kiriting. Maydon bo'sh qolsa, xonadon turining umumiy maydoni ishlatiladi. Narx bo'sh bo'lsa, showroom'da "Narx so'rov bo'yicha" deb ko'rinadi.</p>
+      <div class="tools">
+        <label>Valyuta<select id="cur"><option value="UZS">so'm</option><option value="USD">$ (dollar)</option></select></label>
+        <label>Tez to'ldirish: xonadon<select id="qType"><option>A</option><option>B</option><option>C</option><option>D</option></select></label>
+        <label>1 m² narxi<input type="number" id="qPpm" min="0" step="any" placeholder="masalan 9500000"></label>
+        <label>Qavatlar<select id="qFl"><option value="all">hamma qavat</option><option value="free">faqat sotuvdagilar</option></select></label>
+        <button class="btn" type="button" id="qGo">Narxlarni hisoblash</button>
+      </div>
+      <table class="grid" id="grid"></table>
+    </section>
+    <section class="panel" id="p-tours" hidden>
+      <p class="lead">Har bir xonadon turiga 360 sayr biriktiring. Rasm 360° panorama (2:1 nisbat, masalan 4096×2048) bo'lishi kerak. Yuklangan rasm darhol saqlanadi, lekin showroom'da "Saqlash" bosilgandan keyin ko'rinadi.</p>
+      <h2 style="font:600 24px/1 'Sofia Cond',sans-serif;margin:0 0 10px">Xonadon turlari</h2>
+      <div class="types" id="types"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin:0 0 10px"><h2 style="font:600 24px/1 'Sofia Cond',sans-serif;margin:0">Sayrlar</h2><button class="btn sm" type="button" id="newTour">+ Yangi sayr</button></div>
+      <div id="tours"></div>
+    </section>
+  </main>
+  <div class="save"><button class="btn pri" id="saveBtn" type="button" disabled>Saqlash</button><span class="msg" id="saveMsg">O'zgarish yo'q</span></div>
+</div>
+<input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const FLOORS = [10,9,8,7,6,5,4,3,2], TYPES = ['A','B','C','D'];
+const ST = { free:'Sotuvda', reserved:'Bron', sold:'Sotilgan' };
+const BUILTIN_PTS = { L:['L1','L2','L3'], K:['K1','K2','K3'], B:['B1','B2','B3'], H:['H1','H2','H3'], G:['G1','G2','G3'], T:['T1','T2'] };
+let cfg = null, dirty = false;
+const H = { 'x-sr':'1' };
+function el(tag, props, ...kids){ const e = document.createElement(tag); if (props) for (const k in props) { if (k === 'class') e.className = props[k]; else if (k.startsWith('on')) e.addEventListener(k.slice(2), props[k]); else if (k in e) e[k] = props[k]; else e.setAttribute(k, props[k]); } for (const c of kids) if (c != null) e.append(c); return e; }
+function setDirty(v){ dirty = v; $('#saveBtn').disabled = !v; const m = $('#saveMsg'); m.className = 'msg'; m.textContent = v ? 'Saqlanmagan o\'zgarishlar bor' : 'O\'zgarish yo\'q'; }
+function toast(t, ms){ const d = el('div', { class:'toast', role:'status' }, t); document.body.append(d); setTimeout(() => d.remove(), ms || 3500); }
+addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+async function boot(){
+  const tok = (location.hash || '').slice(1);
+  if (/^[0-9a-f]{64}$/.test(tok)) {
+    history.replaceState(null, '', location.pathname); // tokenni manzildan darhol olib tashlaymiz
+    const r = await fetch('/api/admin/login', { method:'POST', headers:{ ...H, 'content-type':'application/json' }, body: JSON.stringify({ token: tok }) });
+    if (!r.ok) { $('#gateMsg').textContent = 'Havola eskirgan yoki allaqachon ishlatilgan. Yangisini oling:'; }
+  }
+  const me = await fetch('/api/admin/me', { headers:H }).then(r => r.ok ? r.json() : null).catch(() => null);
+  if (!me) { $('#gate').hidden = false; return; }
+  $('#who').textContent = me.name + (me.updated_at ? ' · oxirgi saqlash: ' + new Date(me.updated_at * 1000).toLocaleString('ru-RU') : '');
+  cfg = await fetch('/api/config?t=' + Date.now(), { cache:'no-store' }).then(r => r.json());
+  $('#app').hidden = false; renderAll();
+}
+function renderAll(){ renderPrices(); renderTypes(); renderTours(); }
+
+/* ---------- Narx va holat ---------- */
+function renderPrices(){
+  $('#cur').value = cfg.currency;
+  const t = $('#grid'); t.textContent = '';
+  const hr = el('tr', null, el('th'));
+  for (const k of TYPES) { const th = el('th', null, k); const s = el('small', null, 'Umumiy maydon: ');
+    const ai = el('input', { type:'number', min:1, max:1000, step:'any', value: cfg.types[k].area, style:'width:70px;min-height:26px;padding:2px 6px', 'aria-label': k + ' turi umumiy maydoni' });
+    ai.oninput = () => { cfg.types[k].area = ai.value === '' ? null : +ai.value; setDirty(true); renderPrices.areaPh(k); };
+    s.append(ai, ' m²'); th.append(s); hr.append(th); }
+  t.append(el('thead', null, hr));
+  const tb = el('tbody'); t.append(tb);
+  for (const f of FLOORS) {
+    const tr = el('tr', null, el('th', { scope:'row' }, f + '-qavat'));
+    for (const k of TYPES) {
+      const u = cfg.units[f][k];
+      const price = el('input', { type:'number', min:0, step:'any', placeholder:'Narx', value: u.price ?? '', 'aria-label': f + '-qavat ' + k + ' narxi' });
+      price.oninput = () => { u.price = price.value === '' ? null : +price.value; setDirty(true); };
+      const st = el('select', { 'aria-label': f + '-qavat ' + k + ' holati' });
+      for (const s in ST) st.append(el('option', { value:s }, ST[s]));
+      st.value = u.status; st.className = 'st-' + u.status;
+      st.onchange = () => { u.status = st.value; st.className = 'st-' + st.value; setDirty(true); };
+      const area = el('input', { type:'number', min:1, max:1000, step:'any', value: u.area ?? '', placeholder: cfg.types[k].area, 'aria-label': f + '-qavat ' + k + ' maydoni', 'data-ph': k });
+      area.oninput = () => { u.area = area.value === '' ? null : +area.value; setDirty(true); };
+      tr.append(el('td', { 'data-k': k }, el('div', { class:'cell' }, price, st, el('label', { class:'area' }, 'Maydon', area, 'm²'))));
+    }
+    tb.append(tr);
+  }
+}
+renderPrices.areaPh = k => document.querySelectorAll('input[data-ph="' + k + '"]').forEach(i => i.placeholder = cfg.types[k].area ?? '');
+$('#cur').onchange = () => { cfg.currency = $('#cur').value; setDirty(true); };
+$('#qGo').onclick = () => {
+  const k = $('#qType').value, ppm = +$('#qPpm').value, only = $('#qFl').value === 'free';
+  if (!(ppm > 0)) { toast('1 m² narxini kiriting'); return; }
+  let n = 0;
+  for (const f of FLOORS) { const u = cfg.units[f][k]; if (only && u.status !== 'free') continue; const a = u.area || cfg.types[k].area; if (!a) continue; u.price = Math.round(a * ppm); n++; }
+  renderPrices(); setDirty(true); toast(k + ' xonadonlar: ' + n + ' ta narx hisoblandi. Saqlashni unutmang.');
+};
+
+/* ---------- 360 ---------- */
+function tourOptions(sel){ const s = el('select'); s.append(el('option', { value:'' }, 'Sayr yo\'q')); for (const id in cfg.tours) s.append(el('option', { value:id }, cfg.tours[id].name)); s.value = sel || ''; return s; }
+function renderTypes(){
+  const w = $('#types'); w.textContent = '';
+  for (const k of TYPES) { const s = tourOptions(cfg.types[k].tour); s.setAttribute('aria-label', k + ' xonadon sayri');
+    s.onchange = () => { cfg.types[k].tour = s.value || null; setDirty(true); renderTours(); };
+    w.append(el('label', null, el('b', null, k + ' xonadon'), s)); }
+}
+function thumb(src, label, changed, onPick, onReset){
+  const box = el('div', { class:'th' + (changed ? ' changed' : '') });
+  box.append(src ? el('img', { src, alt: label, loading:'lazy' }) : el('div', { class:'empty' }, 'Rasm yo\'q'));
+  const sm = el('small', null, el('span', null, label));
+  const acts = el('span');
+  acts.append(el('button', { type:'button', onclick: onPick }, src ? 'Almashtirish' : 'Yuklash'));
+  if (onReset && changed) acts.append(' · ', el('button', { type:'button', onclick: onReset }, 'Asl'));
+  sm.append(acts); box.append(sm, el('div', { class:'bar' }));
+  return box;
+}
+function renderTours(){
+  const w = $('#tours'); w.textContent = '';
+  for (const id in cfg.tours) {
+    const t = cfg.tours[id];
+    const name = el('input', { type:'text', value:t.name, maxLength:40, 'aria-label':'Sayr nomi' });
+    name.oninput = () => { t.name = name.value; setDirty(true); };
+    const used = TYPES.filter(k => cfg.types[k].tour === id);
+    const hd = el('div', { class:'hd' }, name, el('span', { class:'tag' }, t.builtin ? 'Blender reja bilan' : 'Oddiy sayr'),
+      el('span', { class:'tag' }, used.length ? used.join(', ') + ' xonadonlarda' : 'Hech qayerga ulanmagan'), el('span', { class:'sp' }),
+      el('a', { class:'btn sm', href:'/360/?t=' + encodeURIComponent(id), target:'_blank', rel:'noopener' }, 'Ko\'rish ↗'));
+    if (!t.builtin) {
+      hd.append(el('button', { class:'btn sm', type:'button', onclick: () => { t.rooms.push({ id:'r' + Math.random().toString(16).slice(2,8), name:'Yangi xona', yaw:0, pano:null }); setDirty(true); renderTours(); } }, '+ Xona'));
+      hd.append(el('button', { class:'btn sm danger', type:'button', onclick: () => { if (!confirm('"' + t.name + '" sayrini o\'chirasizmi? Unga ulangan xonadonlardan ham uziladi.')) return; delete cfg.tours[id]; for (const k of TYPES) if (cfg.types[k].tour === id) cfg.types[k].tour = null; setDirty(true); renderTypes(); renderTours(); } }, 'O\'chirish'));
+    }
+    const card = el('div', { class:'tour' }, hd);
+    t.rooms.forEach((r, i) => {
+      const up = el('button', { type:'button', 'aria-label':'Yuqoriga', onclick: () => { if (i) { [t.rooms[i-1], t.rooms[i]] = [t.rooms[i], t.rooms[i-1]]; setDirty(true); renderTours(); } } }, '▲');
+      const dn = el('button', { type:'button', 'aria-label':'Pastga', onclick: () => { if (i < t.rooms.length - 1) { [t.rooms[i+1], t.rooms[i]] = [t.rooms[i], t.rooms[i+1]]; setDirty(true); renderTours(); } } }, '▼');
+      const rn = el('input', { type:'text', value:r.name, maxLength:40, 'aria-label':'Xona nomi' }); rn.oninput = () => { r.name = rn.value; setDirty(true); };
+      const sr = el('input', { type:'radio', name:'start-' + id, checked: t.start === r.id }); sr.onchange = () => { t.start = r.id; setDirty(true); };
+      const yw = el('input', { type:'number', value:r.yaw || 0, min:-360, max:360, step:5, 'aria-label':'Boshlang\'ich yo\'nalish, gradus' }); yw.oninput = () => { r.yaw = +yw.value || 0; setDirty(true); };
+      const thumbs = el('div', { class:'thumbs' });
+      if (t.builtin) {
+        for (const p of (BUILTIN_PTS[r.id] || [])) {
+          const key = t.panos[p];
+          thumbs.append(thumb(key ? '/pano/' + key + '.jpg' : '/360/p/' + p + '.jpg', p, !!key,
+            e => pickPano(e.target.closest('.th'), k => { t.panos[p] = k; }), () => { delete t.panos[p]; setDirty(true); renderTours(); }));
+        }
+      } else {
+        thumbs.append(thumb(r.pano ? '/pano/' + r.pano + '.jpg' : null, '360 rasm', false, e => pickPano(e.target.closest('.th'), k => { r.pano = k; })));
+      }
+      const del = t.builtin ? el('span') : el('button', { class:'btn sm danger', type:'button', onclick: () => { t.rooms.splice(i, 1); if (t.start === r.id) t.start = t.rooms[0]?.id || null; setDirty(true); renderTours(); } }, 'O\'chirish');
+      card.append(el('div', { class:'room' }, el('div', { class:'ord' }, up, dn), rn, el('label', { class:'start' }, sr, 'Boshlanish'), el('label', { class:'yaw' }, yw, '°'), thumbs, del));
+    });
+    if (!t.rooms.length) card.append(el('p', { class:'lead', style:'padding:12px 14px;margin:0' }, '"+ Xona" bilan xona qo\'shing va har biriga 360 rasm yuklang.'));
+    w.append(card);
+  }
+}
+$('#newTour').onclick = () => {
+  const n = prompt('Yangi sayr nomi (masalan: "A xonadon")', 'A xonadon'); if (!n) return;
+  let id = 'T' + Math.random().toString(16).slice(2, 7);
+  cfg.tours[id] = { name: n.slice(0, 40), builtin:false, start:null, rooms:[] };
+  setDirty(true); renderTypes(); renderTours(); toast('Sayr yaratildi. Xona qo\'shib, rasm yuklang va xonadon turiga ulang.');
+};
+
+/* rasm yuklash: brauzerda 4096×2048 gacha kichraytirib, JPEG qilib yuboramiz */
+let pending = null;
+function pickPano(box, done){ pending = { box, done }; $('#file').value = ''; $('#file').click(); }
+$('#file').onchange = async () => {
+  const f = $('#file').files[0]; if (!f || !pending) return;
+  const { box, done } = pending; pending = null;
+  const bar = box.querySelector('.bar');
+  try {
+    if (f.size > 60 * 1024 * 1024) throw new Error('Fayl juda katta (60 MB dan ko\'p)');
+    const img = await createImageBitmap(f);
+    const ratio = img.width / img.height;
+    if (ratio < 1.9 || ratio > 2.1) throw new Error('Bu 360° panorama emas: nisbat 2:1 bo\'lishi kerak (hozir ' + img.width + '×' + img.height + ')');
+    const W = Math.min(4096, img.width), Hh = Math.round(W / 2);
+    const c = document.createElement('canvas'); c.width = W; c.height = Hh; c.getContext('2d').drawImage(img, 0, 0, W, Hh);
+    bar.style.width = '35%';
+    let q = 0.86, blob;
+    do { blob = await new Promise(r => c.toBlob(r, 'image/jpeg', q)); q -= 0.08; } while (blob.size > 7.5 * 1024 * 1024 && q > 0.5);
+    bar.style.width = '70%';
+    const r = await fetch('/api/admin/pano', { method:'POST', headers:{ ...H, 'content-type':'image/jpeg' }, body: blob });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401) throw new Error('Sessiya tugagan. Botdan yangi havola oling.');
+    if (!r.ok || !j.ok) throw new Error('Yuklab bo\'lmadi (' + (j.err || r.status) + ')');
+    bar.style.width = '100%';
+    done(j.key); setDirty(true); renderTours(); toast('Rasm yuklandi. Showroom\'da ko\'rinishi uchun "Saqlash"ni bosing.');
+  } catch (e) { bar.style.width = '0'; toast(e.message || 'Xato', 6000); }
+};
+
+/* ---------- saqlash ---------- */
+$('#saveBtn').onclick = async () => {
+  const b = $('#saveBtn'), m = $('#saveMsg'); b.disabled = true; m.className = 'msg'; m.textContent = 'Saqlanmoqda…';
+  try {
+    const r = await fetch('/api/admin/config', { method:'PUT', headers:{ ...H, 'content-type':'application/json' }, body: JSON.stringify(cfg) });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401) throw new Error('Sessiya tugagan. Botdan yangi havola oling (o\'zgarishlar shu sahifada saqlanib turibdi).');
+    if (!r.ok || !j.ok) throw new Error('Saqlab bo\'lmadi (' + (j.err || r.status) + ')');
+    cfg = j.config; dirty = false; renderAll(); m.className = 'msg ok'; m.textContent = 'Saqlandi ✓ Showroom bir necha soniyada yangilanadi.';
+  } catch (e) { m.className = 'msg err'; m.textContent = e.message; b.disabled = false; }
+};
+$('#logout').onclick = async () => { if (dirty && !confirm('Saqlanmagan o\'zgarishlar yo\'qoladi. Chiqasizmi?')) return; dirty = false; await fetch('/api/admin/logout', { method:'POST', headers:H }); location.reload(); };
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  $('#p-prices').hidden = b.dataset.tab !== 'prices'; $('#p-tours').hidden = b.dataset.tab !== 'tours';
+});
+boot();
+})();
+</script>
+</body>
+</html>

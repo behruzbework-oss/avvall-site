@@ -288,12 +288,23 @@ async function panelText(env) {
 async function panelKb(env) {
   const team = (await env.DB.prepare('SELECT t.*, u.name FROM team t LEFT JOIN users u ON u.id=t.id ORDER BY u.name').all()).results;
   const rows = team.map(m => [{ text: (m.name || String(m.id)).slice(0, 16), callback_data: `pu:${m.id}` }, { text: m.mention ? '🔔' : '🔕', callback_data: `pm:${m.id}` }, { text: m.dm ? '✉️' : '—', callback_data: `pd:${m.id}` }, { text: m.role === 'manager' ? 'menejer' : '👑', callback_data: `pr:${m.id}` }, { text: '🗑', callback_data: `px:${m.id}` }]);
+  rows.push([{ text: '🏢 Showroom: narx va 360', callback_data: 'pa:0' }]);
   rows.push([{ text: '⏰ Eslatma: 15 / 30 / 60 daq', callback_data: 'pt:0' }]);
   rows.push([{ text: '📝 Xabar shablonlari', callback_data: 'pl:0' }, { text: '🤝 Akkauntni ulash', callback_data: 'pb:0' }]);
   rows.push([{ text: '📊 Statistika', callback_data: 'ps:0' }, { text: '🔄 Yangilash', callback_data: 'pp:0' }]);
   return rows;
 }
 const addKb = { keyboard: [[{ text: '➕ Xodim qo\'shish', request_users: { request_id: 1, user_is_bot: false, max_quantity: 10, request_name: true, request_username: true } }], [{ text: '⚙️ Panel' }]], resize_keyboard: true };
+// Showroom admin paneli uchun bir martalik kirish havolasi (15 daqiqa, demo.avvall.uz bilan umumiy D1)
+async function sendAdminLink(env, chat, uid) {
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS sr_tokens(hash TEXT PRIMARY KEY, uid INT, exp INT)').run();
+  const tok = [...crypto.getRandomValues(new Uint8Array(32))].map(x => x.toString(16).padStart(2, '0')).join('');
+  const h = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(tok)))].map(x => x.toString(16).padStart(2, '0')).join('');
+  await env.DB.prepare('INSERT INTO sr_tokens(hash,uid,exp) VALUES(?,?,?)').bind(h, uid, now() + 900).run();
+  return tg(env, 'sendMessage', { chat_id: chat, parse_mode: 'HTML', protect_content: true,
+    text: '🏢 <b>Showroom admin paneli</b>\n\nNarx, holat va 360 sayrlarni shu yerda o\'zgartirasiz. Havola <b>15 daqiqa</b> ishlaydi va <b>bir marta</b> ochiladi, hech kimga yubormang.',
+    reply_markup: { inline_keyboard: [[{ text: '🔓 Admin panelni ochish', url: 'https://demo.avvall.uz/admin/#' + tok }]] } });
+}
 async function showPanel(env, chat, edit) {
   const body = { chat_id: chat, text: await panelText(env), parse_mode: 'HTML', reply_markup: { inline_keyboard: await panelKb(env) } };
   if (edit) return tg(env, 'editMessageText', { ...body, message_id: edit });
@@ -311,6 +322,7 @@ async function panelCb(env, q, act, sid, rest, ans) {
     case 'pu': return ans((await userName(env, id)) + ` · ID ${id}`, true);
     case 'pt': { const v = { '15': '30', '30': '60', '60': '15' }[await setting(env, 'remind', '30')]; await kset(env, 'set:remind', v); await showPanel(env, chat, edit); return ans(`Eslatma ${v} daqiqa oldin`); }
     case 'pp': await showPanel(env, chat, edit); return ans('Yangilandi');
+    case 'pa': await sendAdminLink(env, chat, uid); return ans('Havola yuborildi');
     case 'ps': await dm(env, chat, await stats(env, 30)); return ans('');
     case 'pl': {
       let s = '📝 <b>Mijozga xabar shablonlari</b>\nO\'zgaruvchilar: {ism} {kompaniya} {sana} {soat}\n';
@@ -346,6 +358,10 @@ async function onMessage(env, m) {
   if (priv && !text.startsWith('/') && !(await isTeam(env, m.from.id))) {
     const L = await env.DB.prepare('SELECT * FROM leads WHERE client_chat=? ORDER BY id DESC').bind(m.chat.id).first();
     if (L) { await env.DB.prepare('UPDATE leads SET client_last=? WHERE id=?').bind(now(), L.id).run(); await post(env, TOPIC_OF[L.status] || 'new', `💬 <b>${num(L.id)} ${esc(L.name)}</b> yozdi:\n${esc(text)}`); return; }
+  }
+  if (priv && cmd === '/admin') {
+    if (!(await isAdmin(env, m.from.id))) return dm(env, m.chat.id, 'Bu buyruq faqat adminlar uchun.');
+    return sendAdminLink(env, m.chat.id, m.from.id);
   }
   if (priv && (cmd === '/start' || cmd === '/panel' || text === '⚙️ Panel')) {
     if (!(await isAdmin(env, m.from.id))) return dm(env, m.chat.id, 'Salom! Men AVVALL lid botiman. Panel faqat adminlar uchun.');
@@ -476,7 +492,7 @@ export default {
     if (url.pathname === '/init') {
       if ((await kget(env, 'botname')) && (!env.INIT_KEY || url.searchParams.get('k') !== env.INIT_KEY)) return new Response('no', { status: 403 });
       const r = await tg(env, 'setWebhook', { url: `${url.origin}/tg`, secret_token: await secretOf(env), allowed_updates: ['message', 'callback_query', 'business_connection', 'business_message'] });
-      await tg(env, 'setMyCommands', { commands: [{ command: 'panel', description: 'Admin panel' }, { command: 'stats', description: 'Statistika (30 kun)' }, { command: 'bugun', description: 'Bugungi uchrashuvlar' }, { command: 'test', description: 'Sinov lidi' }, { command: 'setup', description: 'Guruhni sozlash' }] });
+      await tg(env, 'setMyCommands', { commands: [{ command: 'panel', description: 'Admin panel' }, { command: 'admin', description: 'Showroom: narx va 360' }, { command: 'stats', description: 'Statistika (30 kun)' }, { command: 'bugun', description: 'Bugungi uchrashuvlar' }, { command: 'test', description: 'Sinov lidi' }, { command: 'setup', description: 'Guruhni sozlash' }] });
       const me = await tg(env, 'getMe', {}); if (me.ok) await kset(env, 'botname', me.result.username);
       return json({ webhook: r.ok, err: r.description, bot: me.result?.username, group: (await conf(env)).g });
     }

@@ -121,6 +121,11 @@ button.lvl:hover span::before, button.lvl.on span::before { width:40px; opacity:
 .apt:hover, .apt.hov { background:var(--raised); }
 .apt.on { background:var(--stone); color:var(--ground); }
 .apt.on small { color:rgba(19,36,30,.7); }
+.apt .pr { grid-column:2; font-size:13.5px; font-weight:500; font-style:normal; font-variant-numeric:tabular-nums; }
+.apt.sold { opacity:.55; } .apt.sold .pr, .apt.res .pr { color:#E8B07A; } .apt.on .pr { color:var(--ground); }
+.stage polygon.sold { fill:rgba(19,36,30,.45); }
+.act .info { margin:0 18px 0 0; font-size:14px; line-height:1.45; } .act .info b { display:block; font:600 22px/1.1 var(--cond); white-space:nowrap; }
+.act { gap:6px 14px; flex-wrap:wrap; }
 .act { display:flex; align-items:center; padding:14px 24px; }
 .act a { display:inline-block; text-decoration:none; background:var(--verd); color:var(--ground); font-weight:600; font-size:15.5px; padding:14px 22px; border-radius:3px; }
 .act a:hover { background:#A6CBB8; }
@@ -161,7 +166,9 @@ button.lvl:hover span::before, button.lvl.on span::before { width:40px; opacity:
   .apts { grid-column:1; grid-template-columns:repeat(4,1fr); }
   .apt { grid-template-columns:1fr; padding:12px 12px 14px; row-gap:2px; }
   .apt b { font-size:36px; }
-  .apt small { grid-column:1; }
+  .apt small, .apt .pr { grid-column:1; }
+  .apt .pr { font-size:12px; }
+  .apt { min-width:0; }
   .apt:nth-child(4) { border-right:0; }
   .act { grid-column:1 / -1; border-top:1px solid var(--line); padding:14px 16px 22px; }
   .act a { width:100%; text-align:center; }
@@ -331,20 +338,43 @@ for (const a of APTS) {
   tpoly[a.k] = p;
   const t = document.createElement('div'); t.className = 'tag'; t.textContent = a.k; tags.appendChild(t); ttag[a.k] = t;
   const c = document.createElement('button'); c.type = 'button'; c.className = 'apt';
-  c.innerHTML = '<b>' + a.k + '</b><span>' + a.area + ' m²</span><small>' + (a.tour ? '360° sayr bor' : 'Reja ko\'rinishi') + '</small>';
+  c.innerHTML = '<b>' + a.k + '</b><span>' + a.area + ' m²</span><small>' + (a.tour ? '360° sayr bor' : 'Reja ko\'rinishi') + '</small><em class="pr"></em>';
   c.addEventListener('pointerenter', () => hov(a.k, true)); c.addEventListener('pointerleave', () => hov(a.k, false));
   c.addEventListener('click', () => pick(sel === a.k ? null : a.k));
   aptsEl.appendChild(c); acell[a.k] = c;
 }
 const act = document.createElement('div'); act.className = 'act'; aptsEl.appendChild(act);
 function hov(k, on){ tpoly[k].classList.toggle('hov', on); acell[k].classList.toggle('hov', on); }
+/* ---- admin paneldan: narx, holat, maydon, 360 sayr ---- */
+let CFG = null;
+const ST = { free:'Sotuvda', reserved:'Bron qilingan', sold:'Sotilgan' };
+const short = v => v == null ? '' : (CFG && CFG.currency === 'USD' ? (v >= 1e3 ? '$' + (Math.round(v / 100) / 10).toLocaleString('ru-RU') + 'k' : '$' + Math.round(v)) : (v >= 1e9 ? (Math.round(v / 1e7) / 100).toLocaleString('ru-RU') + ' mlrd so\'m' : v >= 1e6 ? Math.round(v / 1e6).toLocaleString('ru-RU') + ' mln so\'m' : money(v)));
+const money = v => v == null ? '' : (CFG && CFG.currency === 'USD' ? '$' + Math.round(v).toLocaleString('ru-RU') : Math.round(v).toLocaleString('ru-RU') + ' so\'m');
+function unit(k){ const u = CFG && CFG.units && CFG.units[floorN] && CFG.units[floorN][k]; const t = CFG && CFG.types && CFG.types[k];
+  const a = APTS.find(x => x.k === k);
+  return { area: (u && u.area) || (t && t.area) || a.area, price: u ? u.price : null, status: u ? u.status : 'free', tour: CFG ? (t && t.tour) : (a.tour ? 'D' : null) }; }
+function renderUnits(){
+  for (const a of APTS) { const u = unit(a.k), c = acell[a.k];
+    c.querySelector('span').textContent = u.area + ' m²';
+    c.querySelector('small').textContent = u.tour ? '360° sayr bor' : 'Reja ko\'rinishi';
+    c.querySelector('.pr').textContent = u.status !== 'free' ? ST[u.status] : (u.price ? short(u.price) : '');
+    c.classList.toggle('sold', u.status === 'sold'); c.classList.toggle('res', u.status === 'reserved');
+    tpoly[a.k].classList.toggle('sold', u.status === 'sold'); }
+  if (sel) pick(sel);
+}
+fetch('/api/config', { cache:'no-cache' }).then(r => r.ok ? r.json() : null).then(c => { if (c && c.units) { CFG = c; renderUnits(); } }).catch(() => {});
 function pick(k){
   sel = k;
   for (const a of APTS) { const on = a.k === k; tpoly[a.k].classList.toggle('on', on); ttag[a.k].classList.toggle('on', on); acell[a.k].classList.toggle('on', on); acell[a.k].setAttribute('aria-pressed', on); }
   const a = APTS.find(x => x.k === k);
-  if (!a) act.innerHTML = '<p>Xonadonni rejada yoki shu ro\'yxatda tanlang.</p>';
-  else if (a.tour) act.innerHTML = '<a href="' + a.tour + '?f=' + floorN + '#H1">360° sayrni boshlash</a>';
-  else act.innerHTML = '<p>' + a.k + ' xonadon uchun 360° sayr hali tayyor emas. Hozircha D xonadonni ko\'rish mumkin.</p>';
+  act.textContent = '';
+  if (!a) { const p = document.createElement('p'); p.textContent = 'Xonadonni rejada yoki shu ro\'yxatda tanlang.'; act.appendChild(p); return; }
+  const u = unit(k), info = document.createElement('p'); info.className = 'info';
+  const b = document.createElement('b'); b.textContent = u.status === 'free' ? (u.price ? money(u.price) : 'Narx so\'rov bo\'yicha') : ST[u.status]; info.appendChild(b);
+  info.appendChild(document.createTextNode(u.area + ' m²' + (u.status === 'free' && u.price ? ' · ' + money(u.price / u.area) + '/m²' : '')));
+  act.appendChild(info);
+  if (u.tour) { const l = document.createElement('a'); l.href = '/360/?t=' + encodeURIComponent(u.tour) + '&f=' + floorN; l.textContent = '360° sayrni boshlash'; act.appendChild(l); }
+  else { const p = document.createElement('p'); p.textContent = '360° sayr hali tayyor emas.'; act.appendChild(p); }
 }
 
 async function loadFrames(){
@@ -459,7 +489,7 @@ function route(){
     floorN = n; document.body.className = 'v-floor'; $('#ftitle').textContent = n + '-qavat';
     frail.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.textContent === n));
     document.title = 'Zumrad Residence, ' + n + '-qavat';
-    pick(null); requestAnimationFrame(() => layoutTurn(true)); loadFrames().then(() => { shown = -1; show(); });
+    pick(null); if (CFG) renderUnits(); requestAnimationFrame(() => layoutTurn(true)); loadFrames().then(() => { shown = -1; show(); });
     setTimeout(() => $('#hint').classList.add('off'), 6000);
   } else {
     document.body.className = 'v-building'; document.title = 'Zumrad Residence';
