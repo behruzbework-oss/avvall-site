@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /zumrad/
+Disallow: /bot/
+Disallow: /tools/
+
+Sitemap: https://avvall.uz/sitemap.xml
