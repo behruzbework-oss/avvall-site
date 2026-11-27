@@ -11,481 +11,351 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* IDEA: the sales-office maquette seen through glass. The render never leaves the screen;
-   everything else is a pane of smoked glass laid over it.
-   COLOUR: smoked green-black glass, white ink, ornament gold from the facade panels for selection only.
-   TYPE: Geologica alone. Light 200 for names and figures, 400/500 for reading.
-   LAYOUT: desktop = picture + one glass pane on the right; phone = picture + bottom sheet under the thumb. */
+/* IDEA: the picture is the page. Controls are small panes of smoked glass at the edges; nothing sits on the building.
+   Three screens: building -> floor (3D cutaway) -> apartment (360 tour). Each is a full screen of its own. */
 :root{
-  --ink:#f4f2ec;--mute:rgba(244,242,236,.66);--faint:rgba(244,242,236,.14);--hair:rgba(255,255,255,.16);
-  --glass:rgba(22,27,24,.46);--glass2:rgba(255,255,255,.07);--gold:#d9b673;
-  --free:#63d49b;--hold:#f0c355;--sold:#e8776b;
-  --peek:46dvh;--pad:20px;
+  --ink:#f4f2ec;--mute:rgba(244,242,236,.68);--faint:rgba(244,242,236,.14);--hair:rgba(255,255,255,.16);
+  --glass:rgba(22,27,24,.5);--glass2:rgba(255,255,255,.07);--gold:#d9b673;
+  --free:#63d49b;--hold:#f0c355;--sold:#e8776b;--pad:14px;
   color-scheme:dark;
 }
 *{box-sizing:border-box;min-width:0}
 html,body{height:100%}
-body{margin:0;background:#161a18;color:var(--ink);font:400 16px/1.5 Geologica,system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+body{margin:0;background:#161a18;color:var(--ink);font:400 14px/1.45 Geologica,system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
-:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+button,select{font:inherit;color:inherit;cursor:pointer}
+button{background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 h1,h2,h3,p{margin:0}
-.fig{font-weight:200;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.glass{background:var(--glass);border:1px solid var(--hair);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 14px 40px rgba(0,0,0,.3);
+  -webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:rgba(22,27,24,.92)}}
+.pill{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:999px;white-space:nowrap}
+.ico{width:40px;padding:0;justify-content:center;font-size:17px}
+.sel{position:relative;padding:0}
+.sel select{appearance:none;-webkit-appearance:none;background:none;border:0;height:40px;padding:0 30px 0 14px;border-radius:999px;outline-offset:2px}
+.sel select option{background:#1d2320;color:#f4f2ec}
+.sel::after{content:"";position:absolute;right:13px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--mute);border-bottom:1.5px solid var(--mute);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+.mute{color:var(--mute)}
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;height:40px}
+.seg button{height:32px;padding:0 13px;border-radius:999px;color:var(--mute);white-space:nowrap}
+.seg button.on{background:var(--ink);color:#161a18;font-weight:500}
 
-.glass{background:var(--glass);border:1px solid var(--hair);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 24px 60px rgba(0,0,0,.35);
-  -webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5)}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:rgba(22,27,24,.9)}}
+.bar{position:fixed;z-index:20;left:var(--pad);right:var(--pad);top:var(--pad);display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}
+.bar>*{pointer-events:auto}
+.bar .sp{flex:1;pointer-events:none}
+.brand{font-weight:500;letter-spacing:-.01em}
+.brand svg{width:18px;height:18px;flex:none}
 
-/* ---------- picture ---------- */
+/* ---------- building ---------- */
 .stage{position:fixed;inset:0;overflow:hidden;background:#161a18}
-.stage .back{position:absolute;inset:-40px;background:center/cover no-repeat;filter:blur(34px) brightness(.95) saturate(1.3)}
+.stage .blur{position:absolute;inset:-40px;background:center/cover no-repeat;filter:blur(30px) brightness(.9) saturate(1.2)}
 .art{position:absolute;left:0;top:0;width:2048px;height:1152px;transform-origin:0 0;will-change:transform}
 .art img{position:absolute;inset:0;width:100%;height:100%;transition:filter 1.2s}
 .art svg{position:absolute;inset:0;width:100%;height:100%}
-.hot{fill:rgba(255,255,255,0);stroke:rgba(255,255,255,.55);stroke-width:3;stroke-linejoin:round;cursor:pointer;transition:fill .3s,stroke .3s}
-.hot:hover,.hot:focus-visible,.hot.sel{fill:rgba(217,182,115,.3);stroke:#fff;outline:0}
-.dim{fill:rgba(12,15,13,.6);pointer-events:none}
-.clouds{position:absolute;inset:-20% -40%;pointer-events:none;mix-blend-mode:multiply;opacity:.34;
-  background:radial-gradient(28% 18% at 20% 30%,#566170 0,transparent 70%),radial-gradient(22% 16% at 60% 55%,#566170 0,transparent 70%),radial-gradient(30% 20% at 85% 25%,#566170 0,transparent 70%),radial-gradient(18% 14% at 40% 80%,#566170 0,transparent 70%);
-  filter:blur(30px);animation:drift 70s linear infinite alternate}
-@keyframes drift{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
-.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(12,15,13,.5),transparent 22%,transparent 60%,rgba(12,15,13,.55))}
-
-.chip{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;padding:8px 14px 8px 10px;border-radius:999px;white-space:nowrap;font-size:14px;transition:opacity .3s,background .3s}
-.chip b{font-weight:500}
-.chip i{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ink);color:#161a18;font-style:normal;font-weight:500;font-size:14px}
-.chip span{color:var(--mute)}
-.chip:hover{background:rgba(22,27,24,.7)}
+.hot{fill:rgba(255,255,255,0);stroke:rgba(255,255,255,.5);stroke-width:3;stroke-linejoin:round;cursor:pointer;transition:fill .25s,stroke .25s}
+.hot:hover,.hot:focus-visible,.hot.sel{fill:rgba(217,182,115,.28);stroke:#fff;outline:0}
+.dim{fill:rgba(12,15,13,.55);pointer-events:none}
+.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(12,15,13,.45),transparent 16%,transparent 78%,rgba(12,15,13,.5))}
+.chip{position:absolute;transform:translate(-50%,-50%);height:32px;padding:0 12px 0 4px;gap:7px;font-size:13px;transition:opacity .25s}
+.chip i{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#161a18;font-style:normal;font-weight:500;font-size:13px}
 .chip.off{opacity:0;pointer-events:none}
+.time output{font-variant-numeric:tabular-nums;min-width:2.8em}
+.time input{width:110px;margin:0;accent-color:var(--gold);background:none}
+.foot{position:fixed;z-index:20;left:var(--pad);bottom:var(--pad);display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:calc(100vw - 2*var(--pad))}
+.stat{gap:12px}.stat b{font-weight:500}.stat span{display:inline-flex;align-items:center;gap:6px}
+.views{gap:3px;padding:3px}
+.views button{width:54px;height:34px;border-radius:999px;overflow:hidden;opacity:.6;border:1px solid transparent}
+.views button img{width:100%;height:100%;object-fit:cover;display:block}
+.views button.on{opacity:1;border-color:var(--gold)}
 
-/* ---------- top bar ---------- */
-.top{position:fixed;z-index:6;left:var(--pad);top:var(--pad);display:flex;gap:10px;align-items:center}
-.brand{display:flex;align-items:center;gap:10px;height:48px;padding:0 18px 0 14px;border-radius:999px;font-weight:500;letter-spacing:-.01em}
-.brand svg{width:22px;height:22px;flex:none}
-.time{display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:999px}
-.time output{font-size:18px;min-width:2.9em}
-.time input{width:150px;height:44px;margin:0;accent-color:var(--gold);background:none}
+/* block panel: chessboard */
+.side{position:fixed;z-index:15;right:var(--pad);top:calc(var(--pad) + 48px);width:300px;max-height:calc(100dvh - 2*var(--pad) - 48px);border-radius:20px;padding:14px;overflow:auto;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin}
+.side h2{font-size:18px;font-weight:500;letter-spacing:-.01em}
+.side .hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.board{display:grid;gap:3px}
+.frow{display:grid;grid-template-columns:34px repeat(var(--n),1fr);gap:3px}
+.frow a.q{display:grid;place-items:center;height:30px;border-radius:8px;font-weight:500;background:var(--glass2);border:1px solid var(--hair)}
+.frow a.q:hover{border-color:var(--gold);color:var(--gold)}
+.cell{display:grid;place-items:center;height:30px;border-radius:8px;font-size:13px;background:color-mix(in srgb,var(--c) 24%,transparent);border:1px solid color-mix(in srgb,var(--c) 60%,transparent)}
+.cell:hover{background:color-mix(in srgb,var(--c) 46%,transparent)}
+.cell.sold{background:transparent;border-color:var(--hair);color:rgba(244,242,236,.4);text-decoration:line-through}
+.colh{display:grid;grid-template-columns:34px repeat(var(--n),1fr);gap:3px;font-size:11px;color:var(--mute);text-align:center}
+.note{font-size:12px;color:var(--mute)}
 
-.title{position:fixed;z-index:5;left:var(--pad);bottom:calc(var(--pad) + 4px);pointer-events:none;max-width:min(60vw,900px);text-shadow:0 2px 30px rgba(0,0,0,.45)}
-.title h1{font-weight:200;font-size:clamp(56px,8.4vw,148px);line-height:.92;letter-spacing:-.055em;text-wrap:balance}
-.title p{margin-top:14px;font-size:17px;color:rgba(255,255,255,.86);max-width:36ch}
-.title h1 span{display:inline-block;animation:rise .9s cubic-bezier(.2,.7,.1,1) both}
-.title h1 span:nth-child(2){animation-delay:.12s}
-@keyframes rise{from{opacity:0;transform:translateY(.35em)}to{opacity:1;transform:none}}
+/* ---------- floor page ---------- */
+.page{position:fixed;inset:0;background:radial-gradient(120% 90% at 50% 40%,#2a302c 0,#161a18 70%);display:flex;flex-direction:column}
+.fwrap{flex:1;position:relative;margin:62px var(--pad) 8px;min-height:0}
+.fview{position:absolute;inset:0;display:grid;place-items:center}
+.fbox{position:relative;max-width:100%;max-height:100%}
+.fbox img{display:block;max-width:100%;max-height:calc(100dvh - 150px);width:auto;height:auto}
+.fbox.plan img{background:#fbfaf7;border-radius:14px}
+.fbox svg{position:absolute;inset:0;width:100%;height:100%}
+.ap{stroke:rgba(255,255,255,.9);stroke-width:2;vector-effect:non-scaling-stroke;cursor:pointer;fill-opacity:.07;transition:fill-opacity .2s}
+.ap:hover,.ap:focus-visible,.ap.on{fill-opacity:.38;outline:0}
+.ap.sold{cursor:default;fill-opacity:.3}
+.aptag{position:absolute;transform:translate(-50%,-50%);pointer-events:none;height:26px;padding:0 9px;font-size:12px;gap:6px}
+.rot{position:absolute;top:50%;transform:translateY(-50%);z-index:3}
+.rot.l{left:0}.rot.r{right:0}
+.flist{flex:none;display:flex;gap:6px;overflow-x:auto;padding:0 var(--pad) var(--pad);scrollbar-width:none}
+.flist::-webkit-scrollbar{display:none}
+.flist a{flex:none;height:44px;border-radius:14px;padding:0 12px;display:flex;align-items:center;gap:10px;background:var(--glass2);border:1px solid var(--hair)}
+.flist a:hover,.flist a.on{border-color:var(--gold)}
+.flist a.sold{opacity:.5}
+.flist b{font-weight:500}
+.flist small{display:block;font-size:11px;color:var(--mute);line-height:1.2}
 
-/* ---------- pane ---------- */
-.pane{position:fixed;z-index:10;right:var(--pad);top:var(--pad);bottom:var(--pad);width:404px;border-radius:30px;display:flex;flex-direction:column;overflow:hidden;transition:width .45s cubic-bezier(.3,.8,.2,1);animation:in .7s .25s both}
-.pane.wide{width:min(700px,calc(100vw - 2*var(--pad)))}
-@keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.grab{display:none}
-.dock{flex:none;display:flex;gap:4px;padding:8px;border-bottom:1px solid var(--hair)}
-.dock a{flex:1;display:grid;place-items:center;height:44px;border-radius:999px;font-size:15px;color:var(--mute);transition:background .25s,color .25s}
-.dock a:hover{color:var(--ink)}
-.dock a.on{background:var(--ink);color:#161a18;font-weight:500}
-.body{flex:1;overflow:auto;overscroll-behavior:contain;padding:22px 22px 28px;display:flex;flex-direction:column;gap:22px;scrollbar-width:thin;scrollbar-color:var(--faint) transparent}
-.body>*{flex:none}
-.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-.head h2{font-weight:200;font-size:44px;line-height:1;letter-spacing:-.04em}
-.head p{color:var(--mute);font-size:14px;margin-top:6px}
-.back{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px 0 12px;border-radius:999px;background:var(--glass2);border:1px solid var(--hair);font-size:14px;flex:none}
-.back:hover{background:rgba(255,255,255,.14)}
-.lead{font-size:17px;line-height:1.45;max-width:34ch}
-.note{font-size:13px;color:var(--mute)}
-h3{font-weight:400;font-size:14px;color:var(--mute)}
+/* ---------- apartment: 360 ---------- */
+.tour{position:fixed;inset:0;background:#0d100f;touch-action:none;cursor:grab}
+.tour:active{cursor:grabbing}
+.tour canvas{display:block;width:100%;height:100%}
+.load{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);background:#0d100f;transition:opacity .4s;pointer-events:none}
+.split{position:absolute;top:0;bottom:0;width:44px;margin-left:-22px;cursor:ew-resize;z-index:4;touch-action:none}
+.split::before{content:"";position:absolute;left:21px;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 12px rgba(0,0,0,.5)}
+.split::after{content:"‹ ›";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;color:#161a18;display:grid;place-items:center;font-weight:600;letter-spacing:2px}
+.cl{position:absolute;top:64px;z-index:4;height:28px;padding:0 10px;font-size:12px;pointer-events:none}
+.tb{position:fixed;z-index:25;left:var(--pad);right:var(--pad);bottom:var(--pad);display:flex;gap:8px;align-items:flex-end;pointer-events:none}
+.tb>*{pointer-events:auto}
+.mini{width:190px;border-radius:16px;padding:8px;flex:none}
+.mini svg{display:block;width:100%;height:auto;border-radius:10px;background:#fbfaf7}
+.mini .pt{fill:#161a18;stroke:#fbfaf7;stroke-width:2;vector-effect:non-scaling-stroke;cursor:pointer}
+.mini .pt.on{fill:var(--gold)}
+.mini .cone{fill:rgba(190,120,10,.5);stroke:#8a5a00;stroke-width:1.5;vector-effect:non-scaling-stroke;pointer-events:none}
+.mini p{font-size:11px;color:var(--mute);margin:6px 2px 0}
+.rooms{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;justify-content:center}
+.rooms::-webkit-scrollbar{display:none}
+.rooms button{flex:none;height:36px;padding:0 13px;border-radius:999px;font-size:13px;color:var(--mute)}
+.rooms button.on{color:var(--ink);border-color:var(--gold)}
+.cta{background:var(--gold);color:#1d1708;font-weight:500;border:0;flex:none}
+.info{gap:10px}.info b{font-weight:500}
+.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--mute);padding:20px}
 
-.facts{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--hair)}
-.facts div{padding:14px 0 12px;border-bottom:1px solid var(--hair)}
-.facts div:nth-child(odd){padding-right:14px}
-.facts div:nth-child(even){padding-left:16px;border-left:1px solid var(--hair)}
-.facts b{display:block;font-weight:200;font-size:40px;line-height:1;letter-spacing:-.04em}
-.facts span{display:block;margin-top:6px;font-size:13px;color:var(--mute)}
-
-.blk{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:14px 16px;border-radius:18px;background:var(--glass2);border:1px solid var(--hair);transition:background .25s,border-color .25s}
-.blk+.blk{margin-top:8px}
-.blk:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.3)}
-.blk .n{grid-row:span 2;font-weight:200;font-size:46px;line-height:1;letter-spacing:-.05em;width:.7em}
-.blk b{font-weight:500}
-.blk em{font-style:normal;font-size:13px;color:var(--mute)}
-.blk .bar{grid-column:2/4}
-.bar{display:flex;height:4px;border-radius:9px;overflow:hidden;background:var(--faint)}
-.bar i{display:block}
-
-.gal{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -22px;padding:0 22px 4px;scrollbar-width:none}
-.gal::-webkit-scrollbar{display:none}
-.gal button{flex:0 0 72%;scroll-snap-align:center;border-radius:16px;overflow:hidden}
-.gal img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
-
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--mute)}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px}
-
-/* chessboard: floors x apartments */
-.board{display:grid;gap:5px}
-.frow{display:grid;grid-template-columns:52px repeat(var(--n),1fr);gap:5px;align-items:stretch}
-.frow>a.q{display:grid;place-items:center start;font-weight:200;font-size:30px;letter-spacing:-.04em;line-height:1;border-radius:12px;padding-left:6px;min-height:44px}
-.frow>a.q:hover{color:var(--gold)}
-.cell{display:grid;place-items:center;min-height:44px;border-radius:12px;font-size:15px;color:var(--ink);background:color-mix(in srgb,var(--c) 24%,transparent);border:1px solid color-mix(in srgb,var(--c) 62%,transparent);transition:transform .2s,background .2s}
-.cell:hover{transform:translateY(-2px);background:color-mix(in srgb,var(--c) 46%,transparent)}
-.cell.sold{background:transparent;border-color:var(--hair);color:rgba(244,242,236,.38);text-decoration:line-through}
-.frow.base{color:var(--mute);font-size:13px}
-.frow.base .q{font-weight:200;font-size:30px;letter-spacing:-.04em;line-height:1;padding-left:6px;display:grid;place-items:center start;min-height:40px}
-.frow.base .w{grid-column:2/-1;display:flex;align-items:center;padding:0 14px;border-radius:12px;border:1px dashed var(--hair)}
-.colh{display:grid;grid-template-columns:52px repeat(var(--n),1fr);gap:5px;font-size:12px;color:var(--mute);text-align:center}
-
-.step{display:flex;align-items:center;gap:6px}
-.step a{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--glass2);border:1px solid var(--hair)}
-.step a[aria-disabled=true]{opacity:.3;pointer-events:none}
-.paper{position:relative;background:#fbfaf7;border-radius:20px;overflow:hidden}
-.paper img{display:block;width:100%;height:auto}
-.paper svg{position:absolute;inset:0;width:100%;height:100%}
-.ap{stroke:#fbfaf7;stroke-width:5;cursor:pointer;opacity:.5;transition:opacity .2s}
-.ap:hover,.ap:focus-visible{opacity:.85;stroke:#161a18;outline:0}
-.aplab{font:500 46px Geologica,sans-serif;fill:#161a18;pointer-events:none;paint-order:stroke;stroke:#fbfaf7;stroke-width:9px}
-.rows{display:grid;gap:6px}
-.row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;width:100%;min-height:56px;padding:8px 16px;border-radius:16px;background:var(--glass2);border:1px solid var(--hair);text-align:left;transition:background .25s}
-.row:hover{background:rgba(255,255,255,.13)}
-.row .a{font-weight:200;font-size:28px;letter-spacing:-.04em;line-height:1}
-.row small{display:block;font-size:13px;color:var(--mute)}
-.tagst{display:inline-flex;align-items:center;font-size:13px;white-space:nowrap}
-
-.kv{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
-.kv div{padding:14px 0}
-.kv div+div{padding-left:16px;border-left:1px solid var(--hair)}
-.kv b{display:block;font-weight:200;font-size:44px;line-height:1;letter-spacing:-.04em}
-.kv span{display:block;margin-top:6px;font-size:13px;color:var(--mute)}
-.seg{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--glass2);border:1px solid var(--hair)}
-.seg button{flex:1;height:44px;border-radius:999px;font-size:15px;color:var(--mute)}
-.seg button.on{background:var(--ink);color:#161a18;font-weight:500}
-.pano{aspect-ratio:2/1;border-radius:20px;display:grid;place-items:center;text-align:center;padding:16px;border:1px dashed var(--hair);color:var(--mute);font-size:14px}
-.pano b{display:block;color:var(--ink);font-weight:400;font-size:17px;margin-bottom:4px}
-.view360{position:relative;border-radius:20px;overflow:hidden;background:#0d100f;aspect-ratio:16/10;touch-action:none;cursor:grab}
-.view360:active{cursor:grabbing}
-.view360 canvas{display:block;width:100%;height:100%}
-.view360 .hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:6px 14px;border-radius:999px;font-size:13px;pointer-events:none;transition:opacity .5s;white-space:nowrap}
-.view360 .full{position:absolute;right:10px;top:10px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
-.view360 .load{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;color:var(--mute);background:#0d100f;transition:opacity .4s}
-.view360.big{position:fixed;inset:0;z-index:60;border-radius:0;aspect-ratio:auto}
-.view360.big .seg2{display:flex}
-.seg2{display:none;position:absolute;left:50%;top:12px;transform:translateX(-50%);gap:4px;padding:4px;border-radius:999px}
-.seg2 button{height:40px;padding:0 16px;border-radius:999px;font-size:14px;color:var(--mute)}
-.seg2 button.on{background:var(--ink);color:#161a18;font-weight:500}
-.chipsr{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -22px;padding:0 22px}
-.chipsr::-webkit-scrollbar{display:none}
-.chipsr button{flex:none;height:44px;padding:0 16px;border-radius:999px;background:var(--glass2);border:1px solid var(--hair);font-size:14px;color:var(--mute)}
-.chipsr button.on{border-color:var(--gold);color:var(--ink)}
-@media(max-width:860px){.view360{aspect-ratio:4/3}.chipsr{margin:0 -16px;padding:0 16px}}
-.cta{display:flex;align-items:center;justify-content:center;height:54px;border-radius:999px;background:var(--gold);color:#1d1708;font-weight:500}
-
+.adm{position:fixed;inset:60px var(--pad) var(--pad);border-radius:20px;padding:14px;overflow:auto}
 .adm table{width:100%;border-collapse:collapse;font-size:13px}
-.adm th,.adm td{border-bottom:1px solid var(--hair);padding:6px 6px;text-align:left;font-weight:400}
-.adm select{font:inherit;color:var(--ink);background:rgba(0,0,0,.25);border:1px solid var(--hair);border-radius:8px;height:36px;max-width:100%}
-.scroll{overflow-x:auto}
+.adm th,.adm td{border-bottom:1px solid var(--hair);padding:5px;text-align:left;font-weight:400}
+.adm select{color:var(--ink);background:rgba(0,0,0,.25);border:1px solid var(--hair);border-radius:8px;height:32px;max-width:100%}
 
-.lb{position:fixed;inset:0;z-index:50;background:rgba(8,10,9,.92);display:none;place-items:center;padding:12px}
-.lb.open{display:grid}.lb img{max-width:100%;max-height:92dvh;border-radius:14px}
-
-/* ---------- phone ---------- */
-@media(max-width:860px){
-  :root{--pad:12px}
-  .top{right:var(--pad);justify-content:space-between}
-  .brand{height:44px;padding:0 14px 0 12px;font-size:15px}
-  .time{height:44px;padding:0 12px}
-  .time input{width:92px}
-  .time output{font-size:16px}
-  .title{top:auto;bottom:calc(var(--peek) + 12px);max-width:none;right:var(--pad)}
-  .title h1{font-size:clamp(38px,12vw,60px)}
-  .title p{display:none}
-  .pane{left:0;right:0;top:auto;bottom:0;width:auto;height:var(--peek);border-radius:28px 28px 0 0;border-bottom:0;transition:height .45s cubic-bezier(.3,.8,.2,1);padding-bottom:env(safe-area-inset-bottom)}
-  .pane.wide{width:auto}
-  .pane.open{height:calc(100dvh - 64px)}
-  .grab{display:block;flex:none;height:26px;width:100%;touch-action:none}
-  .grab::before{content:"";display:block;width:44px;height:5px;border-radius:9px;background:rgba(255,255,255,.45);margin:10px auto 0}
-  .dock{padding:0 8px 8px}
-  .body{padding:18px 16px 24px;gap:18px}
-  .gal{margin:0 -16px;padding:0 16px 4px}
-  .head h2{font-size:38px}
-  .chip span{display:none}
-  .chip{padding:6px 12px 6px 6px}
+@media(max-width:760px){
+  :root{--pad:10px}
+  .brand span,.time input{display:none}
+  .side{left:var(--pad);right:var(--pad);width:auto;top:auto;bottom:calc(var(--pad) + 48px);max-height:46dvh}
+  .stat .x{display:none}
+  .mini{width:128px}
+  .tb{flex-wrap:wrap}
+  .rooms{order:3;flex:0 0 100%;justify-content:flex-start}
+  .info .x{display:none}
+  .fwrap{margin-top:108px}
+  .fbox img{max-height:calc(100dvh - 210px)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-
-<div class="stage" id="stage" aria-label="Majmuaning tepadan ko'rinishi">
-  <div class="back" style="background-image:url(img/t3.webp)"></div>
-  <div class="art" id="art">
-    <img id="hero" src="img/r3.webp" alt="Siyovush House majmuasining tepadan ko'rinishi" width="2048" height="1152">
-    <div class="clouds"></div>
-    <svg id="hotsvg" viewBox="0 0 2048 1152"></svg>
-  </div>
-  <div class="shade"></div>
-  <div id="chips"></div>
-</div>
-
-<header class="top">
-  <a class="brand glass" href="#" aria-label="Siyovush House, bosh sahifa">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 2l4 4-4 4-4-4zM12 14l4 4-4 4-4-4zM2 12l4-4 4 4-4 4zM14 12l4-4 4 4-4 4z"/></svg>
-    Siyovush House
-  </a>
-  <label class="time glass"><output class="fig" id="sunv">13:00</output><input type="range" id="sun" min="6" max="21" step="0.25" value="13" aria-label="Kun vaqti"></label>
-</header>
-
-<div class="title" id="over"></div>
-
-<aside class="pane glass" id="pane">
-  <button class="grab" id="grab" aria-label="Panelni ochish yoki yopish"></button>
-  <nav class="dock" id="crumbs" aria-label="Bloklar"></nav>
-  <div class="body" id="view"></div>
-</aside>
-
-<div class="lb" id="lb"><img alt=""></div>
-
+<div id="app"></div>
 <script>
 {
 const ST={free:{t:"Bo'sh",c:'var(--free)'},hold:{t:'Bron',c:'var(--hold)'},sold:{t:'Sotilgan',c:'var(--sold)'}};
-const FLOORS=[2,3,4,5,6,7,8,9];
-const FOCUS={x0:330,y0:150,x1:1475,y1:985};
-const ar=a=>a.toFixed(2).replace('.',',');
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let P=null,status={},localMode=true,route={},T={s:1,x:0,y:0};
-const $=id=>document.getElementById(id);
-const key=(b,f,n)=>`b${b}-q${f}-x${n}`;
-const st=k=>status[k]||'free';
-const phone=()=>matchMedia('(max-width:860px)').matches;
+const FLOORS=[2,3,4,5,6,7,8,9],BL=['1','2','3'];
+const VIEWS=[[3,"Ko'cha tomoni",{x0:330,y0:150,x1:1475,y1:985}],[4,'Hovli tomoni',{x0:200,y0:120,x1:1848,y1:1040}],[1,'Burchakdan',{x0:120,y0:60,x1:1500,y1:1000}],[2,'Yon tomondan',{x0:500,y0:40,x1:1900,y1:1000}]];
+const ar=a=>a.toFixed(1).replace('.',',');
+let P=null,FL=null,PTS={},status={},route={},T={s:1,x:0,y:0};
+const S={view:0,fv:0,fmode:'3d'};
+const $=id=>document.getElementById(id),app=$('app');
+const key=(b,f,n)=>`b${b}-q${f}-x${n}`,st=k=>status[k]||'free';
+const BRAND=`<a class="pill glass brand" href="#" aria-label="Siyovush House, bosh sahifa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 2l4 4-4 4-4-4zM12 14l4 4-4 4-4-4zM2 12l4-4 4 4-4 4zM14 12l4-4 4 4-4 4z"/></svg><span>Siyovush House</span></a>`;
+const sel=(id,label,opts,val)=>`<label class="pill glass sel"><select id="${id}" aria-label="${label}">${opts.map(o=>`<option value="${o[0]}"${o[0]==val?' selected':''}>${o[1]}</option>`).join('')}</select></label>`;
+const legend=()=>`<div class="legend">${Object.values(ST).map(o=>`<span><i class="dot" style="background:${o.c}"></i>${o.t}</span>`).join('')}</div>`;
 
 /* ---------- data ---------- */
 function loadLocal(){try{return JSON.parse(localStorage.getItem('sb-status')||'{}')}catch(e){return {}}}
-function setStatus(k,v){status[k]=v;const l=loadLocal();l[k]=v;try{localStorage.setItem('sb-status',JSON.stringify(l))}catch(e){}render()}
-async function connect(){
-  let base={};
-  try{const r=await fetch('status.json',{cache:'no-store'});if(r.ok)base=await r.json()}catch(e){}
-  status=Object.assign({},base,loadLocal());render();
-}
+function setStatus(k,v){status[k]=v;const l=loadLocal();l[k]=v;try{localStorage.setItem('sb-status',JSON.stringify(l))}catch(e){}}
 function count(b,f){const c={free:0,hold:0,sold:0};for(const q of (f?[f]:FLOORS))for(const a of P[b].apts)c[st(key(b,q,a.n))]++;return c}
-const bar=c=>{const t=c.free+c.hold+c.sold;return `<div class="bar">${['free','hold','sold'].map(s=>`<i style="width:${c[s]/t*100}%;background:${ST[s].c}"></i>`).join('')}</div>`};
-const legend=()=>`<div class="legend">${Object.values(ST).map(o=>`<span><i class="dot" style="background:${o.c}"></i>${o.t}</span>`).join('')}</div>`;
 
-/* ---------- picture: fit the buildings into the free part of the screen ---------- */
+/* ---------- building ---------- */
 function fit(){
-  const W=innerWidth,H=innerHeight,ph=phone();
-  const pr=$('pane').getBoundingClientRect();
-  const free=ph?{x:0,y:64,w:W,h:Math.max(200,H-Math.min(pr.height,H*.46)-64-56)}:{x:0,y:0,w:Math.max(320,pr.left),h:H};
-  const fw=FOCUS.x1-FOCUS.x0,fh=FOCUS.y1-FOCUS.y0;
-  const cover=Math.max(W/2048,H/1152);
-  const want=Math.min(free.w/fw,free.h/fh)*(ph?1.06:.9);
-  const s=ph?Math.min(cover,want):Math.max(cover,Math.min(want,cover*1.5));
-  let x=free.x+free.w/2-(FOCUS.x0+fw/2)*s, y=free.y+free.h/2-(FOCUS.y0+fh/2)*s;
+  const art=$('art');if(!art)return;
+  const W=innerWidth,H=innerHeight,side=$('side'),ph=W<=760;
+  const fr={x:0,y:56,w:W-(side&&!ph?320:0),h:H-56-(ph&&side?H*.46+60:60)};
+  const F=VIEWS[S.view][2],fw=F.x1-F.x0,fh=F.y1-F.y0,cover=Math.max(W/2048,H/1152);
+  const want=Math.min(fr.w/fw,fr.h/fh)*.96,s=ph?Math.min(cover,want):Math.max(cover,Math.min(want,cover*1.6));
+  let x=fr.x+fr.w/2-(F.x0+fw/2)*s,y=fr.y+fr.h/2-(F.y0+fh/2)*s;
   if(2048*s>=W)x=Math.min(0,Math.max(W-2048*s,x));
-  if(!ph)y=Math.min(0,Math.max(H-1152*s,y));
-  T={s,x,y};
-  $('art').style.transform=`translate(${x}px,${y}px) scale(${s})`;
-  placeChips();
-}
-function drawHot(sel){
-  const svg=$('hotsvg');let h='';
-  if(sel){h+=`<path class="dim" fill-rule="evenodd" d="M0 0H2048V1152H0Z M${P[sel].hot.map(p=>p.join(' ')).join(' L')}Z"/>`}
-  for(const b of ['1','2','3'])h+=`<polygon class="hot${b==sel?' sel':''}" data-b="${b}" tabindex="0" role="link" aria-label="${b}-blok" points="${P[b].hot.map(p=>p.join(',')).join(' ')}"/>`;
-  svg.innerHTML=h;
-  $('chips').innerHTML=['1','2','3'].map(b=>{const c=count(b);return `<a class="chip glass${sel?' off':''}" data-b="${b}" href="#blok-${b}"><i>${b}</i><b>blok</b><span>${c.free} ta bo'sh</span></a>`}).join('');
-  placeChips();
-}
-function placeChips(){
-  if(!P)return;
-  document.querySelectorAll('#chips .chip').forEach(el=>{
-    const h=P[el.dataset.b].hot;let x=0,y=1e9;for(const p of h){x+=p[0];if(p[1]<y)y=p[1]}x/=h.length;
-    const ys=h.map(p=>p[1]);const cy=(Math.min(...ys)+Math.max(...ys))/2;
-    el.style.left=(T.x+x*T.s)+'px';el.style.top=(T.y+(y*.72+cy*.28)*T.s)+'px';
-  });
+  if(1152*s>=H)y=Math.min(0,Math.max(H-1152*s,y));
+  T={s,x,y};art.style.transform=`translate(${x}px,${y}px) scale(${s})`;
+  document.querySelectorAll('#chips .chip').forEach(el=>{const h=P[el.dataset.b].hot;let cx=0,top=1e9,bot=0;for(const p of h){cx+=p[0];top=Math.min(top,p[1]);bot=Math.max(bot,p[1])}cx/=h.length;
+    el.style.left=(x+cx*s)+'px';el.style.top=(y+(top*.8+bot*.2)*s)+'px'});
 }
 function sun(){
-  const h=+$('sun').value,hh=Math.floor(h),mm=Math.round((h-hh)*60);
+  const i=$('sun');if(!i)return;const h=+i.value,hh=Math.floor(h),mm=Math.round((h-hh)*60);
   $('sunv').textContent=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
-  let f;
-  if(h<7.5)f='brightness(.78) saturate(.8) sepia(.35) hue-rotate(-12deg)';
-  else if(h<10)f='brightness(.95) saturate(1.05) sepia(.15)';
-  else if(h<16)f='none';
-  else if(h<18.5)f='brightness(.96) saturate(1.15) sepia(.32) hue-rotate(-8deg)';
-  else if(h<19.6)f='brightness(.72) saturate(1.1) sepia(.45) hue-rotate(-18deg)';
-  else f='brightness(.42) saturate(.7) hue-rotate(185deg) sepia(.2)';
-  $('hero').style.filter=f;
+  const f=h<7.5?'brightness(.78) saturate(.8) sepia(.35) hue-rotate(-12deg)':h<10?'brightness(.95) saturate(1.05) sepia(.15)':h<16?'none':h<18.5?'brightness(.96) saturate(1.15) sepia(.32) hue-rotate(-8deg)':h<19.6?'brightness(.72) saturate(1.1) sepia(.45) hue-rotate(-18deg)':'brightness(.42) saturate(.7) hue-rotate(185deg) sepia(.2)';
+  $('hero').style.filter=f;S.sun=h;
+}
+function board(b){
+  const pl=P[b],n=pl.apts.length;
+  return `<div class="board"><div class="colh" style="--n:${n}"><span></span>${pl.apts.map(a=>`<span>${a.area.toFixed(0)} m²</span>`).join('')}</div>
+  ${[9,8,7,6,5,4,3,2].map(q=>`<div class="frow" style="--n:${n}"><a class="q" href="#b${b}-q${q}" title="${q}-qavatni ochish" aria-label="${q}-qavat">${q}</a>${pl.apts.map(a=>{const s=st(key(b,q,a.n));return `<a class="cell ${s}" style="--c:${ST[s].c}" href="#b${b}-q${q}-x${a.n}" aria-label="${q}-qavat, ${a.n}-xonadon, ${ar(a.area)} m², ${ST[s].t}">${a.rooms}</a>`}).join('')}</div>`).join('')}</div>`;
+}
+function vHome(b){
+  const all={free:0,hold:0,sold:0};for(const x of BL){const c=count(x);for(const k in all)all[k]+=c[k]}
+  const v=VIEWS[S.view],hot=v[0]==3,c=b?count(b):null;
+  app.innerHTML=`<div class="stage"><div class="blur" style="background-image:url(img/t${v[0]}.webp)"></div>
+    <div class="art" id="art"><img id="hero" src="img/r${v[0]}.webp" alt="Siyovush House: ${v[1]}" width="2048" height="1152">
+      <svg viewBox="0 0 2048 1152">${hot?(b?`<path class="dim" fill-rule="evenodd" d="M0 0H2048V1152H0Z M${P[b].hot.map(p=>p.join(' ')).join(' L')}Z"/>`:'')+BL.map(x=>`<polygon class="hot${x==b?' sel':''}" data-b="${x}" tabindex="0" role="link" aria-label="${x}-blok" points="${P[x].hot.map(p=>p.join(',')).join(' ')}"/>`).join(''):''}</svg></div>
+    <div class="shade"></div><div id="chips">${hot?BL.map(x=>`<a class="pill glass chip${b?' off':''}" data-b="${x}" href="#b${x}"><i>${x}</i>blok</a>`).join(''):''}</div></div>
+  <header class="bar">${BRAND}${sel('sb','Blok',[['','Blokni tanlang'],...BL.map(x=>[x,x+'-blok'])],b||'')}
+    <span class="sp"></span>
+    <label class="pill glass time" title="Kun vaqti"><output id="sunv">13:00</output><input type="range" id="sun" min="6" max="21" step="0.25" value="${S.sun||13}" aria-label="Kun vaqti"></label></header>
+  ${b?`<aside class="side glass" id="side"><div class="hd"><h2>${b}-blok</h2><a class="pill glass ico" href="#" aria-label="Yopish" style="height:32px;width:32px">×</a></div>
+    <p class="note">${c.free} bo'sh · ${c.hold} bron · ${c.sold} sotilgan</p>${legend()}${board(b)}
+    <p class="note">Qavat raqami: qavatning 3D ko'rinishi. Katak: xonadon va 360° sayr. Katakdagi son: xonalar.</p></aside>`:''}
+  <footer class="foot"><div class="pill glass views" role="group" aria-label="Ko'rinish">${VIEWS.map((x,i)=>`<button data-v="${i}" class="${i==S.view?'on':''}" title="${x[1]}" aria-label="${x[1]}" aria-pressed="${i==S.view}"><img src="img/t${x[0]}.webp" alt=""></button>`).join('')}</div>
+    <div class="pill glass stat"><b>128 xonadon</b><span><i class="dot" style="background:var(--free)"></i>${all.free}<span class="x mute">bo'sh</span></span><span><i class="dot" style="background:var(--hold)"></i>${all.hold}<span class="x mute">bron</span></span><span><i class="dot" style="background:var(--sold)"></i>${all.sold}<span class="x mute">sotilgan</span></span></div></footer>`;
+  sun();fit();
 }
 
-/* ---------- views ---------- */
-function crumbs(b){
-  $('crumbs').innerHTML=`<a href="#" class="${!b&&!route.admin?'on':''}">Majmua</a>`+['1','2','3'].map(x=>`<a href="#blok-${x}" class="${b==x?'on':''}"${b==x?' aria-current="page"':''}>${x}-blok</a>`).join('');
-}
-function vHome(){
-  const all={free:0,hold:0,sold:0};for(const b of ['1','2','3']){const c=count(b);for(const k in all)all[k]+=c[k]}
-  return `<p class="lead">Uch blokli turar joy majmuasi. Binoni bosing, qavatni tanlang va xonadon rejasini ko'ring.</p>
-  <div class="facts">
-    <div><b>${all.free}</b><span>bo'sh xonadon, jami 128 tadan</span></div>
-    <div><b>9</b><span>qavat, 2–9 turar joy</span></div>
-    <div><b>40–91</b><span>m², 1–3 xonali xonadonlar</span></div>
-    <div><b>39</b><span>o'rinli yer osti parkingi</span></div>
-  </div>
-  <div><h3 style="margin-bottom:10px">Bloklar</h3>${['1','2','3'].map(b=>{const c=count(b);return `<a class="blk" href="#blok-${b}"><span class="n">${b}</span><b>${b}-blok</b><em>${c.free} ta bo'sh</em><span class="note">Har qavatda ${P[b].apts.length} ta xonadon</span>${bar(c)}</a>`}).join('')}</div>
-  <div><h3 style="margin-bottom:10px">Loyiha ko'rinishlari</h3><div class="gal" id="gal">${[1,2,4,5,6,7,8].map(i=>`<button data-i="${i}" aria-label="${i}-ko'rinishni kattalashtirish"><img src="img/t${i}.webp" alt="" loading="lazy"></button>`).join('')}</div></div>
-  <p class="note">Tasvirlar loyiha renderlari asosida. Holatlar namuna sifatida ko'rsatilgan.</p>`;
-}
-function vBlock(b){
-  const pl=P[b],n=pl.apts.length,c=count(b);
-  const rows=[9,8,7,6,5,4,3,2].map(q=>`<div class="frow" style="--n:${n}"><a class="q" href="#blok-${b}-q${q}" aria-label="${q}-qavat rejasi">${q}</a>${pl.apts.map(a=>{const s=st(key(b,q,a.n));return `<a class="cell ${s}" style="--c:${ST[s].c}" href="#blok-${b}-q${q}-x${a.n}" aria-label="${q}-qavat, ${a.n}-xonadon, ${ar(a.area)} m², ${ST[s].t}">${a.rooms}</a>`}).join('')}</div>`).join('');
-  return `<div class="head"><div><h2>${b}-blok</h2><p>${c.free} ta bo'sh, ${c.hold} ta bron, ${c.sold} ta sotilgan</p></div></div>
-  ${legend()}
-  <div class="board">
-    <div class="colh" style="--n:${n}"><span></span>${pl.apts.map(a=>`<span>${a.area.toFixed(0)} m²</span>`).join('')}</div>
-    ${rows}
-    <div class="frow base" style="--n:${n}"><span class="q">1</span><span class="w">Savdo maydonlari</span></div>
-    <div class="frow base" style="--n:${n}"><span class="q">−1</span><span class="w">Parking va savdo</span></div>
-  </div>
-  <p class="note">Katakdagi raqam xonalar soni. Katakni bosing: xonadon ochiladi. Qavat raqamini bosing: qavat rejasi ochiladi.</p>`;
-}
+/* ---------- floor ---------- */
 function vFloor(b,f){
-  const pl=P[b],c=count(b,f);
-  return `<div class="head"><div><a class="back" href="#blok-${b}"><span aria-hidden="true">‹</span>${b}-blok</a><h2 style="margin-top:14px">${f}-qavat</h2><p>${c.free} ta bo'sh xonadon</p></div>
-    <div class="step"><a href="#blok-${b}-q${f-1}" aria-label="Pastki qavat" aria-disabled="${f<=2}">↓</a><a href="#blok-${b}-q${f+1}" aria-label="Yuqori qavat" aria-disabled="${f>=9}">↑</a></div></div>
-  ${legend()}
-  <div class="paper"><img src="img/${pl.plan}" alt="${f}-qavat rejasi" width="${pl.w}" height="${pl.h}">
-    <svg viewBox="0 0 ${pl.w} ${pl.h}">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<polygon class="ap" data-x="${a.n}" tabindex="0" role="link" aria-label="${a.n}-xonadon, ${ST[s].t}" fill="${ST[s].c}" points="${a.poly.map(p=>p.join(',')).join(' ')}"/><text class="aplab" x="${a.c[0]}" y="${a.c[1]}" text-anchor="middle">${a.area.toFixed(1).replace('.',',')}</text>`}).join('')}</svg></div>
-  <div class="rows">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<button class="row" data-x="${a.n}"><span class="a">${ar(a.area)}</span><span>${a.rooms} xonali<small>${a.n}-xonadon, m²</small></span><span class="tagst"><i class="dot" style="background:${ST[s].c}"></i>${ST[s].t}</span></button>`}).join('')}</div>`;
-}
-const TOURS={"2-1":{"dir":"pano/b2x1/","rooms":[["liv","Mehmonxona",0.9],["kit","Oshxona",-1.1],["bed1","Yotoqxona",-2.2],["bed2","Ikkinchi yotoqxona",-2.2],["hall","Yo'lak",-1.27],["bath","Hammom",0]]},"1-1":{"dir":"pano/b1x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-2":{"dir":"pano/b1x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-3":{"dir":"pano/b1x3/","rooms":[["liv","Yashash xonasi",0],["kit","Oshxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-5":{"dir":"pano/b1x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-2":{"dir":"pano/b2x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-3":{"dir":"pano/b2x3/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-4":{"dir":"pano/b2x4/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-1":{"dir":"pano/b3x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-2":{"dir":"pano/b3x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-3":{"dir":"pano/b3x3/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-4":{"dir":"pano/b3x4/","rooms":[["liv","Yashash xonasi",0],["kit","Oshxona",0],["bath","Hammom",0]]},"3-5":{"dir":"pano/b3x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-6":{"dir":"pano/b3x6/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-4":{"dir":"pano/b1x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]],"flip":1},"1-6":{"dir":"pano/b1x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]],"flip":1}};
-const V={ren:'standart',room:'',yaw:0,pitch:0,fov:1.35};
-const REN=[['korobka','Korobka',"Ta'mirsiz holat"],['standart','Standart',"Standart ta'mir"],['luxury','Luxury',"Luxury ta'mir"]];
-function vApt(b,f,n){
-  const pl=P[b],a=pl.apts.find(x=>x.n==n),s=st(key(b,f,n));
-  const xs=a.poly.map(p=>p[0]),ys=a.poly.map(p=>p[1]),pad=40,x0=Math.min(...xs)-pad,y0=Math.min(...ys)-pad,w=Math.max(...xs)-x0+pad,h=Math.max(...ys)-y0+pad;
-  return `<div class="head"><div><a class="back" href="#blok-${b}-q${f}"><span aria-hidden="true">‹</span>${f}-qavat</a><h2 style="margin-top:14px">${a.rooms} xonali</h2><p>${b}-blok, ${f}-qavat, ${n}-xonadon</p></div>
-    <span class="tagst" style="font-size:15px"><i class="dot" style="background:${ST[s].c}"></i>${ST[s].t}</span></div>
-  <div class="kv"><div><b>${ar(a.area)}</b><span>m² maydon</span></div><div><b>${a.rooms}</b><span>xona</span></div><div><b>${f}</b><span>qavat</span></div></div>
-  <div class="paper"><svg viewBox="${x0} ${y0} ${w} ${h}" style="position:static;display:block;height:auto" preserveAspectRatio="xMidYMid meet"><image href="img/${pl.plan}" width="${pl.w}" height="${pl.h}"/><polygon points="${a.poly.map(p=>p.join(',')).join(' ')}" fill="${ST[s].c}" fill-opacity=".22" stroke="#161a18" stroke-width="6"/></svg></div>
-  ${(()=>{const t=TOURS[b+'-'+n];const seg=`<div class="seg" id="rtabs">${REN.map(r=>`<button data-r="${r[0]}" class="${r[0]==V.ren?'on':''}" aria-pressed="${r[0]==V.ren}">${r[1]}</button>`).join('')}</div>`;
-   if(!t)return `<div><h3 style="margin-bottom:10px">Xonadon ichida 360° sayr</h3>${seg}</div><div class="pano" id="pano"><div><b>${REN.find(r=>r[0]==V.ren)[2]}</b>360° panorama tayyorlanmoqda</div></div>`;
-   if(!t.rooms.some(r=>r[0]==V.room)){V.room=t.rooms[0][0];V.yaw=t.rooms[0][2];V.pitch=0}
-   return `<div><h3 style="margin-bottom:10px">Xonadon ichida 360° sayr</h3>${seg}</div>
-   <div class="view360" id="v360" data-dir="${t.dir}" data-flip="${t.flip?1:0}"><canvas></canvas><div class="load">Yuklanmoqda…</div><div class="seg2 glass">${REN.map(r=>`<button data-r="${r[0]}" class="${r[0]==V.ren?'on':''}">${r[1]}</button>`).join('')}</div><button class="full glass" id="vfull" aria-label="To'liq ekran">⤢</button><div class="hint glass">Atrofga qarash uchun suring</div></div>
-   <div class="chipsr" id="vrooms">${t.rooms.map(r=>`<button data-room="${r[0]}" class="${r[0]==V.room?'on':''}">${r[1]}</button>`).join('')}</div>`})()}
-  ${s=='sold'?'':`<a class="cta" href="#blok-${b}-q${f}-x${n}" id="cta">Narxini so'rash</a>`}`;
-}
-function vAdmin(){
-  const rows=[];
-  for(const b of ['1','2','3'])for(const q of FLOORS)rows.push(`<tr><td>${b}-blok</td><td>${q}</td>${[1,2,3,4,5,6].map(i=>{const a=P[b].apts.find(x=>x.n==i);if(!a)return '<td></td>';const k=key(b,q,a.n);return `<td><select data-k="${k}" aria-label="${b}-blok ${q}-qavat ${a.n}-xonadon">${Object.entries(ST).map(([v,o])=>`<option value="${v}"${st(k)==v?' selected':''}>${o.t}</option>`).join('')}</select></td>`}).join('')}</tr>`);
-  return `<div class="head"><div><h2>Boshqaruv</h2><p>Demo: o'zgarishlar faqat shu brauzerda saqlanadi.</p></div></div>
-  <div class="adm scroll"><table><thead><tr><th>Blok</th><th>Qavat</th>${[1,2,3,4,5,6].map(n=>`<th>${n}-x.</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+  const pl=P[b],c=count(b,f),three=S.fmode=='3d'&&FL&&FL[b],fr=three?FL[b][S.fv%FL[b].length]:null;
+  const poly=a=>three?fr.polys[a.n].map(p=>(p[0]*fr.w).toFixed(1)+','+(p[1]*fr.h).toFixed(1)).join(' '):a.poly.map(p=>p.join(',')).join(' ');
+  const cen=a=>{if(!three)return [a.c[0]/pl.w,a.c[1]/pl.h];const q=fr.polys[a.n];let x=0,y=0;for(const p of q){x+=p[0];y+=p[1]}return [x/q.length,y/q.length]};
+  app.innerHTML=`<div class="page">
+   <header class="bar"><a class="pill glass ico" href="#b${b}" aria-label="Binoga qaytish">‹</a>${BRAND}
+     ${sel('sb','Blok',BL.map(x=>[x,x+'-blok']),b)}${sel('sf','Qavat',FLOORS.map(x=>[x,x+'-qavat']),f)}
+     <div class="seg glass" role="group" aria-label="Ko'rinish turi"><button data-fm="3d" class="${S.fmode=='3d'?'on':''}">3D</button><button data-fm="plan" class="${S.fmode=='plan'?'on':''}">Reja</button></div>
+     <span class="sp"></span><div class="pill glass">${legend()}</div></header>
+   <div class="fwrap"><div class="fview"><div class="fbox ${three?'':'plan'}" id="fbox">
+     <img src="${three?fr.img:'img/'+pl.plan}" alt="${f}-qavat ${three?'3D ko\'rinishi':'rejasi'}" width="${three?fr.w:pl.w}" height="${three?fr.h:pl.h}">
+     <svg viewBox="0 0 ${three?fr.w:pl.w} ${three?fr.h:pl.h}">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<polygon class="ap ${s}" data-x="${a.n}" tabindex="0" role="link" aria-label="${a.n}-xonadon, ${a.rooms} xonali, ${ar(a.area)} m², ${ST[s].t}" fill="${ST[s].c}" points="${poly(a)}"/>`}).join('')}</svg>
+     ${pl.apts.map(a=>{const s=st(key(b,f,a.n)),p=cen(a);return `<span class="pill glass aptag" style="left:${p[0]*100}%;top:${p[1]*100}%"><i class="dot" style="background:${ST[s].c}"></i>${ar(a.area)} m²</span>`}).join('')}
+   </div></div>
+   ${three?`<button class="pill glass ico rot l" data-rot="-1" aria-label="Chapga aylantirish">‹</button><button class="pill glass ico rot r" data-rot="1" aria-label="O'ngga aylantirish">›</button>`:''}</div>
+   <nav class="flist" aria-label="Xonadonlar">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<a class="${s}" data-x="${a.n}" href="#b${b}-q${f}-x${a.n}"><i class="dot" style="background:${ST[s].c}"></i><span><b>${a.rooms} xonali · ${ar(a.area)} m²</b><small>${a.n}-xonadon · ${ST[s].t}</small></span></a>`}).join('')}</nav></div>`;
 }
 
-/* ---------- 360 viewer (plain WebGL, no library) ---------- */
+/* ---------- apartment: 360 tour ---------- */
+const TOURS={"2-1":{"dir":"pano/b2x1/","rooms":[["liv","Mehmonxona",0.9],["kit","Oshxona",-1.1],["bed1","Yotoqxona",-2.2],["bed2","Ikkinchi yotoqxona",-2.2],["hall","Yo'lak",-1.27],["bath","Hammom",0]]},"1-1":{"dir":"pano/b1x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-2":{"dir":"pano/b1x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-3":{"dir":"pano/b1x3/","rooms":[["liv","Yashash xonasi",0],["kit","Oshxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-5":{"dir":"pano/b1x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-2":{"dir":"pano/b2x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-3":{"dir":"pano/b2x3/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-4":{"dir":"pano/b2x4/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-1":{"dir":"pano/b3x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-2":{"dir":"pano/b3x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-3":{"dir":"pano/b3x3/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-4":{"dir":"pano/b3x4/","rooms":[["liv","Yashash xonasi",0],["kit","Oshxona",0],["bath","Hammom",0]]},"3-5":{"dir":"pano/b3x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-6":{"dir":"pano/b3x6/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-4":{"dir":"pano/b1x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]],"flip":1},"1-6":{"dir":"pano/b1x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]],"flip":1}};
+const V={ren:'standart',ren2:'',room:'',yaw:0,pitch:0,fov:1.35,split:.5};
+const REN=[['korobka','Korobka'],['standart','Standart'],['luxury','Luxury']];
 let PV=null;
-function pano(el){
-  const cv=el.querySelector('canvas'),gl=cv.getContext('webgl',{antialias:false});
-  if(!gl){el.querySelector('.load').textContent="Bu qurilmada 360 ko'rinish ochilmadi.";return null}
-  const sh=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);return o};
-  const pr=gl.createProgram();
+function vApt(b,f,n){
+  const pl=P[b],a=pl.apts.find(x=>x.n==n),s=st(key(b,f,n)),t=TOURS[b+'-'+n],pts=PTS[b+'-'+n]||{};
+  if(t&&!t.rooms.some(r=>r[0]==V.room)){V.room=t.rooms[0][0];V.yaw=t.rooms[0][2];V.pitch=0}
+  const xs=a.poly.map(p=>p[0]),ys=a.poly.map(p=>p[1]),pad=30,x0=Math.min(...xs)-pad,y0=Math.min(...ys)-pad,w=Math.max(...xs)-x0+pad,h=Math.max(...ys)-y0+pad;
+  app.innerHTML=`<div class="tour" id="tour" data-dir="${t?t.dir:''}" data-flip="${t&&t.flip?1:0}">${t?`<canvas></canvas><div class="load" id="load">Yuklanmoqda…</div>
+     <div class="split" id="split" hidden role="slider" tabindex="0" aria-label="Solishtirish chizig'i" aria-valuemin="0" aria-valuemax="100"></div>
+     <span class="pill glass cl" id="clA" hidden></span><span class="pill glass cl" id="clB" hidden></span>`:`<div class="empty"><div><b style="color:var(--ink);font-weight:500">360° sayr tayyorlanmoqda</b><br>Bu xonadon uchun panorama hali yuklanmagan.</div></div>`}</div>
+   <header class="bar"><a class="pill glass ico" href="#b${b}-q${f}" aria-label="Qavatga qaytish">‹</a>
+     <div class="pill glass info"><b>${a.rooms} xonali · ${ar(a.area)} m²</b><span class="x mute">${b}-blok · ${f}-qavat · ${n}-xonadon</span><span style="display:inline-flex;align-items:center;gap:6px"><i class="dot" style="background:${ST[s].c}"></i>${ST[s].t}</span></div>
+     <span class="sp"></span>
+     ${t?`<div class="seg glass" id="rA" role="group" aria-label="Ta'mir holati">${REN.map(r=>`<button data-r="${r[0]}" class="${r[0]==V.ren?'on':''}">${r[1]}</button>`).join('')}</div>
+     ${sel('cmp','Solishtirish',[['','Solishtirish'],...REN.map(r=>[r[0],r[1]+' bilan'])],V.ren2)}`:''}</header>
+   <footer class="tb">
+     <div class="glass mini"><svg viewBox="${x0} ${y0} ${w} ${h}" id="mini"><image href="img/${pl.plan}" width="${pl.w}" height="${pl.h}"/><polygon points="${a.poly.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#161a18" stroke-width="5"/>
+       ${t?`<path class="cone" id="cone" d=""/>`+t.rooms.filter(r=>pts[r[0]]).map(r=>`<circle class="pt${r[0]==V.room?' on':''}" data-room="${r[0]}" cx="${pts[r[0]][0]}" cy="${pts[r[0]][1]}" r="${Math.max(w,h)*.035}" tabindex="0" role="button" aria-label="${r[1]}"/>`).join(''):''}</svg><p>Siz shu yerdasiz: nuqtani bosib xonaga o'ting</p></div>
+     ${t?`<div class="rooms" id="rooms">${t.rooms.map(r=>`<button class="pill glass${r[0]==V.room?' on':''}" data-room="${r[0]}">${r[1]}</button>`).join('')}</div>`:'<span style="flex:1"></span>'}
+     ${s=='sold'?'':`<button class="pill cta" id="cta">Narxini so'rash</button>`}</footer>`;
+  PV=t?pano($('tour'),t,pts,a,Math.max(w,h)):null;if(PV)loadPano();
+}
+function loadPano(){
+  if(!PV)return;const d=PV.el.dataset.dir;PV.load(0,d+V.room+'_'+V.ren+'.jpg');
+  const two=V.ren2&&V.ren2!=V.ren;if(two)PV.load(1,d+V.room+'_'+V.ren2+'.jpg');PV.cmp(two);
+  document.querySelectorAll('#rA button').forEach(z=>z.classList.toggle('on',z.dataset.r==V.ren));
+  document.querySelectorAll('[data-room]').forEach(z=>z.classList.toggle('on',z.dataset.room==V.room));
+}
+function pano(el,t,pts,a,span){
+  const cv=el.querySelector('canvas'),gl=cv.getContext('webgl',{antialias:false}),ld=$('load');
+  if(!gl){ld.textContent="Bu qurilmada 360 ko'rinish ochilmadi.";return null}
+  const sh=(tp,src)=>{const o=gl.createShader(tp);gl.shaderSource(o,src);gl.compileShader(o);return o},pr=gl.createProgram();
   gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));
-  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,`precision highp float;uniform sampler2D t;uniform vec2 r;uniform vec3 v;uniform float f;
+  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,`precision highp float;uniform sampler2D t,t2;uniform vec2 r;uniform vec3 v;uniform float f,s;
    void main(){vec2 p=gl_FragCoord.xy/r*2.-1.;p.x*=r.x/r.y;vec3 d=normalize(vec3(p,1./tan(v.z*.5)));
    float cp=cos(v.y),sp=sin(v.y);d=vec3(d.x,d.y*cp+d.z*sp,-d.y*sp+d.z*cp);
    float cy=cos(v.x),sy=sin(v.x);d=vec3(d.x*cy+d.z*sy,d.y,-d.x*sy+d.z*cy);
-   float u=atan(d.x,d.z)/6.2831853+.5;if(f>.5)u=1.-u;gl_FragColor=texture2D(t,vec2(u,acos(clamp(d.y,-1.,1.))/3.14159265));}`));
+   float u=atan(d.x,d.z)/6.2831853+.5;if(f>.5)u=1.-u;vec2 q=vec2(u,acos(clamp(d.y,-1.,1.))/3.14159265);
+   gl_FragColor=(s>=0.&&gl_FragCoord.x/r.x>s)?texture2D(t2,q):texture2D(t,q);}`));
   gl.linkProgram(pr);gl.useProgram(pr);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
-  const a=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  const uR=gl.getUniformLocation(pr,'r'),uV=gl.getUniformLocation(pr,'v');gl.uniform1f(gl.getUniformLocation(pr,'f'),el.dataset.flip=='1'?1:0);
-  const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-  let ready=false,raf=0,token=0;
+  const al=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(al);gl.vertexAttribPointer(al,2,gl.FLOAT,false,0,0);
+  const U=n=>gl.getUniformLocation(pr,n),uR=U('r'),uV=U('v'),uS=U('s'),flip=el.dataset.flip=='1';
+  gl.uniform1f(U('f'),flip?1:0);gl.uniform1i(U('t'),0);gl.uniform1i(U('t2'),1);
+  const tex=[0,1].map(i=>{const x=gl.createTexture();gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,x);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,1,1,0,gl.RGB,gl.UNSIGNED_BYTE,new Uint8Array([13,16,15]));return x});
+  let ready=false,raf=0,tok=[0,0],two=false;
+  const sp=$('split'),cA=$('clA'),cB=$('clB'),cone=$('cone');
   const draw=()=>{raf=0;const dpr=Math.min(devicePixelRatio||1,2),w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);
     if(!w||!h)return;if(cv.width!=w||cv.height!=h){cv.width=w;cv.height=h}
-    gl.viewport(0,0,w,h);if(!ready)return;gl.uniform2f(uR,w,h);gl.uniform3f(uV,V.yaw,V.pitch,V.fov);gl.drawArrays(gl.TRIANGLES,0,3)};
+    gl.viewport(0,0,w,h);gl.uniform2f(uR,w,h);gl.uniform3f(uV,V.yaw,V.pitch,V.fov);gl.uniform1f(uS,two?V.split:-1);gl.drawArrays(gl.TRIANGLES,0,3);
+    if(two){sp.style.left=V.split*100+'%';sp.setAttribute('aria-valuenow',Math.round(V.split*100));cA.style.right=`calc(${(1-V.split)*100}% + 30px)`;cB.style.left=`calc(${V.split*100}% + 30px)`}
+    const p=pts[V.room];if(cone&&p){const R=span*.22,hf=Math.atan(Math.tan(V.fov/2)*cv.clientWidth/cv.clientHeight),y=flip?-V.yaw:V.yaw,q=g=>[p[0]+R*Math.sin(g),p[1]-R*Math.cos(g)],A=q(y-hf),B=q(y+hf);
+      cone.setAttribute('d',`M${p[0]} ${p[1]}L${A[0]} ${A[1]}A${R} ${R} 0 0 1 ${B[0]} ${B[1]}Z`)}};
   const ask=()=>{if(!raf)raf=requestAnimationFrame(draw)};
-  const load=url=>{const my=++token,im=new Image(),ld=el.querySelector('.load');ld.style.opacity=ready?.0:1;ld.textContent='Yuklanmoqda…';if(!ready)ld.style.opacity=1;
-    im.onload=()=>{if(my!=token)return;const max=gl.getParameter(gl.MAX_TEXTURE_SIZE);let src=im;
+  const load=(i,url)=>{const my=++tok[i],im=new Image();if(!i){ld.style.opacity=1;ld.textContent='Yuklanmoqda…'}
+    im.onload=()=>{if(my!=tok[i])return;const max=gl.getParameter(gl.MAX_TEXTURE_SIZE);let src=im;
       if(im.width>max){const c=document.createElement('canvas');c.width=max;c.height=max/2;c.getContext('2d').drawImage(im,0,0,c.width,c.height);src=c}
-      gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src);ready=true;ld.style.opacity=0;ask()};
-    im.onerror=()=>{if(my==token){ld.style.opacity=1;ld.textContent="Rasm yuklanmadi. Qayta urinib ko'ring."}};im.src=url};
-  /* drag to look, wheel or pinch to zoom */
-  const pts=new Map();let pinch=0;
-  el.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;el.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);const h=el.querySelector('.hint');if(h)h.style.opacity=0});
-  el.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)return;
-    if(pts.size==1){const k=V.fov/cv.clientHeight;V.yaw-=(e.clientX-p[0])*k;V.pitch=Math.max(-1.35,Math.min(1.35,V.pitch+(e.clientY-p[1])*k))}
-    pts.set(e.pointerId,[e.clientX,e.clientY]);
-    if(pts.size==2){const [q,w]=[...pts.values()],d=Math.hypot(q[0]-w[0],q[1]-w[1]);if(pinch)V.fov=Math.max(.6,Math.min(1.8,V.fov*pinch/d));pinch=d}
+      gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,tex[i]);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src);if(!i){ready=true;ld.style.opacity=0}ask()};
+    im.onerror=()=>{if(my==tok[i]&&!i){ld.style.opacity=1;ld.textContent="Rasm yuklanmadi. Qayta urinib ko'ring."}};im.src=url};
+  const cmp=on=>{two=on;sp.hidden=cA.hidden=cB.hidden=!on;if(on){cA.textContent=REN.find(r=>r[0]==V.ren)[1];cB.textContent=REN.find(r=>r[0]==V.ren2)[1]}ask()};
+  const pp=new Map();let pinch=0,drag=false;
+  el.addEventListener('pointerdown',e=>{if(e.target==sp){drag=true;sp.setPointerCapture(e.pointerId);return}el.setPointerCapture(e.pointerId);pp.set(e.pointerId,[e.clientX,e.clientY])});
+  el.addEventListener('pointermove',e=>{if(drag){V.split=Math.max(.04,Math.min(.96,e.clientX/el.clientWidth));ask();return}
+    const p=pp.get(e.pointerId);if(!p)return;
+    if(pp.size==1){const k=V.fov/cv.clientHeight;V.yaw-=(e.clientX-p[0])*k;V.pitch=Math.max(-1.35,Math.min(1.35,V.pitch+(e.clientY-p[1])*k))}
+    pp.set(e.pointerId,[e.clientX,e.clientY]);
+    if(pp.size==2){const [q,w]=[...pp.values()],d=Math.hypot(q[0]-w[0],q[1]-w[1]);if(pinch)V.fov=Math.max(.6,Math.min(1.8,V.fov*pinch/d));pinch=d}
     ask()});
-  const up=e=>{pts.delete(e.pointerId);pinch=0};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  const up=e=>{drag=false;pp.delete(e.pointerId);pinch=0};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
   el.addEventListener('wheel',e=>{e.preventDefault();V.fov=Math.max(.6,Math.min(1.8,V.fov*(1+Math.sign(e.deltaY)*.08)));ask()},{passive:false});
-  const ro=new ResizeObserver(ask);ro.observe(cv);
-  return {load,ask,el};
+  sp.addEventListener('keydown',e=>{if(e.key=='ArrowLeft'||e.key=='ArrowRight'){V.split=Math.max(.04,Math.min(.96,V.split+(e.key=='ArrowLeft'?-.03:.03)));ask()}});
+  new ResizeObserver(ask).observe(cv);
+  return {load,ask,cmp,el};
 }
-function mountPano(){
-  const el=$('v360');if(!el){PV=null;return}
-  PV=pano(el);if(PV)PV.load(el.dataset.dir+V.room+'_'+V.ren+'.jpg');
-  const ph=document.createElement('div');ph.hidden=true;
-  el.addEventListener('click',e=>{
-    const r=e.target.closest('[data-r]');if(r){e.stopPropagation();setRen(r.dataset.r);return}
-    if(e.target.closest('#vfull')){e.stopPropagation();big(el,ph,!el.classList.contains('big'))}
-  });
-  el._ph=ph;
-}
-function big(el,ph,on){
-  if(on){el.parentNode.insertBefore(ph,el);document.body.appendChild(el)}else if(ph.parentNode){ph.parentNode.insertBefore(el,ph);ph.remove()}else el.remove();
-  el.classList.toggle('big',on);el.querySelector('#vfull').textContent=on?'×':'⤢';el.querySelector('#vfull').setAttribute('aria-label',on?'Yopish':"To'liq ekran");if(PV)PV.ask();
-}
-function closeBig(){const el=document.querySelector('body>.view360.big');if(el)big(el,el._ph,false)}
-function setRen(r){
-  V.ren=r;document.querySelectorAll('#rtabs button,.seg2 button').forEach(z=>{const on=z.dataset.r==r;z.classList.toggle('on',on);z.setAttribute('aria-pressed',on)});
-  if(PV)PV.load(PV.el.dataset.dir+V.room+'_'+V.ren+'.jpg');
-  else if($('pano'))$('pano').innerHTML=`<div><b>${REN.find(z=>z[0]==r)[2]}</b>360° panorama tayyorlanmoqda</div>`;
+function vAdmin(){
+  const rows=[];
+  for(const b of BL)for(const q of FLOORS)rows.push(`<tr><td>${b}-blok</td><td>${q}</td>${[1,2,3,4,5,6].map(i=>{const a=P[b].apts.find(x=>x.n==i);if(!a)return '<td></td>';const k=key(b,q,a.n);return `<td><select data-k="${k}" aria-label="${b}-blok ${q}-qavat ${a.n}-xonadon">${Object.entries(ST).map(([v,o])=>`<option value="${v}"${st(k)==v?' selected':''}>${o.t}</option>`).join('')}</select></td>`}).join('')}</tr>`);
+  app.innerHTML=`<div class="page"><header class="bar"><a class="pill glass ico" href="#" aria-label="Bosh sahifa">‹</a>${BRAND}<span class="pill glass">Boshqaruv · o'zgarishlar faqat shu brauzerda saqlanadi</span></header>
+  <div class="adm glass"><table><thead><tr><th>Blok</th><th>Qavat</th>${[1,2,3,4,5,6].map(n=>`<th>${n}-x.</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div></div>`;
 }
 
 /* ---------- router ---------- */
 function parse(){const h=location.hash.slice(1);let m;
   if(h=='admin')return{admin:1};
-  if(m=h.match(/^blok-([123])(?:-q([2-9]))?(?:-x([1-6]))?$/))return{b:m[1],f:m[2]?+m[2]:null,x:m[3]?+m[3]:null};
+  if(m=h.match(/^b(?:lok-)?([123])(?:-q([2-9]))?(?:-x([1-6]))?$/))return{b:m[1],f:m[2]?+m[2]:null,x:m[3]?+m[3]:null};
   return{}}
-let first=true;
-function render(nav){
-  if(!P)return;closeBig();route=parse();let {b,f,x}=route;
+function render(){
+  if(!P)return;PV=null;route=parse();let {b,f,x}=route;
   if(x&&!P[b].apts.some(a=>a.n==x))x=route.x=null;
-  crumbs(b);drawHot(b||null);
-  const big=!!(f||route.admin);
-  $('pane').classList.toggle('wide',big);
-  if(nav){$('pane').classList.toggle('open',big);$('view').scrollTop=0}
-  $('over').innerHTML=route.admin?'':b?`<h1>${b}-blok</h1>${f?`<p>${f}-qavat${x?', '+x+'-xonadon':''}</p>`:''}`:`<h1>${first?'<span>Siyovush</span> <span>House</span>':'Siyovush House'}</h1><p>Binoni tanlang: qavatlar va bo'sh xonadonlar ochiladi.</p>`;
-  first=false;
-  $('view').innerHTML=route.admin?vAdmin():x?vApt(b,f,x):f?vFloor(b,f):b?vBlock(b):vHome();
-  mountPano();
-  setTimeout(fit,phone()?470:30);fit();
+  if(x&&!f)f=route.f=5;
+  if(route.admin)vAdmin();else if(x)vApt(b,f,x);else if(f)vFloor(b,f);else vHome(b);
 }
-
-/* ---------- events ---------- */
-$('hotsvg').addEventListener('click',e=>{const b=e.target.dataset&&e.target.dataset.b;if(b)location.hash='blok-'+b});
-$('hotsvg').addEventListener('keydown',e=>{const b=e.target.dataset&&e.target.dataset.b;if(b&&(e.key=='Enter'||e.key==' ')){e.preventDefault();location.hash='blok-'+b}});
-$('sun').addEventListener('input',sun);
-$('view').addEventListener('click',e=>{
-  const ap=e.target.closest('[data-x]');if(ap&&route.f){location.hash=`blok-${route.b}-q${route.f}-x${ap.dataset.x}`;return}
-  const g=e.target.closest('#gal button');if(g){const lb=$('lb');lb.querySelector('img').src=`img/r${g.dataset.i}.webp`;lb.classList.add('open');return}
-  const r=e.target.closest('[data-r]');if(r){setRen(r.dataset.r);return}
-  const rm=e.target.closest('[data-room]');if(rm){V.room=rm.dataset.room;const tt=TOURS[route.b+'-'+route.x];V.yaw=tt.rooms.find(z=>z[0]==V.room)[2];V.pitch=0;document.querySelectorAll('#vrooms button').forEach(z=>z.classList.toggle('on',z==rm));if(PV)PV.load(PV.el.dataset.dir+V.room+'_'+V.ren+'.jpg');return}
-
-  if(e.target.closest('#cta')){e.preventDefault();e.target.closest('#cta').textContent="Sotuv bo'limi raqami shu yerda bo'ladi"}
+app.addEventListener('click',e=>{
+  const t=e.target,q=s=>t.closest(s);let z;
+  if((z=q('.hot'))){location.hash='b'+z.dataset.b;return}
+  if((z=q('[data-v]'))){S.view=+z.dataset.v;render();return}
+  if((z=q('[data-fm]'))){S.fmode=z.dataset.fm;render();return}
+  if((z=q('[data-rot]'))){S.fv=(S.fv+ +z.dataset.rot+4)%4;render();return}
+  if((z=q('polygon.ap'))){if(!z.classList.contains('sold'))location.hash=`b${route.b}-q${route.f}-x${z.dataset.x}`;return}
+  if((z=q('#rA [data-r]'))){V.ren=z.dataset.r;if(V.ren2==V.ren){V.ren2='';$('cmp').value=''}loadPano();return}
+  if((z=q('[data-room]'))){V.room=z.dataset.room;const r=TOURS[route.b+'-'+route.x].rooms.find(k=>k[0]==V.room);V.yaw=r[2];V.pitch=0;loadPano();return}
+  if(q('#cta')){q('#cta').textContent="Sotuv bo'limi raqami shu yerda bo'ladi"}
 });
-$('view').addEventListener('keydown',e=>{const ap=e.target.closest('polygon[data-x]');if(ap&&(e.key=='Enter'||e.key==' ')){e.preventDefault();location.hash=`blok-${route.b}-q${route.f}-x${ap.dataset.x}`}});
-$('view').addEventListener('change',e=>{const s=e.target.closest('select[data-k]');if(s)setStatus(s.dataset.k,s.value)});
-$('lb').addEventListener('click',()=>$('lb').classList.remove('open'));
-document.addEventListener('keydown',e=>{if(e.key=='Escape'){$('lb').classList.remove('open');closeBig()}});
-/* bottom sheet: tap or drag the handle */
-{const g=$('grab'),p=$('pane');let y0=null,moved=false;
- g.addEventListener('pointerdown',e=>{y0=e.clientY;moved=false;g.setPointerCapture(e.pointerId)});
- g.addEventListener('pointermove',e=>{if(y0!=null&&Math.abs(e.clientY-y0)>8)moved=true});
- g.addEventListener('pointerup',e=>{if(y0==null)return;const d=e.clientY-y0;y0=null;if(moved)p.classList.toggle('open',d<0);else p.classList.toggle('open');setTimeout(fit,470)});
- g.addEventListener('keydown',e=>{if(e.key=='Enter'||e.key==' '){e.preventDefault();p.classList.toggle('open');setTimeout(fit,470)}});
-}
-addEventListener('hashchange',()=>render(true));
-addEventListener('resize',fit);
-
-sun();
-fetch('plans.json').then(r=>r.json()).then(j=>{P=j;render(true);connect()}).catch(()=>{$('view').innerHTML='<p class="lead">Ma\'lumot yuklanmadi. Sahifani yangilang.</p>'});
+app.addEventListener('keydown',e=>{const z=e.target.closest('.hot,polygon.ap,.pt');if(z&&(e.key=='Enter'||e.key==' ')){e.preventDefault();z.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
+app.addEventListener('change',e=>{const t=e.target;
+  if(t.id=='sb'){location.hash=t.value?('b'+t.value+(route.f?'-q'+route.f:'')):'';return}
+  if(t.id=='sf'){location.hash=`b${route.b}-q${t.value}`;return}
+  if(t.id=='cmp'){V.ren2=t.value==V.ren?'':t.value;if(!V.ren2)t.value='';V.split=.5;loadPano();return}
+  const s=t.closest('select[data-k]');if(s)setStatus(s.dataset.k,s.value)});
+app.addEventListener('input',e=>{if(e.target.id=='sun')sun()});
+app.addEventListener('pointerover',e=>{const z=e.target.closest('.flist a');document.querySelectorAll('polygon.ap').forEach(p=>p.classList.toggle('on',!!z&&p.dataset.x==z.dataset.x))});
+addEventListener('hashchange',render);addEventListener('resize',fit);
+Promise.all([fetch('plans.json').then(r=>r.json()),fetch('fl.json').then(r=>r.ok?r.json():null).catch(()=>null),fetch('status.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({}))])
+ .then(([p,fl,s])=>{P=p;if(fl){FL=fl.views;PTS=fl.pts||{}}status=Object.assign({},s,loadLocal());render()})
+ .catch(()=>{app.innerHTML='<div class="empty">Ma\'lumot yuklanmadi. Sahifani yangilang.</div>'});
 }
 </script>
 </body>
