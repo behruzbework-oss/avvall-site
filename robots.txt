@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /zumrad/
+Disallow: /siyovush/
 Disallow: /bot/
 Disallow: /tools/
 

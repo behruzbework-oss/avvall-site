@@ -139,6 +139,6 @@ open(os.path.join(ROOT, 'sitemap.xml'), 'w').write(
     '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
     'xmlns:xhtml="http://www.w3.org/1999/xhtml">' + urls + '\n</urlset>\n')
 open(os.path.join(ROOT, 'robots.txt'), 'w').write(
-    'User-agent: *\nAllow: /\nDisallow: /zumrad/\nDisallow: /bot/\nDisallow: /tools/\n\n'
+    'User-agent: *\nAllow: /\nDisallow: /zumrad/\nDisallow: /siyovush/\nDisallow: /bot/\nDisallow: /tools/\n\n'
     f'Sitemap: {SITE}/sitemap.xml\n')
 print('built:', ', '.join(LANGS))

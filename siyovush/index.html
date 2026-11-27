@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Siyovush House</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Siyovush House turar joy majmuasi: bloklar, qavatlar va xonadonlar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Sofia+Sans+Extra+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm, premium residential sales office; few words, clear numbers.
+   IDEA: the developer's sales-gallery maquette: building, floor, apartment, each a step closer.
+   PICTURE: the client's aerial render as a live map; blocks light up, clouds drift, the day turns.
+   COLOUR and TYPE: facade stone ground, graphite ink, bronze from the ornament panels; status green/amber/red. Onest + Sofia Sans Extra Condensed figures.
+   LAYOUT: full-bleed picture, a thin rail of controls under it, plan and list side by side, drawer for an apartment. */
+:root{color-scheme:light dark;
+--bg:light-dark(#f1ece3,#141311);--card:light-dark(#fbf8f3,#1d1b18);--ink:light-dark(#1f1c19,#ece6dc);--mute:light-dark(#6f675c,#a59c8f);
+--line:light-dark(#ddd4c6,#33302b);--br:light-dark(#8c6a37,#c9a56a);--free:#2f8f5b;--hold:#d39b2a;--sold:#b8433a}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Onest,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--br);outline-offset:2px}
+.num{font-family:"Sofia Sans Extra Condensed",Onest,sans-serif;font-weight:700;letter-spacing:.01em}
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px max(3vw,14px);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.logo{font-weight:700;font-size:17px;text-decoration:none;white-space:nowrap}
+.logo small{display:block;font-weight:500;font-size:12px;color:var(--mute)}
+nav.crumbs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;color:var(--mute);margin-left:auto}
+nav.crumbs a{text-decoration:none;padding:6px 10px;border-radius:99px;border:1px solid var(--line)}
+nav.crumbs a.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stage{position:relative;height:min(78vh,860px);min-height:420px;overflow:hidden;background:#2a2722}
+.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:filter 1.2s}
+.stage svg{position:absolute;inset:0;width:100%;height:100%}
+.hot{fill:rgba(255,255,255,0);stroke:rgba(255,255,255,0);stroke-width:4;cursor:pointer;transition:fill .3s,stroke .3s}
+.hot:hover,.hot:focus,.hot.sel{fill:rgba(201,165,106,.32);stroke:#fff}
+.dim{fill:rgba(15,13,11,.55);pointer-events:none;transition:opacity .4s}
+.clouds{position:absolute;inset:-20% -40%;pointer-events:none;mix-blend-mode:multiply;opacity:.38;
+background:radial-gradient(28% 18% at 20% 30%,#5b6470 0,transparent 70%),radial-gradient(22% 16% at 60% 55%,#5b6470 0,transparent 70%),radial-gradient(30% 20% at 85% 25%,#5b6470 0,transparent 70%),radial-gradient(18% 14% at 40% 80%,#5b6470 0,transparent 70%);
+filter:blur(30px);animation:drift 70s linear infinite}
+.mist{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.28),transparent 30%);animation:breathe 14s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
+@keyframes breathe{from{opacity:.5}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.clouds,.mist{animation:none}}
+.tag{position:absolute;transform:translate(-50%,-100%);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap}
+.tag span{display:block;font-weight:500;font-size:12px;color:var(--mute)}
+.over{position:absolute;left:max(3vw,14px);bottom:20px;max-width:520px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+.over h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 6px;text-wrap:balance}
+.over p{margin:0;font-size:17px}
+.rail{display:flex;flex-wrap:wrap;gap:18px 28px;align-items:center;padding:14px max(3vw,14px);background:var(--card);border-bottom:1px solid var(--line)}
+.sun{display:flex;align-items:center;gap:12px;flex:1 1 320px}
+.sun input{flex:1;accent-color:var(--br);height:44px}
+.sun output{font-size:24px;min-width:3.2em}
+.note{font-size:13px;color:var(--mute)}
+.band{padding:clamp(24px,4vw,56px) max(3vw,14px)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.facts div{background:var(--card);padding:16px 18px}
+.facts b{display:block;font-size:40px;line-height:1}
+.facts span{font-size:14px;color:var(--mute)}
+h2{font-size:clamp(24px,3vw,34px);line-height:1.1;margin:0 0 16px;text-wrap:balance}
+.gal{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
+.gal button{flex:0 0 min(78vw,520px);scroll-snap-align:start;padding:0;border:0;border-radius:12px;overflow:hidden;background:none}
+.gal img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.bk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:left;display:grid;gap:6px}
+.bk b{font-size:20px}
+.bar{display:flex;height:8px;border-radius:9px;overflow:hidden;background:var(--line)}
+.bar i{display:block}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;color:var(--mute)}
+.legend i,.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.split{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:24px;align-items:start}
+.tower{display:grid;gap:6px}
+.fl{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;padding:8px 12px;min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--card);text-align:left}
+.fl.on{border-color:var(--br);box-shadow:inset 0 0 0 1px var(--br)}
+.fl .num{font-size:26px}
+.fl.base{opacity:.7;cursor:default}
+.plan{position:relative;background:#fff;border-radius:14px;border:1px solid var(--line);overflow:hidden}
+.plan img{display:block;width:100%;height:auto}
+.plan svg{position:absolute;inset:0;width:100%;height:100%}
+.ap{stroke:#fff;stroke-width:5;cursor:pointer;opacity:.5;transition:opacity .2s}
+.ap:hover,.ap:focus,.ap.sel{opacity:.85;stroke:#1f1c19}
+.aplab{font:700 44px Onest,sans-serif;fill:#1f1c19;pointer-events:none;paint-order:stroke;stroke:#fff;stroke-width:8px}
+.list{display:grid;gap:8px;margin-top:14px}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);min-height:48px;text-align:left}
+.pill{font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;color:#fff;white-space:nowrap}
+.drawer{position:fixed;z-index:40;inset:0;display:none;background:rgba(10,9,8,.5)}
+.drawer.open{display:block}
+.sheet{position:absolute;right:0;top:0;bottom:0;width:min(560px,100%);background:var(--bg);overflow:auto;padding:20px;display:flex;flex-direction:column;gap:16px}.sheet>*{flex-shrink:0}.sheet .x{align-self:flex-end}
+.sheet .x{justify-self:end;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:22px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border-radius:12px;overflow:hidden}
+.kv div{background:var(--card);padding:12px}.kv b{display:block;font-size:30px;line-height:1}.kv span{font-size:13px;color:var(--mute)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--card)}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pano{aspect-ratio:2/1;border-radius:12px;display:grid;place-items:center;text-align:center;padding:16px;color:#fff;font-weight:600;background-size:cover;background-position:center}
+.mini{background:#fff;border-radius:12px;border:1px solid var(--line);overflow:hidden;position:relative}
+.mini svg{display:block;width:100%;height:auto}
+.adm table{width:100%;border-collapse:collapse;font-size:14px}
+.adm th,.adm td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.adm select{font:inherit;font-size:16px;min-height:40px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.scroll{overflow-x:auto}
+.lb{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.9);display:none;place-items:center;padding:12px}
+.lb.open{display:grid}.lb img{max-width:100%;max-height:92vh;border-radius:8px}
+footer{padding:28px max(3vw,14px);color:var(--mute);font-size:14px;border-top:1px solid var(--line)}
+@media(max-width:760px){header{flex-wrap:wrap}nav.crumbs{margin-left:0;width:100%}.split{grid-template-columns:minmax(0,1fr)}.stage{height:62vh}.tower{grid-template-columns:repeat(4,minmax(0,1fr))}.fl{grid-template-columns:1fr;text-align:center;gap:0}.fl .t{display:none}.over p{font-size:15px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="#">Siyovush House<small>Turar joy majmuasi · 3 blok</small></a>
+  <nav class="crumbs" id="crumbs"></nav>
+</header>
+
+<section class="stage" id="stage" aria-label="Majmua ko'rinishi">
+  <img class="base" id="hero" src="img/r3.webp" alt="Majmuaning tepadan ko'rinishi">
+  <div class="clouds"></div><div class="mist"></div>
+  <svg id="hotsvg" viewBox="0 0 2048 1152" preserveAspectRatio="xMidYMid slice"></svg>
+  <div class="tag" id="tag" hidden></div>
+  <div class="over" id="over"><h1>Blokni tanlang</h1><p>Bino ustiga bosing: qavatlar va bo'sh xonadonlar ochiladi.</p></div>
+</section>
+
+<div class="rail">
+  <label class="sun"><span>Kun vaqti</span><input type="range" id="sun" min="6" max="21" step="0.25" value="13"><output class="num" id="sunv">13:00</output></label>
+  <div class="legend"><span><i style="background:var(--free)"></i>Bo'sh</span><span><i style="background:var(--hold)"></i>Bron</span><span><i style="background:var(--sold)"></i>Sotilgan</span></div>
+  <div class="note" id="dbnote">Holatlar yuklanmoqda…</div>
+</div>
+
+<main id="view"></main>
+
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Xonadon"><div class="sheet" id="sheet"></div></div>
+<div class="lb" id="lb"><img alt=""></div>
+<footer>Siyovush House · Vizualizatsiyalar loyiha renderlari asosida. Holatlar sotuv bo'limi tomonidan yangilanadi.</footer>
+
+<script>
+{
+const ST={free:{t:"Bo'sh",c:'var(--free)'},hold:{t:'Bron',c:'var(--hold)'},sold:{t:'Sotilgan',c:'var(--sold)'}};
+const FLOORS=[2,3,4,5,6,7,8,9];
+const ROOMS=r=>r+' xonali';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let P=null,status={},db=null,canWrite=false,localMode=false;
+const $=id=>document.getElementById(id);
+const key=(b,f,n)=>`b${b}-q${f}-x${n}`;
+const st=k=>status[k]||'free';
+
+/* ---------- data ---------- */
+function loadLocal(){try{status=JSON.parse(localStorage.getItem('sb-status')||'{}')}catch(e){status={}}}
+function saveLocal(){try{localStorage.setItem('sb-status',JSON.stringify(status))}catch(e){}}
+async function setStatus(k,v){
+  status[k]=v; render();
+  if(db){try{await db.collection('status').doc(k).set({s:v,t:Date.now()})}catch(e){$('dbnote').textContent="Saqlab bo'lmadi: faqat egasi o'zgartira oladi."}}
+  else saveLocal();
+}
+async function connect(){
+  let base={};
+  try{const r=await fetch('status.json',{cache:'no-store'}); if(r.ok) base=await r.json()}catch(e){}
+  loadLocal(); status=Object.assign({},base,status); localMode=true;
+  $('dbnote').textContent="Demo: holatlar namuna sifatida ko'rsatilgan.";
+  render();
+}
+
+/* ---------- counts ---------- */
+function count(b,f){const c={free:0,hold:0,sold:0};const fs=f?[f]:FLOORS;for(const q of fs)for(const a of P[b].apts)c[st(key(b,q,a.n))]++;return c}
+const bar=c=>{const t=c.free+c.hold+c.sold;return `<div class="bar">${['free','hold','sold'].map(s=>`<i style="width:${c[s]/t*100}%;background:${ST[s].c}"></i>`).join('')}</div>`};
+
+/* ---------- hero ---------- */
+let curB=null;
+function drawHot(sel){
+  const svg=$('hotsvg');
+  const pts=b=>P[b].hot.map(p=>p.join(',')).join(' ');
+  const mask=sel?`<defs><mask id="m"><rect width="2048" height="1152" fill="#fff"/><polygon points="${pts(sel)}" fill="#000"/></mask></defs><rect class="dim" width="2048" height="1152" mask="url(#m)"/>`:'';
+  svg.innerHTML=mask+['1','2','3'].map(b=>`<polygon class="hot${sel==b?' sel':''}" data-b="${b}" tabindex="0" role="link" aria-label="${b}-blok" points="${pts(b)}"/>`).join('');
+}
+function showTag(b,ev){
+  const t=$('tag'),r=$('stage').getBoundingClientRect(),c=count(b);
+  t.innerHTML=`${b}-blok<span>${c.free} ta bo'sh · ${P[b].apts.length*8} xonadon</span>`;
+  t.style.left=(ev.clientX-r.left)+'px';t.style.top=(ev.clientY-r.top-14)+'px';t.hidden=false;
+}
+function sun(){
+  const h=+$('sun').value,hh=Math.floor(h),mm=Math.round((h-hh)*60);
+  $('sunv').textContent=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+  let f;
+  if(h<7.5)f='brightness(.78) saturate(.8) sepia(.35) hue-rotate(-12deg)';
+  else if(h<10)f='brightness(.95) saturate(1.05) sepia(.15)';
+  else if(h<16)f='none';
+  else if(h<18.5)f='brightness(.96) saturate(1.15) sepia(.32) hue-rotate(-8deg)';
+  else if(h<19.6)f='brightness(.72) saturate(1.1) sepia(.45) hue-rotate(-18deg)';
+  else f='brightness(.42) saturate(.7) hue-rotate(185deg) sepia(.2)';
+  $('hero').style.filter=f;
+}
+
+/* ---------- views ---------- */
+function crumbs(b,f){
+  const l=[`<a href="#" class="${!b?'on':''}">Majmua</a>`];
+  ['1','2','3'].forEach(x=>l.push(`<a href="#blok-${x}" class="${b==x&&!f?'on':''}">${x}-blok</a>`));
+  $('crumbs').innerHTML=l.join('');
+}
+function vHome(){
+  return `<section class="band"><div class="facts">
+   <div><b class="num">3</b><span>blok</span></div><div><b class="num">9</b><span>qavat</span></div>
+   <div><b class="num">128</b><span>xonadon, 1–3 xonali</span></div><div><b class="num">39,6–90,7</b><span>m², xonadon maydoni</span></div>
+   <div><b class="num">39</b><span>o'rin, yer osti parkingi</span></div><div><b class="num">1-qavat</b><span>savdo maydonlari</span></div></div></section>
+  <section class="band" style="padding-top:0"><h2>Bloklar</h2><div class="blocks">${['1','2','3'].map(b=>{const c=count(b);return `<a class="bk" href="#blok-${b}" style="text-decoration:none"><b>${b}-blok</b><span class="note">${P[b].apts.length} ta xonadon har qavatda · 2–9 qavat</span>${bar(c)}<span>${c.free} ta bo'sh · ${c.hold} bron · ${c.sold} sotilgan</span></a>`}).join('')}</div></section>
+  <section class="band" style="padding-top:0"><h2>Loyiha renderlari</h2><div class="gal" id="gal">${[1,2,3,4,5,6,7,8].map(i=>`<button data-i="${i}" aria-label="Render ${i}"><img src="img/t${i}.webp" alt="Render ${i}" loading="lazy"></button>`).join('')}</div></section>`;
+}
+function vBlock(b,f){
+  const tower=[9,8,7,6,5,4,3,2].map(q=>{const c=count(b,q);return `<a class="fl${q==f?' on':''}" href="#blok-${b}-q${q}" style="text-decoration:none"><span class="num">${q}</span><span class="t">${bar(c)}</span><span>${c.free} bo'sh</span></a>`}).join('')+
+    `<div class="fl base"><span class="num">1</span><span class="t note">Savdo maydonlari</span><span></span></div><div class="fl base"><span class="num">−1</span><span class="t note">Parking va savdo</span><span></span></div>`;
+  let right;
+  if(!f){right=`<h2>${b}-blok</h2><p>Qavatni tanlang: reja va xonadonlar holati ochiladi. Har qavatda ${P[b].apts.length} ta xonadon.</p>
+    <div class="list">${P[b].apts.map(a=>`<div class="row"><b class="num" style="font-size:24px">${a.area.toFixed(2).replace('.',',')} m²</b><span>${ROOMS(a.rooms)}</span><span class="note">${count1(b,a.n)} ta bo'sh</span></div>`).join('')}</div>`}
+  else{const pl=P[b];
+    right=`<h2>${b}-blok, ${f}-qavat</h2>
+    <div class="plan"><img src="img/${pl.plan}" alt="${f}-qavat rejasi" width="${pl.w}" height="${pl.h}">
+    <svg viewBox="0 0 ${pl.w} ${pl.h}">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<polygon class="ap" data-x="${a.n}" tabindex="0" role="button" aria-label="${a.n}-xonadon, ${ST[s].t}" fill="${ST[s].c}" points="${a.poly.map(p=>p.join(',')).join(' ')}"/><text class="aplab" x="${a.c[0]}" y="${a.c[1]}" text-anchor="middle">${a.area.toFixed(1).replace('.',',')}</text>`}).join('')}</svg></div>
+    <p class="note">3D aylanma qavat ko'rinishi shu joyga qo'yiladi (tayyorlanmoqda).</p>
+    <div class="list">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<button class="row" data-x="${a.n}"><span class="dot" style="background:${ST[s].c}"></span><span><b>${a.n}-xonadon</b> · ${ROOMS(a.rooms)} · <span class="num" style="font-size:20px">${a.area.toFixed(2).replace('.',',')} m²</span></span><span class="pill" style="background:${ST[s].c}">${ST[s].t}</span></button>`}).join('')}</div>`}
+  return `<section class="band"><div class="split"><div><h2 style="font-size:20px">Qavatlar</h2><div class="tower">${tower}</div></div><div>${right}</div></div></section>`;
+}
+function count1(b,n){let c=0;for(const q of FLOORS)if(st(key(b,q,n))=='free')c++;return c}
+function vAdmin(){
+  const rows=[];
+  for(const b of ['1','2','3'])for(const q of FLOORS)rows.push(`<tr><td>${b}-blok</td><td>${q}</td>${P[b].apts.map(a=>{const k=key(b,q,a.n);return `<td><select data-k="${k}" aria-label="${b}-blok ${q}-qavat ${a.n}-xonadon">${Object.entries(ST).map(([v,o])=>`<option value="${v}"${st(k)==v?' selected':''}>${o.t}</option>`).join('')}</select></td>`}).join('')}</tr>`);
+  return `<section class="band adm"><h2>Holatlarni boshqarish</h2><p class="note">${localMode?"Namuna rejimi: o'zgarishlar faqat shu brauzerda saqlanadi. Haqiqiy saytda bu bo'lim parol bilan himoyalanadi.":"O'zgarishni faqat sahifa egasi saqlay oladi; xaridorlar faqat ko'radi."}</p>
+  <div class="scroll"><table><thead><tr><th>Blok</th><th>Qavat</th>${[1,2,3,4,5,6].map(n=>`<th>${n}-x.</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div></section>`;
+}
+
+/* ---------- apartment drawer ---------- */
+const REN=[['korobka','Korobka'],['standart','Standart'],['luxury','Luxury']];
+function openApt(b,f,n){
+  const pl=P[b],a=pl.apts.find(x=>x.n==n),s=st(key(b,f,n));
+  const xs=a.poly.map(p=>p[0]),ys=a.poly.map(p=>p[1]);const pad=40,x0=Math.min(...xs)-pad,y0=Math.min(...ys)-pad,w=Math.max(...xs)-x0+pad,h=Math.max(...ys)-y0+pad;
+  $('sheet').innerHTML=`<button class="x" id="xclose" aria-label="Yopish">×</button>
+   <div><div class="note">${b}-blok · ${f}-qavat · ${n}-xonadon</div><h2 style="margin:4px 0 0">${ROOMS(a.rooms)} xonadon</h2></div>
+   <div class="kv"><div><b class="num">${a.area.toFixed(2).replace('.',',')}</b><span>m² maydon</span></div><div><b class="num">${a.rooms}</b><span>xona</span></div><div><b class="num">${f}</b><span>qavat</span></div></div>
+   <div><span class="pill" style="background:${ST[s].c};font-size:15px;padding:6px 14px">${ST[s].t}</span> <span class="note">Narx: sotuv bo'limidan so'rang</span></div>
+   <div class="mini"><svg viewBox="${x0} ${y0} ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"><image href="img/${pl.plan}" width="${pl.w}" height="${pl.h}"/><polygon points="${a.poly.map(p=>p.join(',')).join(' ')}" fill="${ST[s].c}" fill-opacity=".25" stroke="#1f1c19" stroke-width="6"/></svg></div>
+   <div><h3 style="margin:0 0 8px">360° sayr</h3><div class="tabs" id="rtabs">${REN.map((r,i)=>`<button data-r="${r[0]}" class="${i?'':'on'}">${r[1]}</button>`).join('')}</div></div>
+   <div class="pano" id="pano"></div>`;
+  setPano('korobka');
+  $('drawer').classList.add('open');$('xclose').focus();
+}
+function setPano(r){
+  const label={korobka:"Ta'mirsiz (korobka) holat",standart:"Standart ta'mir",luxury:"Luxury ta'mir"}[r];
+  const p=$('pano');p.style.background=r=='korobka'?'linear-gradient(135deg,#8d877d,#5f5a52)':r=='standart'?'linear-gradient(135deg,#c9b89a,#8c7a5d)':'linear-gradient(135deg,#3b3227,#9c7a45)';
+  p.innerHTML=`<div>${label}<br><span style="font-weight:400;font-size:14px">360° panorama tayyorlanmoqda</span></div>`;
+  document.querySelectorAll('#rtabs button').forEach(x=>x.classList.toggle('on',x.dataset.r==r));
+}
+function closeApt(){$('drawer').classList.remove('open')}
+
+/* ---------- router ---------- */
+let route={};
+function parse(){const h=location.hash.slice(1);let m;
+  if(h=='admin')return{admin:1};
+  if(m=h.match(/^blok-([123])(?:-q([2-9]))?(?:-x([1-6]))?$/))return{b:m[1],f:m[2]?+m[2]:null,x:m[3]?+m[3]:null};
+  return{}}
+function render(){
+  if(!P)return; route=parse(); const {b,f,x}=route;
+  crumbs(b,f); drawHot(b||null);
+  $('over').innerHTML=route.admin?'<h1>Boshqaruv</h1>':b?`<h1>${b}-blok</h1><p>${f?f+'-qavat tanlangan':'Chapdan qavatni tanlang'}</p>`:"<h1>Blokni tanlang</h1><p>Bino ustiga bosing: qavatlar va bo'sh xonadonlar ochiladi.</p>";
+  $('view').innerHTML=route.admin?vAdmin():b?vBlock(b,f):vHome();
+  if(b&&f&&x&&P[b].apts.some(a=>a.n==x))openApt(b,f,x);else closeApt();
+}
+
+/* ---------- events ---------- */
+$('hotsvg').addEventListener('click',e=>{const b=e.target.dataset&&e.target.dataset.b;if(b)location.hash='blok-'+b});
+$('hotsvg').addEventListener('keydown',e=>{const b=e.target.dataset&&e.target.dataset.b;if(b&&(e.key=='Enter'||e.key==' ')){e.preventDefault();location.hash='blok-'+b}});
+$('hotsvg').addEventListener('pointermove',e=>{const b=e.target.dataset&&e.target.dataset.b;if(b)showTag(b,e);else $('tag').hidden=true});
+$('hotsvg').addEventListener('pointerleave',()=>$('tag').hidden=true);
+$('sun').addEventListener('input',sun);
+$('view').addEventListener('click',e=>{
+  const ap=e.target.closest('[data-x]');if(ap&&route.f){location.hash=`blok-${route.b}-q${route.f}-x${ap.dataset.x}`;return}
+  const g=e.target.closest('#gal button');if(g){const lb=$('lb');lb.querySelector('img').src=`img/r${g.dataset.i}.webp`;lb.classList.add('open')}
+});
+$('view').addEventListener('keydown',e=>{const ap=e.target.closest('polygon[data-x]');if(ap&&(e.key=='Enter'||e.key==' ')){e.preventDefault();location.hash=`blok-${route.b}-q${route.f}-x${ap.dataset.x}`}});
+$('view').addEventListener('change',e=>{const s=e.target.closest('select[data-k]');if(s)setStatus(s.dataset.k,s.value)});
+$('drawer').addEventListener('click',e=>{
+  if(e.target.id=='drawer'||e.target.id=='xclose'){location.hash=`blok-${route.b}-q${route.f}`;return}
+  const r=e.target.closest('[data-r]');if(r)setPano(r.dataset.r);
+});
+$('lb').addEventListener('click',()=>$('lb').classList.remove('open'));
+document.addEventListener('keydown',e=>{if(e.key=='Escape'){if($('lb').classList.contains('open'))$('lb').classList.remove('open');else if($('drawer').classList.contains('open'))location.hash=`blok-${route.b}-q${route.f}`}});
+window.addEventListener('hashchange',()=>{render();if(!route.x)window.scrollTo({top:route.f?$('view').offsetTop-60:0,behavior:'smooth'})});
+
+sun();
+fetch('plans.json').then(r=>r.json()).then(j=>{P=j;render();connect()}).catch(()=>{$('view').innerHTML='<section class="band">Ma\'lumot yuklanmadi.</section>'});
+}
+</script>
+</body>
+</html>
