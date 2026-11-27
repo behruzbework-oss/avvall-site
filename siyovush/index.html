@@ -157,6 +157,22 @@ h3{font-weight:400;font-size:14px;color:var(--mute)}
 .seg button.on{background:var(--ink);color:#161a18;font-weight:500}
 .pano{aspect-ratio:2/1;border-radius:20px;display:grid;place-items:center;text-align:center;padding:16px;border:1px dashed var(--hair);color:var(--mute);font-size:14px}
 .pano b{display:block;color:var(--ink);font-weight:400;font-size:17px;margin-bottom:4px}
+.view360{position:relative;border-radius:20px;overflow:hidden;background:#0d100f;aspect-ratio:16/10;touch-action:none;cursor:grab}
+.view360:active{cursor:grabbing}
+.view360 canvas{display:block;width:100%;height:100%}
+.view360 .hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:6px 14px;border-radius:999px;font-size:13px;pointer-events:none;transition:opacity .5s;white-space:nowrap}
+.view360 .full{position:absolute;right:10px;top:10px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
+.view360 .load{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;color:var(--mute);background:#0d100f;transition:opacity .4s}
+.view360.big{position:fixed;inset:0;z-index:60;border-radius:0;aspect-ratio:auto}
+.view360.big .seg2{display:flex}
+.seg2{display:none;position:absolute;left:50%;top:12px;transform:translateX(-50%);gap:4px;padding:4px;border-radius:999px}
+.seg2 button{height:40px;padding:0 16px;border-radius:999px;font-size:14px;color:var(--mute)}
+.seg2 button.on{background:var(--ink);color:#161a18;font-weight:500}
+.chipsr{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -22px;padding:0 22px}
+.chipsr::-webkit-scrollbar{display:none}
+.chipsr button{flex:none;height:44px;padding:0 16px;border-radius:999px;background:var(--glass2);border:1px solid var(--hair);font-size:14px;color:var(--mute)}
+.chipsr button.on{border-color:var(--gold);color:var(--ink)}
+@media(max-width:860px){.view360{aspect-ratio:4/3}.chipsr{margin:0 -16px;padding:0 16px}}
 .cta{display:flex;align-items:center;justify-content:center;height:54px;border-radius:999px;background:var(--gold);color:#1d1708;font-weight:500}
 
 .adm table{width:100%;border-collapse:collapse;font-size:13px}
@@ -333,6 +349,8 @@ function vFloor(b,f){
     <svg viewBox="0 0 ${pl.w} ${pl.h}">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<polygon class="ap" data-x="${a.n}" tabindex="0" role="link" aria-label="${a.n}-xonadon, ${ST[s].t}" fill="${ST[s].c}" points="${a.poly.map(p=>p.join(',')).join(' ')}"/><text class="aplab" x="${a.c[0]}" y="${a.c[1]}" text-anchor="middle">${a.area.toFixed(1).replace('.',',')}</text>`}).join('')}</svg></div>
   <div class="rows">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<button class="row" data-x="${a.n}"><span class="a">${ar(a.area)}</span><span>${a.rooms} xonali<small>${a.n}-xonadon, m²</small></span><span class="tagst"><i class="dot" style="background:${ST[s].c}"></i>${ST[s].t}</span></button>`}).join('')}</div>`;
 }
+const TOURS={'2-1':{dir:'pano/b2x1/',rooms:[['liv','Mehmonxona',.9],['kit','Oshxona',-1.1],['bed1','Yotoqxona',-2.2],['bed2','Ikkinchi yotoqxona',-2.2],['hall','Yo\'lak',-1.27],['bath','Hammom',0]]}};
+const V={ren:'standart',room:'',yaw:0,pitch:0,fov:1.35};
 const REN=[['korobka','Korobka',"Ta'mirsiz holat"],['standart','Standart',"Standart ta'mir"],['luxury','Luxury',"Luxury ta'mir"]];
 function vApt(b,f,n){
   const pl=P[b],a=pl.apts.find(x=>x.n==n),s=st(key(b,f,n));
@@ -341,8 +359,12 @@ function vApt(b,f,n){
     <span class="tagst" style="font-size:15px"><i class="dot" style="background:${ST[s].c}"></i>${ST[s].t}</span></div>
   <div class="kv"><div><b>${ar(a.area)}</b><span>m² maydon</span></div><div><b>${a.rooms}</b><span>xona</span></div><div><b>${f}</b><span>qavat</span></div></div>
   <div class="paper"><svg viewBox="${x0} ${y0} ${w} ${h}" style="position:static;display:block;height:auto" preserveAspectRatio="xMidYMid meet"><image href="img/${pl.plan}" width="${pl.w}" height="${pl.h}"/><polygon points="${a.poly.map(p=>p.join(',')).join(' ')}" fill="${ST[s].c}" fill-opacity=".22" stroke="#161a18" stroke-width="6"/></svg></div>
-  <div><h3 style="margin-bottom:10px">Xonadon ichida 360° sayr</h3><div class="seg" id="rtabs">${REN.map((r,i)=>`<button data-r="${r[0]}" class="${i?'':'on'}" aria-pressed="${!i}">${r[1]}</button>`).join('')}</div></div>
-  <div class="pano" id="pano"><div><b>${REN[0][2]}</b>360° panorama tayyorlanmoqda</div></div>
+  ${(()=>{const t=TOURS[b+'-'+n];const seg=`<div class="seg" id="rtabs">${REN.map(r=>`<button data-r="${r[0]}" class="${r[0]==V.ren?'on':''}" aria-pressed="${r[0]==V.ren}">${r[1]}</button>`).join('')}</div>`;
+   if(!t)return `<div><h3 style="margin-bottom:10px">Xonadon ichida 360° sayr</h3>${seg}</div><div class="pano" id="pano"><div><b>${REN.find(r=>r[0]==V.ren)[2]}</b>360° panorama tayyorlanmoqda</div></div>`;
+   if(!t.rooms.some(r=>r[0]==V.room)){V.room=t.rooms[0][0];V.yaw=t.rooms[0][2];V.pitch=0}
+   return `<div><h3 style="margin-bottom:10px">Xonadon ichida 360° sayr</h3>${seg}</div>
+   <div class="view360" id="v360" data-dir="${t.dir}"><canvas></canvas><div class="load">Yuklanmoqda…</div><div class="seg2 glass">${REN.map(r=>`<button data-r="${r[0]}" class="${r[0]==V.ren?'on':''}">${r[1]}</button>`).join('')}</div><button class="full glass" id="vfull" aria-label="To'liq ekran">⤢</button><div class="hint glass">Atrofga qarash uchun suring</div></div>
+   <div class="chipsr" id="vrooms">${t.rooms.map(r=>`<button data-room="${r[0]}" class="${r[0]==V.room?'on':''}">${r[1]}</button>`).join('')}</div>`})()}
   ${s=='sold'?'':`<a class="cta" href="#blok-${b}-q${f}-x${n}" id="cta">Narxini so'rash</a>`}`;
 }
 function vAdmin(){
@@ -352,6 +374,70 @@ function vAdmin(){
   <div class="adm scroll"><table><thead><tr><th>Blok</th><th>Qavat</th>${[1,2,3,4,5,6].map(n=>`<th>${n}-x.</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
 }
 
+/* ---------- 360 viewer (plain WebGL, no library) ---------- */
+let PV=null;
+function pano(el){
+  const cv=el.querySelector('canvas'),gl=cv.getContext('webgl',{antialias:false});
+  if(!gl){el.querySelector('.load').textContent="Bu qurilmada 360 ko'rinish ochilmadi.";return null}
+  const sh=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);return o};
+  const pr=gl.createProgram();
+  gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));
+  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,`precision highp float;uniform sampler2D t;uniform vec2 r;uniform vec3 v;
+   void main(){vec2 p=gl_FragCoord.xy/r*2.-1.;p.x*=r.x/r.y;vec3 d=normalize(vec3(p,1./tan(v.z*.5)));
+   float cp=cos(v.y),sp=sin(v.y);d=vec3(d.x,d.y*cp+d.z*sp,-d.y*sp+d.z*cp);
+   float cy=cos(v.x),sy=sin(v.x);d=vec3(d.x*cy+d.z*sy,d.y,-d.x*sy+d.z*cy);
+   gl_FragColor=texture2D(t,vec2(atan(d.x,d.z)/6.2831853+.5,acos(clamp(d.y,-1.,1.))/3.14159265));}`));
+  gl.linkProgram(pr);gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const a=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+  const uR=gl.getUniformLocation(pr,'r'),uV=gl.getUniformLocation(pr,'v');
+  const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  let ready=false,raf=0,token=0;
+  const draw=()=>{raf=0;const dpr=Math.min(devicePixelRatio||1,2),w=Math.round(cv.clientWidth*dpr),h=Math.round(cv.clientHeight*dpr);
+    if(!w||!h)return;if(cv.width!=w||cv.height!=h){cv.width=w;cv.height=h}
+    gl.viewport(0,0,w,h);if(!ready)return;gl.uniform2f(uR,w,h);gl.uniform3f(uV,V.yaw,V.pitch,V.fov);gl.drawArrays(gl.TRIANGLES,0,3)};
+  const ask=()=>{if(!raf)raf=requestAnimationFrame(draw)};
+  const load=url=>{const my=++token,im=new Image(),ld=el.querySelector('.load');ld.style.opacity=ready?.0:1;ld.textContent='Yuklanmoqda…';if(!ready)ld.style.opacity=1;
+    im.onload=()=>{if(my!=token)return;const max=gl.getParameter(gl.MAX_TEXTURE_SIZE);let src=im;
+      if(im.width>max){const c=document.createElement('canvas');c.width=max;c.height=max/2;c.getContext('2d').drawImage(im,0,0,c.width,c.height);src=c}
+      gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src);ready=true;ld.style.opacity=0;ask()};
+    im.onerror=()=>{if(my==token){ld.style.opacity=1;ld.textContent="Rasm yuklanmadi. Qayta urinib ko'ring."}};im.src=url};
+  /* drag to look, wheel or pinch to zoom */
+  const pts=new Map();let pinch=0;
+  el.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;el.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);const h=el.querySelector('.hint');if(h)h.style.opacity=0});
+  el.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)return;
+    if(pts.size==1){const k=V.fov/cv.clientHeight;V.yaw-=(e.clientX-p[0])*k;V.pitch=Math.max(-1.35,Math.min(1.35,V.pitch+(e.clientY-p[1])*k))}
+    pts.set(e.pointerId,[e.clientX,e.clientY]);
+    if(pts.size==2){const [q,w]=[...pts.values()],d=Math.hypot(q[0]-w[0],q[1]-w[1]);if(pinch)V.fov=Math.max(.6,Math.min(1.8,V.fov*pinch/d));pinch=d}
+    ask()});
+  const up=e=>{pts.delete(e.pointerId);pinch=0};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  el.addEventListener('wheel',e=>{e.preventDefault();V.fov=Math.max(.6,Math.min(1.8,V.fov*(1+Math.sign(e.deltaY)*.08)));ask()},{passive:false});
+  const ro=new ResizeObserver(ask);ro.observe(cv);
+  return {load,ask,el};
+}
+function mountPano(){
+  const el=$('v360');if(!el){PV=null;return}
+  PV=pano(el);if(PV)PV.load(el.dataset.dir+V.room+'_'+V.ren+'.jpg');
+  const ph=document.createElement('div');ph.hidden=true;
+  el.addEventListener('click',e=>{
+    const r=e.target.closest('[data-r]');if(r){e.stopPropagation();setRen(r.dataset.r);return}
+    if(e.target.closest('#vfull')){e.stopPropagation();big(el,ph,!el.classList.contains('big'))}
+  });
+  el._ph=ph;
+}
+function big(el,ph,on){
+  if(on){el.parentNode.insertBefore(ph,el);document.body.appendChild(el)}else if(ph.parentNode){ph.parentNode.insertBefore(el,ph);ph.remove()}else el.remove();
+  el.classList.toggle('big',on);el.querySelector('#vfull').textContent=on?'×':'⤢';el.querySelector('#vfull').setAttribute('aria-label',on?'Yopish':"To'liq ekran");if(PV)PV.ask();
+}
+function closeBig(){const el=document.querySelector('body>.view360.big');if(el)big(el,el._ph,false)}
+function setRen(r){
+  V.ren=r;document.querySelectorAll('#rtabs button,.seg2 button').forEach(z=>{const on=z.dataset.r==r;z.classList.toggle('on',on);z.setAttribute('aria-pressed',on)});
+  if(PV)PV.load(PV.el.dataset.dir+V.room+'_'+V.ren+'.jpg');
+  else if($('pano'))$('pano').innerHTML=`<div><b>${REN.find(z=>z[0]==r)[2]}</b>360° panorama tayyorlanmoqda</div>`;
+}
+
 /* ---------- router ---------- */
 function parse(){const h=location.hash.slice(1);let m;
   if(h=='admin')return{admin:1};
@@ -359,7 +445,7 @@ function parse(){const h=location.hash.slice(1);let m;
   return{}}
 let first=true;
 function render(nav){
-  if(!P)return;route=parse();let {b,f,x}=route;
+  if(!P)return;closeBig();route=parse();let {b,f,x}=route;
   if(x&&!P[b].apts.some(a=>a.n==x))x=route.x=null;
   crumbs(b);drawHot(b||null);
   const big=!!(f||route.admin);
@@ -368,6 +454,7 @@ function render(nav){
   $('over').innerHTML=route.admin?'':b?`<h1>${b}-blok</h1>${f?`<p>${f}-qavat${x?', '+x+'-xonadon':''}</p>`:''}`:`<h1>${first?'<span>Siyovush</span> <span>House</span>':'Siyovush House'}</h1><p>Binoni tanlang: qavatlar va bo'sh xonadonlar ochiladi.</p>`;
   first=false;
   $('view').innerHTML=route.admin?vAdmin():x?vApt(b,f,x):f?vFloor(b,f):b?vBlock(b):vHome();
+  mountPano();
   setTimeout(fit,phone()?470:30);fit();
 }
 
@@ -378,13 +465,15 @@ $('sun').addEventListener('input',sun);
 $('view').addEventListener('click',e=>{
   const ap=e.target.closest('[data-x]');if(ap&&route.f){location.hash=`blok-${route.b}-q${route.f}-x${ap.dataset.x}`;return}
   const g=e.target.closest('#gal button');if(g){const lb=$('lb');lb.querySelector('img').src=`img/r${g.dataset.i}.webp`;lb.classList.add('open');return}
-  const r=e.target.closest('[data-r]');if(r){const d=REN.find(z=>z[0]==r.dataset.r);$('pano').innerHTML=`<div><b>${d[2]}</b>360° panorama tayyorlanmoqda</div>`;document.querySelectorAll('#rtabs button').forEach(z=>{const on=z==r;z.classList.toggle('on',on);z.setAttribute('aria-pressed',on)});return}
+  const r=e.target.closest('[data-r]');if(r){setRen(r.dataset.r);return}
+  const rm=e.target.closest('[data-room]');if(rm){V.room=rm.dataset.room;const tt=TOURS[route.b+'-'+route.x];V.yaw=tt.rooms.find(z=>z[0]==V.room)[2];V.pitch=0;document.querySelectorAll('#vrooms button').forEach(z=>z.classList.toggle('on',z==rm));if(PV)PV.load(PV.el.dataset.dir+V.room+'_'+V.ren+'.jpg');return}
+
   if(e.target.closest('#cta')){e.preventDefault();e.target.closest('#cta').textContent="Sotuv bo'limi raqami shu yerda bo'ladi"}
 });
 $('view').addEventListener('keydown',e=>{const ap=e.target.closest('polygon[data-x]');if(ap&&(e.key=='Enter'||e.key==' ')){e.preventDefault();location.hash=`blok-${route.b}-q${route.f}-x${ap.dataset.x}`}});
 $('view').addEventListener('change',e=>{const s=e.target.closest('select[data-k]');if(s)setStatus(s.dataset.k,s.value)});
 $('lb').addEventListener('click',()=>$('lb').classList.remove('open'));
-document.addEventListener('keydown',e=>{if(e.key=='Escape')$('lb').classList.remove('open')});
+document.addEventListener('keydown',e=>{if(e.key=='Escape'){$('lb').classList.remove('open');closeBig()}});
 /* bottom sheet: tap or drag the handle */
 {const g=$('grab'),p=$('pane');let y0=null,moved=false;
  g.addEventListener('pointerdown',e=>{y0=e.clientY;moved=false;g.setPointerCapture(e.pointerId)});
