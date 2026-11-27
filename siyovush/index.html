@@ -349,7 +349,7 @@ function vFloor(b,f){
     <svg viewBox="0 0 ${pl.w} ${pl.h}">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<polygon class="ap" data-x="${a.n}" tabindex="0" role="link" aria-label="${a.n}-xonadon, ${ST[s].t}" fill="${ST[s].c}" points="${a.poly.map(p=>p.join(',')).join(' ')}"/><text class="aplab" x="${a.c[0]}" y="${a.c[1]}" text-anchor="middle">${a.area.toFixed(1).replace('.',',')}</text>`}).join('')}</svg></div>
   <div class="rows">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<button class="row" data-x="${a.n}"><span class="a">${ar(a.area)}</span><span>${a.rooms} xonali<small>${a.n}-xonadon, m²</small></span><span class="tagst"><i class="dot" style="background:${ST[s].c}"></i>${ST[s].t}</span></button>`}).join('')}</div>`;
 }
-const TOURS={'2-1':{dir:'pano/b2x1/',rooms:[['liv','Mehmonxona',.9],['kit','Oshxona',-1.1],['bed1','Yotoqxona',-2.2],['bed2','Ikkinchi yotoqxona',-2.2],['hall','Yo\'lak',-1.27],['bath','Hammom',0]]}};
+const TOURS={"2-1":{"dir":"pano/b2x1/","rooms":[["liv","Mehmonxona",0.9],["kit","Oshxona",-1.1],["bed1","Yotoqxona",-2.2],["bed2","Ikkinchi yotoqxona",-2.2],["hall","Yo'lak",-1.27],["bath","Hammom",0]]},"1-1":{"dir":"pano/b1x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-2":{"dir":"pano/b1x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-3":{"dir":"pano/b1x3/","rooms":[["liv","Yashash xonasi",0],["kit","Oshxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-5":{"dir":"pano/b1x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-2":{"dir":"pano/b2x2/","rooms":[["liv","Mehmonxona",0],["bed","Yotoqxona",0]]},"1-4":{"dir":"pano/b1x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]],"flip":1},"1-6":{"dir":"pano/b1x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]],"flip":1}};
 const V={ren:'standart',room:'',yaw:0,pitch:0,fov:1.35};
 const REN=[['korobka','Korobka',"Ta'mirsiz holat"],['standart','Standart',"Standart ta'mir"],['luxury','Luxury',"Luxury ta'mir"]];
 function vApt(b,f,n){
@@ -363,7 +363,7 @@ function vApt(b,f,n){
    if(!t)return `<div><h3 style="margin-bottom:10px">Xonadon ichida 360° sayr</h3>${seg}</div><div class="pano" id="pano"><div><b>${REN.find(r=>r[0]==V.ren)[2]}</b>360° panorama tayyorlanmoqda</div></div>`;
    if(!t.rooms.some(r=>r[0]==V.room)){V.room=t.rooms[0][0];V.yaw=t.rooms[0][2];V.pitch=0}
    return `<div><h3 style="margin-bottom:10px">Xonadon ichida 360° sayr</h3>${seg}</div>
-   <div class="view360" id="v360" data-dir="${t.dir}"><canvas></canvas><div class="load">Yuklanmoqda…</div><div class="seg2 glass">${REN.map(r=>`<button data-r="${r[0]}" class="${r[0]==V.ren?'on':''}">${r[1]}</button>`).join('')}</div><button class="full glass" id="vfull" aria-label="To'liq ekran">⤢</button><div class="hint glass">Atrofga qarash uchun suring</div></div>
+   <div class="view360" id="v360" data-dir="${t.dir}" data-flip="${t.flip?1:0}"><canvas></canvas><div class="load">Yuklanmoqda…</div><div class="seg2 glass">${REN.map(r=>`<button data-r="${r[0]}" class="${r[0]==V.ren?'on':''}">${r[1]}</button>`).join('')}</div><button class="full glass" id="vfull" aria-label="To'liq ekran">⤢</button><div class="hint glass">Atrofga qarash uchun suring</div></div>
    <div class="chipsr" id="vrooms">${t.rooms.map(r=>`<button data-room="${r[0]}" class="${r[0]==V.room?'on':''}">${r[1]}</button>`).join('')}</div>`})()}
   ${s=='sold'?'':`<a class="cta" href="#blok-${b}-q${f}-x${n}" id="cta">Narxini so'rash</a>`}`;
 }
@@ -382,15 +382,15 @@ function pano(el){
   const sh=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);return o};
   const pr=gl.createProgram();
   gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}'));
-  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,`precision highp float;uniform sampler2D t;uniform vec2 r;uniform vec3 v;
+  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,`precision highp float;uniform sampler2D t;uniform vec2 r;uniform vec3 v;uniform float f;
    void main(){vec2 p=gl_FragCoord.xy/r*2.-1.;p.x*=r.x/r.y;vec3 d=normalize(vec3(p,1./tan(v.z*.5)));
    float cp=cos(v.y),sp=sin(v.y);d=vec3(d.x,d.y*cp+d.z*sp,-d.y*sp+d.z*cp);
    float cy=cos(v.x),sy=sin(v.x);d=vec3(d.x*cy+d.z*sy,d.y,-d.x*sy+d.z*cy);
-   gl_FragColor=texture2D(t,vec2(atan(d.x,d.z)/6.2831853+.5,acos(clamp(d.y,-1.,1.))/3.14159265));}`));
+   float u=atan(d.x,d.z)/6.2831853+.5;if(f>.5)u=1.-u;gl_FragColor=texture2D(t,vec2(u,acos(clamp(d.y,-1.,1.))/3.14159265));}`));
   gl.linkProgram(pr);gl.useProgram(pr);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const a=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  const uR=gl.getUniformLocation(pr,'r'),uV=gl.getUniformLocation(pr,'v');
+  const uR=gl.getUniformLocation(pr,'r'),uV=gl.getUniformLocation(pr,'v');gl.uniform1f(gl.getUniformLocation(pr,'f'),el.dataset.flip=='1'?1:0);
   const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
