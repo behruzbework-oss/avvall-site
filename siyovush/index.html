@@ -424,7 +424,7 @@ app.addEventListener('click',e=>{
   if((z=q('[data-v]'))){S.view=+z.dataset.v;render();return}
   if((z=q('[data-fm]'))){S.fmode=z.dataset.fm;render();return}
   if((z=q('[data-rot]'))){S.fv=(S.fv+ +z.dataset.rot+4)%4;render();return}
-  if((z=q('polygon.ap'))){if(!z.classList.contains('sold'))location.hash=`b${route.b}-q${route.f}-x${z.dataset.x}`;return}
+  if((z=q('polygon.ap'))){if(z.dataset.x&&!z.classList.contains('sold'))location.hash=`b${route.b}-q${route.f}-x${z.dataset.x}`;return}
   if((z=q('#rA [data-r]'))){V.ren=z.dataset.r;if(V.ren2==V.ren){V.ren2='';$('cmp').value=''}loadPano();return}
   if((z=q('[data-room]'))){V.room=z.dataset.room;const r=(route.park?PARK:TOURS[route.b+'-'+route.x]).rooms.find(k=>k[0]==V.room);V.yaw=r[2];V.pitch=0;loadPano();return}
   if(q('#cta')){q('#cta').textContent="Sotuv bo'limi raqami shu yerda bo'ladi"}
