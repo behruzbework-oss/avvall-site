@@ -99,6 +99,12 @@ h1,h2,h3,p{margin:0}
 .ap:hover,.ap:focus-visible,.ap.on{fill-opacity:.38;outline:0}
 .ap.sold{cursor:default;fill-opacity:.3}
 .aptag{position:absolute;transform:translate(-50%,-50%);pointer-events:none;height:26px;padding:0 9px;font-size:12px;gap:6px}
+.spin{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.spin:active{cursor:grabbing}.spin img{pointer-events:none;-webkit-user-drag:none}
+.spin .ap{transition:none}
+.pt3{fill:var(--gold);stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;cursor:pointer}
+.un{fill:var(--gold)}
+.hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);height:26px;padding:0 10px;font-size:12px;color:var(--mute);pointer-events:none;white-space:nowrap}
 .rot{position:absolute;top:50%;transform:translateY(-50%);z-index:3}
 .rot.l{left:0}.rot.r{right:0}
 .flist{flex:none;display:flex;gap:6px;overflow-x:auto;padding:0 var(--pad) var(--pad);scrollbar-width:none}
@@ -168,7 +174,8 @@ const FLOORS=[2,3,4,5,6,7,8,9],BL=['1','2','3'];
 const VIEWS=[[3,"Ko'cha tomoni",{x0:330,y0:150,x1:1475,y1:985}],[4,'Hovli tomoni',{x0:200,y0:120,x1:1848,y1:1040}],[1,'Burchakdan',{x0:120,y0:60,x1:1500,y1:1000}],[2,'Yon tomondan',{x0:500,y0:40,x1:1900,y1:1000}]];
 const ar=a=>a.toFixed(1).replace('.',',');
 let P=null,FL=null,PTS={},status={},route={},T={s:1,x:0,y:0};
-const S={view:0,fv:0,fmode:'3d'};
+const S={view:0,fv:0,fmode:'3d',pmode:'3d',nospin:{}};
+const SHOPS=[{"id":"d11","t":"Do'kon 1","k":"shop","a":64.6},{"id":"d12","t":"Do'kon 2","k":"shop","a":64.6},{"id":"d13","t":"Do'kon 3","k":"shop","a":64.6},{"id":"d14","t":"Do'kon 4","k":"shop","a":64.6},{"id":"d15","t":"Do'kon 5","k":"shop","a":64.6},{"id":"l1","t":"1-blok kirish lobbisi","k":"lobby","a":35.1},{"id":"c3","t":"Burchak kafe","k":"cafe","a":259.5},{"id":"d36","t":"Do'kon 6","k":"shop","a":105.6},{"id":"d37","t":"Do'kon 7","k":"shop","a":100.0},{"id":"l3","t":"3-blok kirish lobbisi","k":"lobby","a":55.4},{"id":"d28","t":"Do'kon 8","k":"shop","a":58.5},{"id":"d29","t":"Do'kon 9","k":"shop","a":58.5},{"id":"d210","t":"Do'kon 10","k":"shop","a":58.5},{"id":"d211","t":"Do'kon 11","k":"shop","a":58.5},{"id":"l2","t":"2-blok kirish lobbisi","k":"lobby","a":45.7}],SPD={};
 const $=id=>document.getElementById(id),app=$('app');
 const key=(b,f,n)=>`b${b}-q${f}-x${n}`,st=k=>status[k]||'free';
 const BRAND=`<a class="pill glass brand" href="#" aria-label="Siyovush House, bosh sahifa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 2l4 4-4 4-4-4zM12 14l4 4-4 4-4-4zM2 12l4-4 4 4-4 4zM14 12l4-4 4 4-4 4z"/></svg><span>Siyovush House</span></a>`;
@@ -204,7 +211,8 @@ function board(b){
   const pl=P[b],n=pl.apts.length;
   return `<div class="board"><div class="colh" style="--n:${n}"><span></span>${pl.apts.map(a=>`<span>${a.area.toFixed(0)} m²</span>`).join('')}</div>
   ${[9,8,7,6,5,4,3,2].map(q=>`<div class="frow" style="--n:${n}"><a class="q" href="#b${b}-q${q}" title="${q}-qavatni ochish" aria-label="${q}-qavat">${q}</a>${pl.apts.map(a=>{const s=st(key(b,q,a.n));return `<a class="cell ${s}" style="--c:${ST[s].c}" href="#b${b}-q${q}-x${a.n}" aria-label="${q}-qavat, ${a.n}-xonadon, ${ar(a.area)} m², ${ST[s].t}">${a.rooms}</a>`}).join('')}</div>`).join('')}
-  <div class="frow" style="--n:1"><a class="q" href="#parking" aria-label="Yer osti parking">−1</a><a class="cell" style="--c:var(--gold)" href="#parking">Yer osti parking · 360° ko'rish</a></div></div>`;
+  <div class="frow" style="--n:1"><a class="q" href="#b${b}-q1" aria-label="1-qavat">1</a><a class="cell" style="--c:var(--gold)" href="#b${b}-q1">Do'konlar va kirish lobbisi</a></div>
+  <div class="frow" style="--n:1"><a class="q" href="#parking" aria-label="Yer osti parking">−1</a><a class="cell" style="--c:var(--gold)" href="#parking">Yer osti parking · 3D va 360°</a></div></div>`;
 }
 function vHome(b){
   const all={free:0,hold:0,sold:0};for(const x of BL){const c=count(x);for(const k in all)all[k]+=c[k]}
@@ -226,21 +234,56 @@ function vHome(b){
 
 /* ---------- floor ---------- */
 function vFloor(b,f){
-  const pl=P[b],c=count(b,f),three=S.fmode=='3d'&&FL&&FL[b],fr=three?FL[b][S.fv%FL[b].length]:null;
+  const pl=P[b],c=count(b,f),sp=S.fmode=='3d'&&!S.nospin['f'+b],three=!sp&&S.fmode=='3d'&&FL&&FL[b],fr=three?FL[b][S.fv%FL[b].length]:null;
   const poly=a=>three?fr.polys[a.n].map(p=>(p[0]*fr.w).toFixed(1)+','+(p[1]*fr.h).toFixed(1)).join(' '):a.poly.map(p=>p.join(',')).join(' ');
   const cen=a=>{if(!three)return [a.c[0]/pl.w,a.c[1]/pl.h];const q=fr.polys[a.n];let x=0,y=0;for(const p of q){x+=p[0];y+=p[1]}return [x/q.length,y/q.length]};
   app.innerHTML=`<div class="page">
    <header class="bar"><a class="pill glass ico" href="#b${b}" aria-label="Binoga qaytish">‹</a>${BRAND}
-     ${sel('sb','Blok',BL.map(x=>[x,x+'-blok']),b)}${sel('sf','Qavat',FLOORS.map(x=>[x,x+'-qavat']),f)}
+     ${sel('sb','Blok',BL.map(x=>[x,x+'-blok']),b)}${sel('sf','Qavat',[[1,"1-qavat · do'konlar"],...FLOORS.map(x=>[x,x+'-qavat'])],f)}
      <div class="seg glass" role="group" aria-label="Ko'rinish turi"><button data-fm="3d" class="${S.fmode=='3d'?'on':''}">3D</button><button data-fm="plan" class="${S.fmode=='plan'?'on':''}">Reja</button></div>
      <span class="sp"></span><div class="pill glass">${legend()}</div></header>
-   <div class="fwrap"><div class="fview"><div class="fbox ${three?'':'plan'}" id="fbox">
+   <div class="fwrap"><div class="fview">${sp?'<div class="fbox spin" id="fbox"></div>':`<div class="fbox ${three?'':'plan'}" id="fbox">
      <img src="${three?fr.img:'img/'+pl.plan}" alt="${f}-qavat ${three?'3D ko\'rinishi':'rejasi'}" width="${three?fr.w:pl.w}" height="${three?fr.h:pl.h}">
      <svg viewBox="0 0 ${three?fr.w:pl.w} ${three?fr.h:pl.h}">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<polygon class="ap ${s}" data-x="${a.n}" tabindex="0" role="link" aria-label="${a.n}-xonadon, ${a.rooms} xonali, ${ar(a.area)} m², ${ST[s].t}" fill="${ST[s].c}" points="${poly(a)}"/>`}).join('')}</svg>
      ${pl.apts.map(a=>{const s=st(key(b,f,a.n)),p=cen(a);return `<span class="pill glass aptag" style="left:${p[0]*100}%;top:${p[1]*100}%"><i class="dot" style="background:${ST[s].c}"></i>${ar(a.area)} m²</span>`}).join('')}
-   </div></div>
+   </div>`}</div>
    ${three?`<button class="pill glass ico rot l" data-rot="-1" aria-label="Chapga aylantirish">‹</button><button class="pill glass ico rot r" data-rot="1" aria-label="O'ngga aylantirish">›</button>`:''}</div>
    <nav class="flist" aria-label="Xonadonlar">${pl.apts.map(a=>{const s=st(key(b,f,a.n));return `<a class="${s}" data-x="${a.n}" href="#b${b}-q${f}-x${a.n}"><i class="dot" style="background:${ST[s].c}"></i><span><b>${a.rooms} xonali · ${ar(a.area)} m²</b><small>${a.n}-xonadon · ${ST[s].t}</small></span></a>`}).join('')}</nav></div>`;
+  if(sp)spin('f'+b,pl.apts.map(a=>{const s=st(key(b,f,a.n));return {id:b+'-'+a.n,cls:'ap '+s,at:`data-x="${a.n}" tabindex="0" role="link" aria-label="${a.n}-xonadon, ${a.rooms} xonali, ${ar(a.area)} m², ${ST[s].t}" fill="${ST[s].c}"`,tag:`<i class="dot" style="background:${ST[s].c}"></i>${ar(a.area)} m²`}}));
+}
+/* ---------- 144 kadrli aylanma ko'rinish ---------- */
+function spin(name,items){
+  const box=$('fbox');if(!box)return;
+  const run=D=>{if($('fbox')!==box)return;const n=D.n,W=D.w,H=D.h;
+    box.innerHTML=`<img alt="3D ko'rinish, aylantirish mumkin" width="${W}" height="${H}" draggable="false"><svg viewBox="0 0 ${W} ${H}">${items.map(it=>D.polys[it.id]?(D.polys[it.id][0].length==2?`<circle class="${it.cls}" ${it.at} data-i="${it.id}" r="${W*.016}"/>`:`<polygon class="${it.cls}" ${it.at} data-i="${it.id}"/>`):'').join('')}</svg>${items.map(it=>it.tag&&D.polys[it.id]?`<span class="pill glass aptag" data-t="${it.id}">${it.tag}</span>`:'').join('')}<span class="pill glass hint">Aylantirish uchun suring</span>`;
+    const img=box.firstChild,els=[...box.querySelectorAll('[data-i]')],tags=[...box.querySelectorAll('[data-t]')],ims=new Array(n),ok=new Array(n).fill(false);
+    let F=S['fr_'+name]||0,Tg=F,vel=0,held=false,lx=0,lm=0,lt=0,raf=0,shown=-1,mv=0;
+    const near=f=>{const k=((Math.round(f)%n)+n)%n;for(let d=0;d<n/2;d++){if(ok[(k+d)%n])return (k+d)%n;if(ok[(k-d+n)%n])return (k-d+n)%n}return -1};
+    const show=()=>{const k=near(F);if(k<0||k==shown)return;shown=k;img.src=ims[k].src;
+      for(const e of els){const q=D.polys[e.dataset.i][k];if(q.length==2){e.setAttribute('cx',q[0]*W);e.setAttribute('cy',q[1]*H)}else{let s='';for(let i=0;i<q.length;i+=2)s+=(q[i]*W).toFixed(1)+','+(q[i+1]*H).toFixed(1)+' ';e.setAttribute('points',s)}}
+      for(const t of tags){const q=D.polys[t.dataset.t][k];let x=0,y=0;for(let i=0;i<q.length;i+=2){x+=q[i];y+=q[i+1]}t.style.left=x/(q.length/2)*100+'%';t.style.top=y/(q.length/2)*100+'%'}};
+    const tick=now=>{raf=0;const dt=Math.min(50,now-(lt||now-16));lt=now;if(!held){Tg+=vel*dt;vel*=Math.exp(-dt/420);if(Math.abs(vel)<1e-4)vel=0}
+      const d=Tg-F;F=Math.abs(d)<.02?Tg:F+d*(1-Math.exp(-dt/60));S['fr_'+name]=F;show();if(Math.abs(Tg-F)>.02||vel||held)go();else lt=0};
+    const go=()=>{if(!raf)raf=requestAnimationFrame(tick)};
+    const ld=i=>{const im=new Image();im.onload=()=>{ok[i]=true;ims[i]=im;if(shown<0||near(F)==i)show()};im.src=`tt/${name}/${String(i).padStart(3,'0')}.webp`};
+    const k0=((Math.round(F)%n)+n)%n;ld(k0);for(const st of [16,8,4,2,1])for(let i=0;i<n;i+=st)if(i!=k0&&(st==16||i%(st*2)))setTimeout(ld,st==16?0:st==8?250:st==4?700:st==2?1400:2400,i);
+    const mvf=e=>{if(!held)return;const dx=e.clientX-lx,now=performance.now(),dt=Math.max(8,now-lm),k=n/(box.clientWidth*1.15)*1.3;lx=e.clientX;lm=now;mv+=Math.abs(dx);if(mv>6)box.dataset.drag=1;Tg-=dx*k;vel=vel*.6-dx*k/dt*.4;go()};
+    const upf=()=>{if(!held)return;held=false;if(performance.now()-lm>90)vel=0;removeEventListener('pointermove',mvf);removeEventListener('pointerup',upf);removeEventListener('pointercancel',upf);go()};
+    box.addEventListener('pointerdown',e=>{held=true;lx=e.clientX;lm=performance.now();vel=0;mv=0;delete box.dataset.drag;addEventListener('pointermove',mvf);addEventListener('pointerup',upf);addEventListener('pointercancel',upf);const h=box.querySelector('.hint');if(h)h.remove()});
+    box.addEventListener('keydown',e=>{if(e.key=='ArrowLeft'||e.key=='ArrowRight'){Tg+=e.key=='ArrowLeft'?-6:6;go()}});
+  };
+  (SPD[name]?Promise.resolve(SPD[name]):fetch(`tt/${name}.json`).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>SPD[name]=d)).then(run).catch(()=>{S.nospin[name]=1;if($('fbox')===box)render()});
+}
+/* ---------- 1-qavat: do'konlar (konseptual) ---------- */
+function vShop(b){
+  const us=SHOPS.filter(u=>u.id[1]==b),K={shop:"Do'kon",cafe:'Kafe',lobby:'Kirish lobbisi'};
+  app.innerHTML=`<div class="page">
+   <header class="bar"><a class="pill glass ico" href="#b${b}" aria-label="Binoga qaytish">‹</a>${BRAND}
+     ${sel('sb','Blok',BL.map(x=>[x,x+'-blok']),b)}${sel('sf','Qavat',[[1,"1-qavat · do'konlar"],...FLOORS.map(x=>[x,x+'-qavat'])],1)}
+     <span class="sp"></span><div class="pill glass" style="color:var(--mute)">Konseptual reja: 1-qavat chizmasi hali tasdiqlanmagan</div></header>
+   <div class="fwrap"><div class="fview">${S.nospin['s'+b]?'<div class="empty">1-qavatning 3D ko\'rinishi tayyorlanmoqda.</div>':'<div class="fbox spin" id="fbox"></div>'}</div></div>
+   <nav class="flist" aria-label="1-qavat xonalari">${us.map(u=>`<a data-u="${u.id}" tabindex="0"><i class="dot" style="background:var(--gold)"></i><span><b>${u.t}</b><small>${K[u.k]} · ${ar(u.a)} m²</small></span></a>`).join('')}</nav></div>`;
+  if(!S.nospin['s'+b])spin('s'+b,us.map(u=>({id:u.id,cls:'ap un',at:`data-u="${u.id}" aria-label="${u.t}, ${ar(u.a)} m²"`,tag:`${u.t} · ${ar(u.a)} m²`})));
 }
 
 /* ---------- apartment: 360 tour ---------- */
@@ -249,12 +292,19 @@ const V={ren:'standart',ren2:'',room:'',yaw:0,pitch:0,fov:1.35,split:.5};window.
 const REN=[['korobka','Korobka'],['standart','Standart'],['luxury','Luxury']];
 const PARK={dir:'pano/parking/',rooms:[['kirish','Kirish',0],['burchak','Burilish',1.2],['yolak',"Markaziy yo'lak",1.57],['lift','Lift lobbisi',3.14]],w:1060,h:1060,pts:{kirish:[216,946],burchak:[216,242],yolak:[710,242],lift:[480,256]}};
 function vPark(){
-  const t=PARK;if(!t.rooms.some(r=>r[0]==V.room)){V.room=t.rooms[0][0];V.yaw=t.rooms[0][2];V.pitch=0}
+  const t=PARK;
+  if(S.pmode=='3d'&&!S.nospin.p){
+    app.innerHTML=`<div class="page"><header class="bar"><a class="pill glass ico" href="#" aria-label="Binoga qaytish">‹</a>${BRAND}
+      <div class="pill glass info"><b>Yer osti parking</b><span class="x mute">−1-qavat · 39 o'rin · liftlar har blokka</span></div>
+      <div class="seg glass" role="group" aria-label="Ko'rinish turi"><button data-pm="3d" class="on">3D</button><button data-pm="360">360°</button></div></header>
+      <div class="fwrap"><div class="fview"><div class="fbox spin" id="fbox"></div></div></div>
+      <nav class="flist" aria-label="360 nuqtalari">${t.rooms.map(r=>`<a data-room3="${r[0]}" tabindex="0"><i class="dot" style="background:var(--gold)"></i><span><b>${r[1]}</b><small>360° ko'rish</small></span></a>`).join('')}</nav></div>`;
+    spin('p',t.rooms.map(r=>({id:r[0],cls:'pt3',at:`data-room3="${r[0]}" tabindex="0" role="button" aria-label="${r[1]}, 360 ko'rish"`,tag:r[1]})));return}if(!t.rooms.some(r=>r[0]==V.room)){V.room=t.rooms[0][0];V.yaw=t.rooms[0][2];V.pitch=0}
   V.ren2='';
   app.innerHTML=`<div class="tour" id="tour" data-dir="${t.dir}" data-flip="0" data-one="1"><canvas></canvas><div class="load" id="load">Yuklanmoqda…</div>
      <div class="split" id="split" hidden></div><span class="pill glass cl" id="clA" hidden></span><span class="pill glass cl" id="clB" hidden></span></div>
    <header class="bar"><a class="pill glass ico" href="#" aria-label="Binoga qaytish">‹</a><button class="pill glass ico" id="clean" aria-label="Panellarni yashirish yoki ko'rsatish" aria-pressed="${document.body.classList.contains('clean')}">⤢</button>
-     <div class="pill glass info"><b>Yer osti parking</b><span class="x mute">−1-qavat · 39 o'rin · liftlar har blokka</span></div></header>
+     <div class="pill glass info"><b>Yer osti parking</b><span class="x mute">−1-qavat · 39 o'rin · liftlar har blokka</span></div><div class="seg glass" role="group" aria-label="Ko'rinish turi"><button data-pm="3d">3D</button><button data-pm="360" class="on">360°</button></div></header>
    <footer class="tb"><div class="glass mini"><svg viewBox="0 0 ${t.w} ${t.h}" id="mini"><image href="img/parking-plan.webp" width="${t.w}" height="${t.h}"/><path class="cone" id="cone" d=""/>
        ${t.rooms.map(r=>`<circle class="pt${r[0]==V.room?' on':''}" data-room="${r[0]}" cx="${t.pts[r[0]][0]}" cy="${t.pts[r[0]][1]}" r="34" tabindex="0" role="button" aria-label="${r[1]}"/>`).join('')}</svg><p>Siz shu yerdasiz: nuqtani bosib o'ting</p></div>
      <div class="rooms" id="rooms">${t.rooms.map(r=>`<button class="pill glass${r[0]==V.room?' on':''}" data-room="${r[0]}">${r[1]}</button>`).join('')}</div></footer>`;
@@ -356,17 +406,20 @@ function vAdmin(){
 /* ---------- router ---------- */
 function parse(){const h=location.hash.slice(1);let m;
   if(h=='admin')return{admin:1};if(h=='parking')return{park:1};
-  if(m=h.match(/^b(?:lok-)?([123])(?:-q([2-9]))?(?:-x([1-6]))?$/))return{b:m[1],f:m[2]?+m[2]:null,x:m[3]?+m[3]:null};
+  if(m=h.match(/^b(?:lok-)?([123])(?:-q([1-9]))?(?:-x([1-6]))?$/))return{b:m[1],f:m[2]?+m[2]:null,x:m[3]?+m[3]:null};
   return{}}
 function render(){
   if(!P)return;PV=null;document.body.classList.remove('look');route=parse();let {b,f,x}=route;
   if(x&&!P[b].apts.some(a=>a.n==x))x=route.x=null;
   if(x&&!f)f=route.f=5;
-  if(route.admin)vAdmin();else if(route.park)vPark();else if(x)vApt(b,f,x);else if(f)vFloor(b,f);else vHome(b);
+  if(route.admin)vAdmin();else if(route.park)vPark();else if(f==1)vShop(b);else if(x)vApt(b,f,x);else if(f)vFloor(b,f);else vHome(b);
 }
 app.addEventListener('click',e=>{
   const t=e.target,q=s=>t.closest(s);let z;
   if((z=q('#clean'))){z.setAttribute('aria-pressed',document.body.classList.toggle('clean'));return}
+  if($('fbox')&&$('fbox').dataset.drag&&q('#fbox'))return;
+  if((z=q('[data-pm]'))){S.pmode=z.dataset.pm;render();return}
+  if((z=q('[data-room3]'))){V.room=z.dataset.room3;const r=PARK.rooms.find(k=>k[0]==V.room);V.yaw=r[2];V.pitch=0;S.pmode='360';render();return}
   if((z=q('.hot'))){location.hash='b'+z.dataset.b;return}
   if((z=q('[data-v]'))){S.view=+z.dataset.v;render();return}
   if((z=q('[data-fm]'))){S.fmode=z.dataset.fm;render();return}
@@ -376,14 +429,14 @@ app.addEventListener('click',e=>{
   if((z=q('[data-room]'))){V.room=z.dataset.room;const r=(route.park?PARK:TOURS[route.b+'-'+route.x]).rooms.find(k=>k[0]==V.room);V.yaw=r[2];V.pitch=0;loadPano();return}
   if(q('#cta')){q('#cta').textContent="Sotuv bo'limi raqami shu yerda bo'ladi"}
 });
-app.addEventListener('keydown',e=>{const z=e.target.closest('.hot,polygon.ap,.pt');if(z&&(e.key=='Enter'||e.key==' ')){e.preventDefault();z.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
+app.addEventListener('keydown',e=>{const z=e.target.closest('.hot,polygon.ap,.pt,.pt3,[data-room3]');if(z&&(e.key=='Enter'||e.key==' ')){e.preventDefault();z.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
 app.addEventListener('change',e=>{const t=e.target;
   if(t.id=='sb'){location.hash=t.value?('b'+t.value+(route.f?'-q'+route.f:'')):'';return}
   if(t.id=='sf'){location.hash=`b${route.b}-q${t.value}`;return}
   if(t.id=='cmp'){V.ren2=t.value==V.ren?'':t.value;if(!V.ren2)t.value='';V.split=.5;loadPano();return}
   const s=t.closest('select[data-k]');if(s)setStatus(s.dataset.k,s.value)});
 app.addEventListener('input',e=>{if(e.target.id=='sun')sun()});
-app.addEventListener('pointerover',e=>{const z=e.target.closest('.flist a');document.querySelectorAll('polygon.ap').forEach(p=>p.classList.toggle('on',!!z&&p.dataset.x==z.dataset.x))});
+app.addEventListener('pointerover',e=>{const z=e.target.closest('.flist a');document.querySelectorAll('polygon.ap').forEach(p=>p.classList.toggle('on',!!z&&(z.dataset.x?p.dataset.x==z.dataset.x:p.dataset.u==z.dataset.u)))});
 addEventListener('hashchange',render);addEventListener('resize',fit);
 Promise.all([fetch('plans.json').then(r=>r.json()),fetch('fl.json').then(r=>r.ok?r.json():null).catch(()=>null),fetch('status.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({}))])
  .then(([p,fl,s])=>{P=p;if(fl){FL=fl.views;PTS=fl.pts||{}}status=Object.assign({},s,loadLocal());render()})
