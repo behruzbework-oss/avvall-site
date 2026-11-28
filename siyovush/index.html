@@ -197,7 +197,8 @@ function sun(){
 function board(b){
   const pl=P[b],n=pl.apts.length;
   return `<div class="board"><div class="colh" style="--n:${n}"><span></span>${pl.apts.map(a=>`<span>${a.area.toFixed(0)} m²</span>`).join('')}</div>
-  ${[9,8,7,6,5,4,3,2].map(q=>`<div class="frow" style="--n:${n}"><a class="q" href="#b${b}-q${q}" title="${q}-qavatni ochish" aria-label="${q}-qavat">${q}</a>${pl.apts.map(a=>{const s=st(key(b,q,a.n));return `<a class="cell ${s}" style="--c:${ST[s].c}" href="#b${b}-q${q}-x${a.n}" aria-label="${q}-qavat, ${a.n}-xonadon, ${ar(a.area)} m², ${ST[s].t}">${a.rooms}</a>`}).join('')}</div>`).join('')}</div>`;
+  ${[9,8,7,6,5,4,3,2].map(q=>`<div class="frow" style="--n:${n}"><a class="q" href="#b${b}-q${q}" title="${q}-qavatni ochish" aria-label="${q}-qavat">${q}</a>${pl.apts.map(a=>{const s=st(key(b,q,a.n));return `<a class="cell ${s}" style="--c:${ST[s].c}" href="#b${b}-q${q}-x${a.n}" aria-label="${q}-qavat, ${a.n}-xonadon, ${ar(a.area)} m², ${ST[s].t}">${a.rooms}</a>`}).join('')}</div>`).join('')}
+  <div class="frow" style="--n:1"><a class="q" href="#parking" aria-label="Yer osti parking">−1</a><a class="cell" style="--c:var(--gold)" href="#parking">Yer osti parking · 360° ko'rish</a></div></div>`;
 }
 function vHome(b){
   const all={free:0,hold:0,sold:0};for(const x of BL){const c=count(x);for(const k in all)all[k]+=c[k]}
@@ -207,7 +208,7 @@ function vHome(b){
       <svg viewBox="0 0 2048 1152">${hot?(b?`<path class="dim" fill-rule="evenodd" d="M0 0H2048V1152H0Z M${P[b].hot.map(p=>p.join(' ')).join(' L')}Z"/>`:'')+BL.map(x=>`<polygon class="hot${x==b?' sel':''}" data-b="${x}" tabindex="0" role="link" aria-label="${x}-blok" points="${P[x].hot.map(p=>p.join(',')).join(' ')}"/>`).join(''):''}</svg></div>
     <div class="shade"></div><div id="chips">${hot?BL.map(x=>`<a class="pill glass chip${b?' off':''}" data-b="${x}" href="#b${x}"><i>${x}</i>blok</a>`).join(''):''}</div></div>
   <header class="bar">${BRAND}${sel('sb','Blok',[['','Blokni tanlang'],...BL.map(x=>[x,x+'-blok'])],b||'')}
-    <span class="sp"></span>
+    <a class="pill glass" href="#parking">Parking</a><span class="sp"></span>
     <label class="pill glass time" title="Kun vaqti"><output id="sunv">13:00</output><input type="range" id="sun" min="6" max="21" step="0.25" value="${S.sun||13}" aria-label="Kun vaqti"></label></header>
   ${b?`<aside class="side glass" id="side"><div class="hd"><h2>${b}-blok</h2><a class="pill glass ico" href="#" aria-label="Yopish" style="height:32px;width:32px">×</a></div>
     <p class="note">${c.free} bo'sh · ${c.hold} bron · ${c.sold} sotilgan</p>${legend()}${board(b)}
@@ -240,6 +241,19 @@ function vFloor(b,f){
 const TOURS={"2-1":{"dir":"pano/b2x1/","rooms":[["liv","Mehmonxona",0.9],["kit","Oshxona",-1.1],["bed1","Yotoqxona",-2.2],["bed2","Ikkinchi yotoqxona",-2.2],["hall","Yo'lak",-1.27],["bath","Hammom",0]]},"1-1":{"dir":"pano/b1x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-2":{"dir":"pano/b1x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-3":{"dir":"pano/b1x3/","rooms":[["liv","Yashash xonasi",0],["kit","Oshxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-5":{"dir":"pano/b1x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-2":{"dir":"pano/b2x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-3":{"dir":"pano/b2x3/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"2-4":{"dir":"pano/b2x4/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-1":{"dir":"pano/b3x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-2":{"dir":"pano/b3x2/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-3":{"dir":"pano/b3x3/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed1","Yotoqxona",0],["bed2","Ikkinchi yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-4":{"dir":"pano/b3x4/","rooms":[["liv","Yashash xonasi",0],["kit","Oshxona",0],["bath","Hammom",0]]},"3-5":{"dir":"pano/b3x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"3-6":{"dir":"pano/b3x6/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]]},"1-4":{"dir":"pano/b1x1/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]],"flip":1},"1-6":{"dir":"pano/b1x5/","rooms":[["liv","Mehmonxona",0],["kit","Oshxona",0],["bed","Yotoqxona",0],["hall","Yo'lak",0],["bath","Hammom",0]],"flip":1}};
 const V={ren:'standart',ren2:'',room:'',yaw:0,pitch:0,fov:1.35,split:.5};
 const REN=[['korobka','Korobka'],['standart','Standart'],['luxury','Luxury']];
+const PARK={dir:'pano/parking/',rooms:[['kirish','Kirish',0],['burchak','Burilish',1.2],['yolak',"Markaziy yo'lak",1.57],['lift','Lift lobbisi',3.14]],w:1060,h:1060,pts:{kirish:[216,946],burchak:[216,242],yolak:[710,242],lift:[480,256]}};
+function vPark(){
+  const t=PARK;if(!t.rooms.some(r=>r[0]==V.room)){V.room=t.rooms[0][0];V.yaw=t.rooms[0][2];V.pitch=0}
+  V.ren2='';
+  app.innerHTML=`<div class="tour" id="tour" data-dir="${t.dir}" data-flip="0" data-one="1"><canvas></canvas><div class="load" id="load">Yuklanmoqda…</div>
+     <div class="split" id="split" hidden></div><span class="pill glass cl" id="clA" hidden></span><span class="pill glass cl" id="clB" hidden></span></div>
+   <header class="bar"><a class="pill glass ico" href="#" aria-label="Binoga qaytish">‹</a>
+     <div class="pill glass info"><b>Yer osti parking</b><span class="x mute">−1-qavat · 39 o'rin · liftlar har blokka</span></div></header>
+   <footer class="tb"><div class="glass mini"><svg viewBox="0 0 ${t.w} ${t.h}" id="mini"><image href="img/parking-plan.webp" width="${t.w}" height="${t.h}"/><path class="cone" id="cone" d=""/>
+       ${t.rooms.map(r=>`<circle class="pt${r[0]==V.room?' on':''}" data-room="${r[0]}" cx="${t.pts[r[0]][0]}" cy="${t.pts[r[0]][1]}" r="34" tabindex="0" role="button" aria-label="${r[1]}"/>`).join('')}</svg><p>Siz shu yerdasiz: nuqtani bosib o'ting</p></div>
+     <div class="rooms" id="rooms">${t.rooms.map(r=>`<button class="pill glass${r[0]==V.room?' on':''}" data-room="${r[0]}">${r[1]}</button>`).join('')}</div></footer>`;
+  PV=pano($('tour'),t,t.pts,null,t.w);if(PV)loadPano();
+}
 let PV=null;
 function vApt(b,f,n){
   const pl=P[b],a=pl.apts.find(x=>x.n==n),s=st(key(b,f,n)),t=TOURS[b+'-'+n],pts=PTS[b+'-'+n]||{};
@@ -261,7 +275,7 @@ function vApt(b,f,n){
   PV=t?pano($('tour'),t,pts,a,Math.max(w,h)):null;if(PV)loadPano();
 }
 function loadPano(){
-  if(!PV)return;const d=PV.el.dataset.dir;PV.load(0,d+V.room+'_'+V.ren+'.jpg');
+  if(!PV)return;const d=PV.el.dataset.dir;PV.load(0,d+V.room+(PV.el.dataset.one?'':'_'+V.ren)+'.jpg');
   const two=V.ren2&&V.ren2!=V.ren;if(two)PV.load(1,d+V.room+'_'+V.ren2+'.jpg');PV.cmp(two);
   document.querySelectorAll('#rA button').forEach(z=>z.classList.toggle('on',z.dataset.r==V.ren));
   document.querySelectorAll('[data-room]').forEach(z=>z.classList.toggle('on',z.dataset.room==V.room));
@@ -324,14 +338,14 @@ function vAdmin(){
 
 /* ---------- router ---------- */
 function parse(){const h=location.hash.slice(1);let m;
-  if(h=='admin')return{admin:1};
+  if(h=='admin')return{admin:1};if(h=='parking')return{park:1};
   if(m=h.match(/^b(?:lok-)?([123])(?:-q([2-9]))?(?:-x([1-6]))?$/))return{b:m[1],f:m[2]?+m[2]:null,x:m[3]?+m[3]:null};
   return{}}
 function render(){
   if(!P)return;PV=null;route=parse();let {b,f,x}=route;
   if(x&&!P[b].apts.some(a=>a.n==x))x=route.x=null;
   if(x&&!f)f=route.f=5;
-  if(route.admin)vAdmin();else if(x)vApt(b,f,x);else if(f)vFloor(b,f);else vHome(b);
+  if(route.admin)vAdmin();else if(route.park)vPark();else if(x)vApt(b,f,x);else if(f)vFloor(b,f);else vHome(b);
 }
 app.addEventListener('click',e=>{
   const t=e.target,q=s=>t.closest(s);let z;
@@ -341,7 +355,7 @@ app.addEventListener('click',e=>{
   if((z=q('[data-rot]'))){S.fv=(S.fv+ +z.dataset.rot+4)%4;render();return}
   if((z=q('polygon.ap'))){if(!z.classList.contains('sold'))location.hash=`b${route.b}-q${route.f}-x${z.dataset.x}`;return}
   if((z=q('#rA [data-r]'))){V.ren=z.dataset.r;if(V.ren2==V.ren){V.ren2='';$('cmp').value=''}loadPano();return}
-  if((z=q('[data-room]'))){V.room=z.dataset.room;const r=TOURS[route.b+'-'+route.x].rooms.find(k=>k[0]==V.room);V.yaw=r[2];V.pitch=0;loadPano();return}
+  if((z=q('[data-room]'))){V.room=z.dataset.room;const r=(route.park?PARK:TOURS[route.b+'-'+route.x]).rooms.find(k=>k[0]==V.room);V.yaw=r[2];V.pitch=0;loadPano();return}
   if(q('#cta')){q('#cta').textContent="Sotuv bo'limi raqami shu yerda bo'ladi"}
 });
 app.addEventListener('keydown',e=>{const z=e.target.closest('.hot,polygon.ap,.pt');if(z&&(e.key=='Enter'||e.key==' ')){e.preventDefault();z.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
